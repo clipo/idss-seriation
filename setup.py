@@ -1,29 +1,18 @@
 from distutils.core import setup
 
-setup(name="ctmixtures",
-      version="1.0",
+setup(name="idss-seriation",
+      version="2.0",
       packages = [
-        'ctmixtures',
-        'ctmixtures.analysis',
-        'ctmixtures.data',
-        'ctmixtures.dynamics',
-        'ctmixtures.population',
-        'ctmixtures.rules',
-        'ctmixtures.traits',
-        'ctmixtures.utils'
+        'seriation',
       ],
       scripts = [
-          'admin/ctmixtures-planner.py',
-          'admin/ctmixtures-priorsampler-runbuilder.py',
-          'analytics/ctmixtures-export-data.py',
-          'simulations/sim-ctmixture-notimeaveraging.py',
-          'simulations/sim-ctmixture-timeaveraging.py'
+          'bin/idss-seriation.py',
       ],
-      author='Mark E. Madsen',
-      author_email='mark@madsenlab.org',
-      url='https://github.com/mmadsen/ctmixtures',
+      author='Carl P. Lipo and Mark E. Madsen',
+      author_email='clipo@csulb.edu',
+      url='https://github.com/clipo/idss-seriation',
       classifiers=[
-          'Development Status :: 3 - Alpha',
+          'Development Status :: 2 - Beta',
           'Environment :: Console',
           'Intended Audience :: Science/Research',
           'License :: OSI Approved :: Apache Software License',

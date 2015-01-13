@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (c) 2013.  Carl P. Lipo <clipo@csulb.edu>
+# Copyright (c) 2013-2015.  Carl P. Lipo <clipo@csulb.edu>
 #
 # This work is licensed under the terms of the Apache Software License, Version 2.0.  See the file LICENSE for details.
 __author__ = 'carllipo'
@@ -12,43 +12,37 @@ __author__ = 'carllipo'
 ##      svgwrite
 
 import csv
-from datetime import datetime
-import operator
 import argparse
-import sys
 import logging as logger
 import itertools
-import math
 import random as rnd
 import curses  # for windows use:http://www.lfd.uci.edu/~gohlke/pythonlibs/#curses
-from itertools import chain
 import traceback
-import collections
 import operator
 import time
-from datetime import datetime
-import os
 import re
 import uuid
-import pickle
 import multiprocessing
-import numpy as np
+import pickle
+import os
+import collections
+
 import scipy as sp
 import scipy.stats
 import networkx as nx
-import networkx.algorithms.isomorphism as iso
 from pylab import *
 import matplotlib.pyplot as plt
-import matplotlib.mlab as mlab
 import xlsxwriter
 from networkx.algorithms.isomorphism.isomorph import graph_could_be_isomorphic as isomorphic
-import MST
+
+import seriation.MST
 import shapefile
-if os.name != 'nt':
-    import memory
-from frequencySeriationMaker import frequencySeriationMaker
-import seriationEvaluation
-from occurrenceSeriationMaker import occurrenceSeriationMaker
+
+# if os.name != 'nt':
+#     import memory
+from seriation.frequencySeriationMaker import frequencySeriationMaker
+import seriation.seriationEvaluation as seriationEvaluation
+from seriation.occurrenceSeriationMaker import occurrenceSeriationMaker
 
 
 
@@ -64,8 +58,8 @@ class IDSS():
         self.inputFile = ""
         self.solutionCount=0
         self.outputDirectory = ""
-        if os.name != "nt":
-            self.mem = memory.Memory()
+        # if os.name != "nt":
+        #     self.mem = memory.Memory()
         self.start = time.time()
         self.assemblageSize = {}
         self.assemblageFrequencies = {}
@@ -1081,8 +1075,8 @@ class IDSS():
         ## Now make the graphic for set of graphs
         plt.rcParams['text.usetex'] = False
         plt.rcParams['font.family']='sans-serif'
-        newfilename = self.outputDirectory + sumgraphfilename
-        gmlfilename = self.outputDirectory + sumgraphfilename + ".gml"
+        newfilename = sumgraphfilename
+        gmlfilename = sumgraphfilename + ".gml"
         self.saveGraph(sumGraph, gmlfilename)
         if self.args['shapefile'] is not None and self.args['xyfile'] is not None:
             self.createShapefile(sumGraph, self.outputDirectory + newfilename[0:-4] + ".shp")
@@ -1129,7 +1123,7 @@ class IDSS():
             if a not in nodeList:
                 sumGraph.add_node(a, name=a, xCoordinate=self.xAssemblage[a], yCoordinate=self.yAssemblage[a],
                                   size=self.assemblageSize[a]/self.totalAssemblageSize*self.nodeSizeFactor)
-        sumgraphOutputFile = self.outputDirectory + sumgraphfilename + ".vna"
+        sumgraphOutputFile = sumgraphfilename + ".vna"
         SUMGRAPH = open(sumgraphOutputFile, 'w')
         SUMGRAPH.write("*Node data\n")
         SUMGRAPH.write("ID AssemblageSize X Y Easting Northing\n")
@@ -1158,7 +1152,7 @@ class IDSS():
             SUMGRAPH.write(text)
 
         ## Now make the graphic for the sumgraph
-        newfilename = self.outputDirectory + sumgraphfilename + "-weight.png"
+        newfilename =  sumgraphfilename + "-weight.png"
         self.saveGraph(sumGraph, sumgraphfilename + ".gml")
         plt.figure(newfilename, figsize=(8, 8))
         plt.rcParams['text.usetex'] = False
@@ -1195,7 +1189,7 @@ class IDSS():
         plt.savefig(newfilename, dpi=75)
 
         if self.args['shapefile'] is not None and self.args['xyfile'] is not None:
-            self.createShapefile(sumGraph, self.outputDirectory + sumgraphfilename + "-weight.shp")
+            self.createShapefile(sumGraph, sumgraphfilename + "-weight.shp")
 
 
     #################################################### OUTPUT SECTION ####################################################
@@ -1742,7 +1736,6 @@ class IDSS():
             self.args['screen'] = None
         else:
             logger.basicConfig(stream=sys.stderr, level=logger.ERROR)
-            self.args['screen'] = True
 
         logger.debug("Arguments: %s", self.args)
 
@@ -1804,8 +1797,14 @@ class IDSS():
         if self.args['outputdirectory'] not in self.FalseList:
             self.outputDirectory = self.args['outputdirectory']
         else:
-            self.outputDirectory = "../output/"
+            self.outputDirectory = "output/"
 
+
+        # make sure the outputdirectory ends with a slash since we assume that throughout the remainder of the code
+        if self.outputDirectory.endswith("/"):
+            pass
+        else:
+            self.outputDirectory += "/"
 
         ###########################################################################################################
         ### If occurrence seriation, collapse all the identical solutions (shouldnt be a problem for the frequency set but I suppose it could be
@@ -2003,8 +2002,8 @@ class IDSS():
                     self.scr.addstr(8, 43, "                                           ")
                     msg = "Number of seriation solutions at this step: %d" % currentTotal
                     self.scr.addstr(8, 0, msg)
-                    if os.name != "nt":
-                        msg = "Memory used:        " + str(self.mem.memory())
+                    # if os.name != "nt":
+                    #     msg = "Memory used:        " + str(self.mem.memory())
                     self.scr.addstr(9, 0, msg)
                     self.scr.refresh()
 
@@ -2203,7 +2202,7 @@ class IDSS():
                             help="If true, a .VNA files will be created for every solution.")
         parser.add_argument('--threshold', default=None,
                             help="Sets the maximum difference between the frequencies of types that will be examine. This has the effect of keeping one from evaluating trivial solutions or solutions in which there is limited warrant for establishing continuity. Default is false.")
-        parser.add_argument('--noscreen', default=None,
+        parser.add_argument('--noscreen', default=1,
                             help="If true, there will be no text output (i.e., runs silently). Default is false.")
         parser.add_argument('--xyfile', default=None,
                             help="Enter the name of the XY file that contains the name of the assemblage and the X and Y coordinates for each.")
@@ -2213,32 +2212,32 @@ class IDSS():
                             help="If true, will produce a minimum spanning tree diagram from the set of final solutions.")
         parser.add_argument('--stats', default=None,
                             help="(Not implemented). If true, a histogram of the solutions will be shown in terms of the #s of time pairs are included. Default is false.")
-        parser.add_argument('--screen', default=True,
+        parser.add_argument('--screen', default=None,
                             help="Sets whether the output will be sent all to the screen or not. Default is false. When true, the screen output is all captured through curses.")
         parser.add_argument('--allsolutions', default=None,
                             help="If set, all of the valid solutions are produced even if they are subsets of larger solutions.")
         parser.add_argument('--inputfile',
-                            help="<REQUIRED> Enter the name of the data file with the assemblage data to process.")
+                            help="<REQUIRED> Enter the name of the data file with the assemblage data to process.", required=True)
         parser.add_argument('--outputdirectory', default=None,
                             help="If you want the output to go someplace other than the /output directory, specify that here.")
         parser.add_argument('--shapefile', default=None,
                             help="Produces a shapefile as part of the output. You must have specified the --xyfile (coordinates for each point) as well.")
-        parser.add_argument('--graphs', default=None,
+        parser.add_argument('--graphs', default=0,
                             help="If true, the program will display the graphs that are created. If not, the graphs are just saved as .png files.")
-        parser.add_argument('--frequency', default=None,
+        parser.add_argument('--frequency', default=1,
                             help="Conduct a standard frequency seriation analysis. Default is None.")
         parser.add_argument('--continuity', default=None, help="Conduct a continuity seriation analysis. Default is None.")
         parser.add_argument('--graphroot', default=None,
                             help="The root of the graph figures (i.e., name of assemblage you want to treat as one end in the graphs.")
         parser.add_argument('--continuityroot', default=None,
                             help="If you have a outgroup or root of the graph, set that here.")
-        parser.add_argument('--atlas', default=None,
+        parser.add_argument('--atlas', default=1,
                             help="If you want to have a figure that shows all of the results independently, set that here.")
-        parser.add_argument('--excel', default=None,
+        parser.add_argument('--excel', default=1,
                             help="Will create excel files with the assemblages in seriation order.")
         parser.add_argument('--noheader',default=None,
                             help="If you do not use type names as the first line of the input file, use this option to read the data.")
-        parser.add_argument('--frequencyseriation', default=None, help="Generates graphical output for the results in a frequency seriation form.")
+        parser.add_argument('--frequencyseriation', default=1, help="Generates graphical output for the results in a frequency seriation form.")
         parser.add_argument('--verbose',default=True, help='Provides output for your information')
         parser.add_argument('--occurrence', default=None, help="Treats data as just occurrence information and produces valid occurrence solutions.")
         parser.add_argument('--occurrenceseriation', default=None, help="Generates graphical output for occurrence seriation.")
@@ -2249,32 +2248,9 @@ class IDSS():
             sys.exit()
         return self.args
 
-if __name__ == "__main__":
-    seriation = IDSS()
-    args = seriation.parse_arguments()
-    frequencyResults, continuityResults, exceptionList = seriation.seriate(args)
-
-''''
-From the command line:
-
-python ./IDSS.py --inputfile=../testdata/pfg.txt --xyfile=../testdata/pfgXY.txt --largestonly=1 --mst=1 --graphs=1"
 
 
-As a module:
 
-from IDSS import IDSS
-
-seriation = IDSS()
-
-args={}
-args{'inputfile'}="../testdata/testdata-5.txt"
-args{'screen'}=1
-args{'debug'}=1
-args('graphs'}=1
-
-frequencyResults,continuityResults,exceptions = seriation.seriate(args)
-
-'''''
 
 
 class AutoVivification(dict):

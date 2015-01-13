@@ -9,7 +9,7 @@ __author__ = 'carllipo'
 
 import shapefile
 
-import networkx as nx
+import networkx as nxx
 from pylab import *
 import matplotlib.pyplot as plt
 import argparse

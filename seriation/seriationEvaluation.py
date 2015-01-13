@@ -5,6 +5,7 @@ import uuid
 from pylab import *
 import networkx as nx
 import re
+import pickle
 
 def filter_list(full_list, excludes):
     s = set(excludes)
