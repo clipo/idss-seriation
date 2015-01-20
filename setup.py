@@ -6,7 +6,7 @@ setup(name="idss-seriation",
         'seriation',
       ],
       scripts = [
-          'bin/idss-seriation.py',
+          'idss-seriation.py',
       ],
       author='Carl P. Lipo and Mark E. Madsen',
       author_email='clipo@csulb.edu',
