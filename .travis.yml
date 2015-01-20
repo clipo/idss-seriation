@@ -9,3 +9,12 @@ install:
   - "pip install -r requirements.txt"
 # command to run tests
 script: nosetests
+
+notifications:
+  email:
+    recipients:
+      - clipo@csulb.edu
+      - mark@madsenlab.org
+
+  slack: historicalscience:zZlkD9dJN4nk07li6avV5LQe
+
