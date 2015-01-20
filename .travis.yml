@@ -3,7 +3,8 @@ python:
   - "2.7"
 # command to install dependencies
 before_install:
-  # nothing at the moment
+  - "sudo apt-get build-dep python-matplotlib"
+  - "sudo apt-get build-dep python-numpy python-scipy"
 install:
   - "pip install ."
   - "pip install -r requirements.txt"
