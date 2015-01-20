@@ -36,6 +36,9 @@ and other dependencies.  Some of these dependencies can be difficult or time-con
 using another Python distribution.  Additionally, Anaconda is self-contained and does not alter your system Python 
 installation, which is a very safe way to proceed, especially on Mac OS X.  
 
+The following assumes that you are using Anaconda.  For some notes on dependencies and packages needed to install under a 
+system or standard Python distribution, see below.  
+
 You should be able to execute Python from the command line before proceeding, in a Terminal window, and see something
 like the following:
 
@@ -54,25 +57,25 @@ untar the package into a working directory.  Alternatively, you can clone the ma
 branch `master` is under active development and we do not warrant its correctness or functionality.  For published 
 research, please use the latest release version.  
 
-2.  After cloning or decompressing the IDSS package, change directories into `idss-seration` and ensure that you have the 
+2.  After cloning or decompressing the IDSS package, change directories into `idss-seriation` and ensure that you have the 
 packages listed in `requirements.txt` installed.  The easiest way to do this is to use the `pip` package manager:
 
 ```shell
 mark:~/ $ pip install -r requirements.txt
 ```
 
+
+
 If you are using Anaconda Scientific Python, some of the dependencies will already have been installed.  This is 
 fine.  But there are many small packages that we rely upon, so installation could take several minutes.  Be patient.  
 
 Some packages require a standard C/C++ compiler to install.  On Mac OS X, you will need the XCode development 
 environment and its command line tools installed.  On Ubuntu Linux, for example, the package `build-essentials` is sufficient.  
- On Windows, you will need a minimal GCC or other command line compiler environment.  http://www.mingw.org/ is a good
- place to start.
+On Windows, you will need a minimal GCC or other command line compiler environment.  http://www.mingw.org/ is a good
+place to start.
  
-We do not regularly work with Windows systems and cannot answer questions about getting specific Python packages compiled
-and installed in a Windows environment.  You are **especially** recommended to use Anaconda Scientific Python on 
-Windows, since it ships with an already compiled version of NumPy and SciPy libraries, which require significant effort 
-to compile and install on Windows.  
+ 
+
 
 3.  After dependencies are installed, run the installation script:
 
@@ -89,8 +92,62 @@ At this point, if the installation directory is in your path, you should be able
 get a help message:
 
 ```shell
-TBD
+mark:~/ $ idss-seriation.py
+
+Couldn't import dot_parser, loading of dot files will not be possible.
+usage: idss-seriation.py [-h] [--debug DEBUG] [--bootstrapCI BOOTSTRAPCI]
+                         [--bootstrapSignificance BOOTSTRAPSIGNIFICANCE]
+                         [--filtered FILTERED] [--largestonly LARGESTONLY]
+                         [--individualfileoutput INDIVIDUALFILEOUTPUT]
+                         [--threshold THRESHOLD] [--noscreen NOSCREEN]
+                         [--xyfile XYFILE] [--pairwisefile PAIRWISEFILE]
+                         [--mst MST] [--stats STATS] [--screen SCREEN]
+                         [--allsolutions ALLSOLUTIONS] --inputfile INPUTFILE
+                         [--outputdirectory OUTPUTDIRECTORY]
+                         [--shapefile SHAPEFILE] [--graphs GRAPHS]
+                         [--frequency FREQUENCY] [--continuity CONTINUITY]
+                         [--graphroot GRAPHROOT]
+                         [--continuityroot CONTINUITYROOT] [--atlas ATLAS]
+                         [--excel EXCEL] [--noheader NOHEADER]
+                         [--frequencyseriation FREQUENCYSERIATION]
+                         [--verbose VERBOSE] [--occurrence OCCURRENCE]
+                         [--occurrenceseriation OCCURRENCESERIATION]
+idss-seriation.py: error: argument --inputfile is required
+
 ```
+
+The first line of output is a warning from the python `NetworkX` package, and does not affect any part of the operation
+of the IDSS seriation library.  It's just that we can't suppress the warning.  
+
+The rest of the help message lists the command line options for the `idss-seriation.py` program.  
+
+
+### Installation Without Anaconda Python ###
+
+If you are using a pre-installed or "system" version of Python, it may be installed in directories on your system which require
+root/superuser/Administrator access.  You may need to prepend `sudo` to installation commands, which will prompt you for your
+password before continuing:
+
+```shell
+mark:~/ $ sudo pip install -r requirements.txt
+```
+
+Furthermore, on a standard Ubuntu Linux system, you may need to install some additional package dependencies before 
+NumPy, SciPy, and Matplotlib can be compiled and installed.  The following work on Ubuntu from 12.04 through 14.04:
+
+```shell
+mark:~/ $ sudo apt-get build-dep python-matplotlib python-numpy python-scipy
+mark:~/ $ sudo pip install -r requirements.txt
+```
+ 
+### Installation on Windows ###
+ 
+We do not regularly work with Windows systems and cannot answer questions about getting specific Python packages compiled
+and installed in a Windows environment.  You are **especially** recommended to use Anaconda Scientific Python on 
+Windows, since it ships with an already compiled version of NumPy and SciPy libraries, which require significant effort 
+to compile and install on Windows.  
+
+
 
 
 ## Data Input Format ##
