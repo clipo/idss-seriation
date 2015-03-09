@@ -846,7 +846,7 @@ class IDSS():
                     labels=names
             )
         atlasFile = self.outputDirectory + self.inputFile[0:-4] + "-" + str(type) + "-atlas.png"
-        plt.savefig(atlasFile, dpi=250)
+        plt.savefig(atlasFile, dpi=400)
         #plt.show() # display
 
     def outputExcel(self, filteredarray, filename, type):
