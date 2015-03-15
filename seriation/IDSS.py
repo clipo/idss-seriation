@@ -92,7 +92,7 @@ class IDSS():
 
     def _setup_defaults(self):
         self.defaults = {'debug': None,
-                    'bootstrapCI': None,
+                    'bootstrapCI': True,
                     'bootstrapSignificance': None,
                     'filtered': None,
                     'largestonly': None,
@@ -1893,7 +1893,7 @@ class IDSS():
         logger.debug("Now calculate the bootstrap comparisons based ")
         logger.debug("on specified confidence interval, if in the arguments.")
 
-        if self.args['bootstrapCI'] is not None:
+        if self.args['bootstrapCI'] == True:
             if self.args['bootstrapSignificance'] not in self.FalseList:
                 confidenceInterval = self.args['bootstrapSignificance']
             else:
