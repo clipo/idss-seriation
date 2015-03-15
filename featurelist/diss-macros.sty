@@ -1,0 +1,243 @@
+%%%%%%%%%%%%%%%%%%%
+%% dissertation-macros.sty
+%%
+%% Copy of madsen-macros.sty, customised for the dissertation to render this compileable
+%% on a standalone basis
+%%
+%% Oct 2013
+%%
+%%%%%%%%%%%%%%%%%%%%
+
+% Stirling numbers
+
+\newcommand{\stirlingsubset}[2]{\ensuremath{\genfrac{\lbrace}{\rbrace}{0pt}{}{#1}{#2}}}
+\newcommand{\stirlingcycle}[2]{\ensuremath{\genfrac{[}{]}{0pt}{}{#1}{#2}}}
+
+% scientific notation:  use:  3.2\e{5}, preferably wrapping it all in math mode
+\providecommand{\e}[1]{\ensuremath{\times 10^{#1}}}
+
+% For use with natbib, because I use these constructions all the time
+\newcommand{\citeeg}[1]{\citetext{e.g., \citealp{#1}}}
+\newcommand{\citeie}[1]{\citetext{i.e., \citealp{#1}}}
+\newcommand{\citecf}[1]{\citetext{cf. \citealp{#1}}}
+
+
+% date/version 
+\newcommand{\datedversion}[2]{Modified: #1\ (#2)}
+
+% Boilerplate Creative Commons License
+\newcommand{\memlicense}{\textsl{This work is licensed under the Creative Commons ``Attribution Noncommercial ShareAlike'' License version 3.0. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to Creative Commons, 559 Nathan Abbott Way, Stanford, California 94305, USA.}}
+
+% commonly used
+\newcommand{\memrunningauthor}{M.E. Madsen\xspace}
+
+% requires lipsum package
+\newcommand{\lorem}[1]{\textcolor{blue}{\lipsum[1-#1]}}
+
+%
+% The following are "todo" annotations for use during writing; should not remain in
+% final document!
+%
+% THE NEXT TWO ARE OLD STYLE AND SHOULD BE DEPRECATED IN ALL NEW DOCS - THE SECOND FORM IS CORRECT!
+%\newcommand{\todofn[1]}{\footnote{\textbf{$\ll$TODO: #1$\gg$}}}
+%\newcommand{\todopara[1]}{\textcolor{red}{\textbf{[#1]}}}
+\newcommand{\chklist}[1]{\item[\ensuremath{\Large\Box}]#1}
+\newcommand{\todofoot}[1]{\footnote{\textsf{$\ll$TODO: #1$\gg$}}}
+\newcommand{\todoblock}[1]{\textcolor{red}{\textsf{[TODO: #1]}}}
+\newcommand{\todoitem}[1]{\chklist{\textcolor{red}{\textbf{[TODO: #1]}}}}
+\newcommand{\notetoauthor}[1]{\textcolor{red}{\textbf{[TO AUTHOR: #1]}}}
+\newcommand{\cureditmarker}[1]{\textcolor{blue}{\textsf{[#1]}}}
+%\newcommand{\LOOKUP}{\textcolor{red}{(LOOKUP)}\xspace}
+
+\newcommand{\editorcomment}[3]{\item[] [Line #2] (#1): \textit{#3}\\}
+\newcommand{\clipocomment}[2]{\editorcomment{clipo}{#1}{#2}}
+
+
+% SW Development plan status
+
+\newcommand{\status}[2]{\textcolor{blue}{[STATUS: #1\xspace TIMELINE: \emph{#2}]}}
+\def\partial{\textsl{partial}\xspace}
+\def\completed{\textbf{complete}\xspace}
+\def\unimpl{\textsl{unimplemented}\xspace}
+
+\newcommand{\committeecomment}[1]{\footnote{\textcolor{red}{\textsf{$\ll$COMMENT TO COMMITTEE: #1$\gg$}}}}
+\newcommand{\tl}{\textsc{TransmissionLab}\xspace}
+\newcommand{\tf}{\textbf{TransmissionFramework}\xspace}
+\newcommand{\ctpy}{\textsc{CTPy}\xspace}
+\newcommand{\simupop}{\textsc{simuPOP}\xspace}
+
+% Useful for in-text references to Java, C++, or Python package/class names
+\newcommand{\classname}[1]{\texttt{#1}\xspace}
+
+% Styles for common scientific text
+\newcommand{\taxon}[1]{\textsf{#1}\xspace}
+
+\newcommand{\REFS}{\textcolor{red}{\textbf{REFS\ldots}}}
+
+% For highlighting an "open question" in outlines and notes
+\newcommand{\oq}[1]{\emph{\textcolor{red}{OQ: #1}}}
+
+
+% because I write this every 10 seconds....
+\newcommand{\cg}{coarse-grain}  %to be used with an ending, -ing, -ed.  
+\newcommand{\evt}{extreme value theory\xspace}
+\newcommand{\wf}{Wright-Fisher\xspace}
+\newcommand{\ct}{cultural transmission\xspace}
+\newcommand{\CT}{Cultural Transmission\xspace}
+\newcommand{\Ct}{Cultural transmission\xspace}
+\newcommand{\socl}{social learning\xspace}
+\newcommand{\Socl}{Social learning\xspace}
+\newcommand{\ar}{archaeological record\xspace}
+\newcommand{\cp}{cumulative palimpsest\xspace}
+\newcommand{\cps}{cumulative palimpsests\xspace}
+
+%ensure proper hyphenation of hyphenated terms
+\newcommand{\timetrans}{time\hyp{}transgressive\xspace}
+\newcommand{\timeav}{time averaging\xspace}
+\newcommand{\timeavd}{time averaged\xspace}
+\newcommand{\TimeAv}{Time Averaging\xspace}
+\newcommand{\TimeAvd}{Time Averaged\xspace}
+\newcommand{\Timeav}{Time averaging\xspace}
+\newcommand{\Timeavd}{Time averaged\xspace}
+
+% common in archy
+\newcommand{\culthist}{culture history\xspace}
+\newcommand{\culthistl}{culture-historical\xspace}
+\newcommand{\Culthist}{Culture history\xspace}
+\newcommand{\Culthistl}{Culture-historical\xspace}
+\newcommand{\arec}{archaeological record\xspace}
+
+
+
+
+\newcommand{\mtl}{$\bar{t}$\xspace}
+
+\newcommand{\tbntiabbrev}{\textbf{TBNTI}\xspace}
+\newcommand{\aniabbrev}{\textbf{ANI}\xspace}
+
+%%%%%%%%% Typesetting shortcuts
+
+\def\iid{$\textbf{iid}$\xspace}
+
+\def\B{\{0,1\}}
+\def\xor{\oplus}
+
+\def\P{{\mathbb P}}
+\def\E{{\mathbb E}}
+\def\var{{\bf Var}}
+
+\def\N{{\mathbb N}}
+\def\Z{{\mathbb Z}}
+\def\R{{\mathbb R}}
+\def\C{{\mathbb C}}
+\def\Q{{\mathbb Q}}
+\def\eps{{\epsilon}}
+
+\def\bz{{\bf z}}
+
+\def\true{{\tt true}}
+\def\false{{\tt false}}
+
+% Geographic coordinates
+\newcommand{\degmin[3]}{\ensuremath{#1^\circ\ #2'\ #3}\xspace}
+\newcommand{\degminsec[4]}{\ensuremath{#1^\circ\ #2'\ #3"\ #4}\xspace}
+
+
+% Biblio abbrevations
+\newcommand{\inprep}{\emph{in prep}\xspace}
+\newcommand{\inpress}{\emph{in press}\xspace}
+\newcommand{\submitted}{\emph{submitted}\xspace}
+\newcommand{\pc}{\emph{personal communication}\xspace}
+
+%% Definitions of useful numbered environments %%
+%\newcommand{\qed}{\nobreak \ifvmode \relax \else
+      %\ifdim\lastskip<1.5em \hskip-\lastskip
+      %\hskip1.5em plus0em minus0.5em \fi \nobreak
+      %\vrule height0.75em width0.5em depth0.25em\fi}
+
+
+
+
+
+% Various abbreviations for costly signaling since I type it nearly constantly...
+%\newcommand{\cst}{costly signaling theory\xspace}
+%\newcommand{\Cst}{Costly signaling theory\xspace}
+%\newcommand{\st}{signaling theory\xspace}
+%\newcommand{\cs}{costly signaling\xspace}
+%\newcommand{\Cs}{Costly signaling\xspace}
+%\newcommand{\CS}{Costly Signaling\xspace}
+%\newcommand{\CST}{Costly Signaling Theory\xspace}
+
+% Generic symbol set for formal models and game strategies
+\newcommand{\modelsym}[2]{\ensuremath{\mathcal{#1}_{#2}}\xspace}
+\newcommand{\modelname}[1]{\ensuremath{\mathsf{#1}}\xspace}
+\newcommand{\modelabbrev}[1]{\ensuremath{\mathsf{#1}}\xspace}
+\newcommand{\stratsym}[1]{\ensuremath{\mathbf{#1}}\xspace}
+
+\newcommand{\observable}[1]{\ensuremath{\mathsf{#1}}\xspace}
+
+% OLD VERSIONS - DEPRECATE
+%\newcommand{\modsym}[2]{\ensuremath{\mathcal{#1}_{#2}}\xspace}
+%\newcommand{\modname}[1]{\ensuremath{\mathcal{#1}}\xspace}
+
+% Proper names that are hard to type....
+\def\Erdos{Erd\H{o}s}
+\newcommand{\tomasovych}{Toma\v{s}ov\'ych\xspace}
+\newcommand{\ERgraph}{\Erdos-Renyi random graph\xspace}
+\newcommand{\ERgraphs}{\Erdos-Renyi random graphs\xspace}
+
+%% shortcut since I use it ALL the freakin' time...
+\newcommand{\GSB}{\modelname{GSB}}
+\newcommand{\GSBC}{\modelsym{GSB}{C}}
+\newcommand{\GSBCA}{\modelsym{GSB}{CA}}
+\newcommand{\GSBCAM}{\modelsym{GSB}{CAM}}
+\newcommand{\JR}{\modelname{JRN}}
+\newcommand{\GSBFULL}{\modelsym{GSB}{CAJR}}
+
+% locations
+\def\LMV{Lower Mississippi River Valley\xspace}
+\def\CMV{Central Mississippi River Valley\xspace}
+
+
+% common abbrevations
+\newcommand{\egt}{evolutionary game theory\xspace}
+\newcommand{\Egt}{Evolutionary game theory\xspace}
+\newcommand{\nplayer}{$n$-player\xspace}
+
+% official terms for CST epistemological problems in archaeology
+\newcommand{\arp}{\textbf{aggregate record problem}\xspace}
+\newcommand{\asp}{\textbf{aggregate signal problem}\xspace}
+\newcommand{\ssp}{\textbf{signaling structure problem}\xspace}
+\newcommand{\mcp}{\textbf{monument context problem}\xspace}
+\newcommand{\ecp}{\textbf{equilibrium correlation problem}\xspace}
+\newcommand{\ARP}{\emph{ARP}\xspace}
+\newcommand{\ASP}{\emph{ASP}\xspace}
+\newcommand{\SSP}{\emph{SSP}\xspace}
+\newcommand{\MCP}{\emph{MCP}\xspace}
+\newcommand{\ECP}{\emph{ECP}\xspace}
+
+% Costly signaling model requirements labels
+\newcommand{\cost}{\textbf{\textsl{cost}}\xspace}
+\newcommand{\benefit}{\textbf{\textsl{benefit}}\xspace}
+\newcommand{\quality}{\textbf{\textsl{quality}}\xspace}
+\newcommand{\corsigqual}{\textbf{\textsl{R(signal,quality)}}\xspace}
+\newcommand{\corqualbenefit}{\textbf{\textsl{R(quality,benefit)}}\xspace}
+
+% Rapa Nui and Oceanic archaeology abbreviations
+\newcommand{\moai}{\emph{moai}\xspace}
+\newcommand{\Moai}{\emph{Moai}\xspace}
+\newcommand{\ahu}{\emph{ahu}\xspace}
+\newcommand{\Ahu}{\emph{Ahu}\xspace}
+\newcommand{\pukao}{\emph{pukao}\xspace}
+\newcommand{\metraux}{M\'{e}traux\xspace}
+\newcommand{\hawaii}{Hawai'i\xspace}
+\newcommand{\hawaiian}{Hawai'ian\xspace}
+\newcommand{\rn}{Rapa Nui\xspace}
+\newcommand{\rnp}{Rapanui\xspace}
+\newcommand{\hp}{\emph{hare paenga}\xspace}
+\newcommand{\moaicount}{10000\todofoot{PLACEHOLDER NUMBER}\xspace}
+\newcommand{\seasoncount}{10000\todofoot{PLACEHOLDER NUMBER}\xspace}
+\newcommand{\projectfull}{University of \hawaii-Manoa--California State University at Long Beach\xspace}
+\newcommand{\projectabbrev}{UH-CSULB\xspace}
+
+

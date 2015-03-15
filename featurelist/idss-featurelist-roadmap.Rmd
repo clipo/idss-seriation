@@ -1,0 +1,35 @@
+
+# Overall Roadmap
+
+The IDSS seriation algorithm has a Python implementation which works and has some optimizations for performance, but needs additional features to support planned analyses.  In particular, a series of features are needed to support large-scale simulation modeling of cultural transmission models "hooked" to seriations, to study how seriations vary given changes to the interaction network or social learning rules.  
+
+This document represents the list of desired features.
+
+# Specific Feature Requests
+
+1.  Jackknife sensitivity analysis of solution stability -- leave-one-out analysis of the assemblages in an input file, automatically generating the selected output solutions and averaging them at the end to calculate the variation across resampling.
+1.  Automatic performance of the spatial clustering analysis, with automatic labeling of graph branches by spatial clusters.
+1.  Automatic counting and stats about the number of viable frequency solutions for the output type chosen.  
+
+
+# Analysis Roadmap
+
+
+1.  Sample size and duration sensitivity
+1.  What patterns beyond unimodality might be useful for sequence alignment?  
+1.  What can we do by combining (analytically) the frequency and continuity output?
+
+
+
+# Infrastructure Enhancements
+
+1.  Output modules split from main algorithm -- interface to output modules, so we can select sets of output processing to happen without doing everything since some of it is time-consuming.
+1.  Database storage of output -- useful for large analysis so that we can pipeline analysis without writing and reading thousands of small files.
+1.  Work on the cluster parallelization -- perhaps we simply do separate runs on different machines, but any given run is multiprocessed on a single node?  Or do we want a more serious parallelization?  
+1.  Web service version of the basic seriation system, which takes a small number of assemblages for free and does output in a zip file which is returned?
+1.  Explore whether KNN would give us a fast lookup table when forming solution sets.  
+
+
+# Completed or In Progress
+
+1.  Command line argument processing has been moved out of the core module in a branch, not yet merged into the master branch.

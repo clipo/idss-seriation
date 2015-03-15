@@ -1,0 +1,177 @@
+
+\documentclass[preprint,times,authoryear,10pt]{elsarticle}
+
+%% The amssymb package provides various useful mathematical symbols
+\usepackage{amssymb,amsmath}
+
+
+%%%%%%%%%% Remove the following before submission %%%%%%%%%%%%%%%%%%
+
+\usepackage{mathspec,xltxtra,xunicode}
+%\usepackage{unicode-math}
+%\defaultfontfeatures{Scale=MatchLowercase}
+\setmainfont[Mapping=tex-text,Numbers=OldStyle]{Times New Roman}
+%\setmainfont[Ligatures=TeX,Numbers=OldStyle]{Minion Pro}
+\setsansfont[Mapping=tex-text]{ITC Legacy Sans Std Medium}
+\setmonofont{Bitstream Vera Sans Mono}
+%\setmathfont(Digits,Latin,Greek)[Script=Math,Uppercase=Italic,Lowercase=Italic]{Minion Math Semibold}
+%\setmathfont[range={\mathbfup->\mathup}]{MinionMath-Bold.otf}
+%\setmathfont[range={\mathbfit->\mathit}]{MinionMath-Bold.otf}
+%\setmathfont[range={\mathit->\mathit}]{MinionMath-Bold.otf}
+
+%%%%%%%%%% Remove the above before submission %%%%%%%%%%%%%%%%%%
+
+%% The amsthm package provides extended theorem environments
+%% \usepackage{amsthm}
+
+%% The lineno packages adds line numbers. Start line numbering with
+%% \begin{linenumbers}, end it with \end{linenumbers}. Or switch it on
+%% for the whole article with \linenumbers after \end{frontmatter}.
+\usepackage{lineno}
+\usepackage{graphicx}
+\usepackage{xspace}
+\usepackage{bm}
+\usepackage{longtable}
+\usepackage{hyphenat}
+\usepackage{lipsum}
+\usepackage{url}
+\usepackage{outlines}
+\usepackage{diss-macros}
+\usepackage[section,ruled]{algorithm}
+\usepackage{algorithmic}
+\usepackage{boxedminipage}
+\usepackage[xetex,bookmarks=true,linkcolor=blue,hyperfootnotes=false,breaklinks=true,citecolor=blue,colorlinks=true]{hyperref}
+\usepackage{sistyle}
+\SIthousandsep{,}
+
+\journal{Unpublished manuscript}
+
+% Pandoc toggle for numbering sections (defaults to be off)
+
+% Pandoc header
+
+
+\begin{document}
+
+\begin{frontmatter}
+
+
+\title{Development Roadmap and Feature List for IDSS Seriation}
+
+\author{Carl P. Lipo}
+\address{Department of Anthropology and IIRMES, 1250 Bellflower Blvd, California State University at Long Beach, Long Beach CA, 90840 USA}
+\ead{Carl.Lipo@csulb.edu}
+\ead[url]{http://lipolab.org}
+
+\author{Mark E. Madsen}
+\address{Department of Anthropology, Box 353100, University of Washington, Seattle WA, 98195 USA}
+\ead{mark@madsenlab.org}
+\ead[url]{http://madsenlab.org}
+
+
+
+\begin{keyword}
+seriation \sep algorithms
+\end{keyword}
+
+
+\end{frontmatter}
+
+\section{Overall Roadmap}\label{overall-roadmap}
+
+The IDSS seriation algorithm has a Python implementation which works and
+has some optimizations for performance, but needs additional features to
+support planned analyses. In particular, a series of features are needed
+to support large-scale simulation modeling of cultural transmission
+models ``hooked'' to seriations, to study how seriations vary given
+changes to the interaction network or social learning rules.
+
+This document represents the list of desired features.
+
+\section{Specific Feature Requests}\label{specific-feature-requests}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  Jackknife sensitivity analysis of solution stability -- leave-one-out
+  analysis of the assemblages in an input file, automatically generating
+  the selected output solutions and averaging them at the end to
+  calculate the variation across resampling.
+\item
+  Automatic performance of the spatial clustering analysis, with
+  automatic labeling of graph branches by spatial clusters.
+\item
+  Automatic counting and stats about the number of viable frequency
+  solutions for the output type chosen.
+\end{enumerate}
+
+\section{Analysis Roadmap}\label{analysis-roadmap}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  Sample size and duration sensitivity
+\item
+  What patterns beyond unimodality might be useful for sequence
+  alignment?\\
+\item
+  What can we do by combining (analytically) the frequency and
+  continuity output?
+\end{enumerate}
+
+\section{Infrastructure Enhancements}\label{infrastructure-enhancements}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  Output modules split from main algorithm -- interface to output
+  modules, so we can select sets of output processing to happen without
+  doing everything since some of it is time-consuming.
+\item
+  Database storage of output -- useful for large analysis so that we can
+  pipeline analysis without writing and reading thousands of small
+  files.
+\item
+  Work on the cluster parallelization -- perhaps we simply do separate
+  runs on different machines, but any given run is multiprocessed on a
+  single node? Or do we want a more serious parallelization?\\
+\item
+  Web service version of the basic seriation system, which takes a small
+  number of assemblages for free and does output in a zip file which is
+  returned?
+\item
+  Explore whether KNN would give us a fast lookup table when forming
+  solution sets.
+\end{enumerate}
+
+\section{Completed or In Progress}\label{completed-or-in-progress}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  Command line argument processing has been moved out of the core module
+  in a branch, not yet merged into the master branch.
+\end{enumerate}
+
+
+%% References with bibTeX database:
+
+\bibliographystyle{elsarticle-harv}
+\bibliography{idss-featurelist-roadmap}
+
+
+
+
+
+
+
+
+
+\end{document}
+
+%%
+%% End of file `elsarticle-template-2-harv.tex'.

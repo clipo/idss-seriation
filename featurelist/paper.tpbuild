@@ -1,0 +1,9 @@
+#!/bin/sh
+
+./knit pdf
+pandoc -s -S --biblio madsenlipo2014-semanticaxelrod.bib madsenlipo2014-semanticaxelrod.md --template=xelatex-template.tex --latex-engine=xelatex -o madsenlipo2014-semanticaxelrod.tex --natbib --number-sections
+latexmk -pdf madsenlipo2014-semanticaxelrod
+
+rm -rf *.log *.bbl *.blg *.out *.md *.docx madsenlipo2014-semanticaxelrod.tex *.epub
+
+
