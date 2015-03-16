@@ -14,12 +14,9 @@ This document represents the list of desired features.
 
 # Analysis Roadmap
 
-
 1.  Sample size and duration sensitivity
 1.  What patterns beyond unimodality might be useful for sequence alignment?  
 1.  What can we do by combining (analytically) the frequency and continuity output?
-
-
 
 # Infrastructure Enhancements
 
@@ -28,7 +25,7 @@ This document represents the list of desired features.
 1.  Work on the cluster parallelization -- perhaps we simply do separate runs on different machines, but any given run is multiprocessed on a single node?  Or do we want a more serious parallelization?  
 1.  Web service version of the basic seriation system, which takes a small number of assemblages for free and does output in a zip file which is returned?
 1.  Explore whether KNN would give us a fast lookup table when forming solution sets.  
-
+1.  Separate the spatial testing bootstrap into a separate module -- parallelizing this separately is probably one of the biggest time impacts.  
 
 # Completed or In Progress
 
