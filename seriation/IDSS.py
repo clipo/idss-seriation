@@ -314,7 +314,7 @@ class IDSS():
 
         reader = csv.reader(xyf, delimiter='\t', quotechar='|')
         ## skip the first line as it is the header (or should be)
-        ## next(reader, None) -- commented out for now
+        next(reader, None)
         for row in reader:
             label = row[0]
             self.xyAssemblages.append(label)
