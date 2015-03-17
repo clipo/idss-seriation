@@ -736,6 +736,7 @@ class IDSS():
 
     #################################################### set up all the output files ####################################################
     def setupOutput(self):
+
         outputFile = self.outputDirectory + self.inputFile[0:-4] + ".vna"
         OUTMSTFILE = OUTMSTDISTANCEFILE = ""
         try:
@@ -1626,8 +1627,8 @@ class IDSS():
         return seriationList
 
     def calculateGeographicSolutionPValue(self,graph):
-
-        bootstrap=1000
+        ## this is the number of bootstrap samples to create to evalute the p-value of the spatial aspect of the solution
+        bootstrap=int(self.args['spatialbootrapN'])
         solutionDistance=0
         assemblagesInSolution=[]
         edges=0
@@ -1799,12 +1800,16 @@ class IDSS():
         else:
             self.outputDirectory = "output/"
 
+        ## create the output directory if it doesnt yet exist.
+        if not os.path.exists(self.outputDirectory):
+            os.makedirs(self.outputDirectory)
 
         # make sure the outputdirectory ends with a slash since we assume that throughout the remainder of the code
         if self.outputDirectory.endswith("/"):
             pass
         else:
             self.outputDirectory += "/"
+
 
         ###########################################################################################################
         ### If occurrence seriation, collapse all the identical solutions (shouldnt be a problem for the frequency set but I suppose it could be
@@ -2154,8 +2159,9 @@ class IDSS():
                 seriation.makeGraph(argument)
 
             if self.args['xyfile'] not in self.FalseList:
-                pscore ,distance, geodistance, sd_geodistance = self.calculateGeographicSolutionPValue(minMaxGraphByWeight)
-                print "Geographic p-value for the continuity seriation minmax solution: ", pscore
+                if self.args['spatialpvalue'] not in self.FalseList:
+                    pscore ,distance, geodistance, sd_geodistance = self.calculateGeographicSolutionPValue(minMaxGraphByWeight)
+                    print "Geographic p-value for the continuity seriation minmax solution: ", pscore
                 filename=self.outputDirectory + "geography.txt"
                 with open(filename, "a") as myfile:
                     text=self.inputFile[0:-4]+"\t"+str(pscore)+"\t"+str(distance)+"\t"+str(geodistance)+"\t" \
@@ -2241,6 +2247,8 @@ class IDSS():
         parser.add_argument('--verbose',default=True, help='Provides output for your information')
         parser.add_argument('--occurrence', default=None, help="Treats data as just occurrence information and produces valid occurrence solutions.")
         parser.add_argument('--occurrenceseriation', default=None, help="Generates graphical output for occurrence seriation.")
+        parser.add_argument('--spatialpvalue', default=None, help="Calculate the p-value for the spatial result (if there is an xy file). ")
+        parser.add_argument('--spatialbootrapN',default=100, help="If you set the --spatialpvalue flag, set this parameter to be the number of bootstraps to use in the calculation of the p-value. Default is 100 (but 1000 is better).")
         try:
             self.args = vars(parser.parse_args())
         except IOError, msg:
