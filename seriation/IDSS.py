@@ -1670,7 +1670,8 @@ class IDSS():
 
     def calculateGeographicSolutionPValue(self,graph):
 
-        bootstrap=1000
+        #bootstrap=1000
+        bootstrap=100
         solutionDistance=0
         assemblagesInSolution=[]
         edges=0
