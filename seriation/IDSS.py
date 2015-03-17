@@ -122,7 +122,10 @@ class IDSS():
                     'occurrence':None,
                     'frequencyseriation':None,
                     'pdf':None,
-                    'atlas': None}
+                    'atlas': None,
+                    'spatialboostrapN':None,
+                    'spatialsignificance':None,
+                    'minmaxbycount':None }
         return self.defaults
 
 
@@ -1670,7 +1673,7 @@ class IDSS():
 
     def calculateGeographicSolutionPValue(self,graph):
 
-        bootstrap=1000
+        bootstrap=int(self.args['spatialbootstrapN'])
         solutionDistance=0
         assemblagesInSolution=[]
         edges=0
@@ -1847,6 +1850,9 @@ class IDSS():
         else:
             self.outputDirectory = "output/"
 
+        ## create directory for output if it doesnt exist already
+        if not os.path.exists(self.outputDirectory):
+            os.makedirs(self.outputDirectory)
 
         # make sure the outputdirectory ends with a slash since we assume that throughout the remainder of the code
         if self.outputDirectory.endswith("/"):
@@ -1903,7 +1909,6 @@ class IDSS():
         ###########################################################################################################
         ### setup the output files. Do this now so that if it fails, its not AFTER all the seriation stuff
         OUTFILE, OUTPAIRSFILE, OUTMSTFILE, OUTMSTDISTANCEFILE = self.setupOutput()
-
 
 
         ###########################################################################################################
@@ -2113,22 +2118,31 @@ class IDSS():
                 self.args['inputfile']=textFileName
                 seriation.makeGraph(self.args)
             #################################################### MinMax Graph ############################################
-            #print self.args
-            minMaxGraphByWeight = self.createMinMaxGraphByWeight(input_graph=sumGraphByWeight, weight='weight')
-            if self.args['xyfile'] not in self.FalseList:
-                pscore, distance, geodistance, sd_geodistance = self.calculateGeographicSolutionPValue(minMaxGraphByWeight)
-                print "Geographic p-value for the frequency seriation minmax solution: ", pscore
-                filename=self.outputDirectory + "geography.txt"
-                with open(filename, "a") as myfile:
-                    text=self.inputFile[0:-4]+"\t"+str(pscore)+"\t"+str(distance)+"\t"+str(geodistance)+"\t" \
-                         + str(sd_geodistance)+"\t"+str(self.totalAssemblageSize)+"\n"
-                    myfile.write(text)
+            ## the minmax by weight is the default minmax output (and default altogether). Minmax by weight
+            ## is created by finding the solution that is created by finding the edges with the smallest distances and then adding
+            ## edges until all assemblages are added while keeping equivalent weighted edges.
 
-            minMaxGraphByCount = self.createMinMaxGraphByCount(input_graph=sumGraphByCount, weight='weight')
-            #if self.args['graphs'] not in self.FalseList:
+            minMaxGraphByWeight = self.createMinMaxGraphByWeight(input_graph=sumGraphByWeight, weight='weight')
             self.graphOutput(minMaxGraphByWeight,
-                        self.outputDirectory + self.inputFile[0:-4] + "-minmax-by-weight.png")
-            self.graphOutput(minMaxGraphByCount,
+                    self.outputDirectory + self.inputFile[0:-4] + "-minmax-by-weight.png")
+            ## if you have an xy file you can then potentially figure out the spatial significance of the minmax solution
+            if self.args['xyfile'] not in self.FalseList:
+                ## if set calculate the spatial significance of the minmax solution.
+                if self.args['spatialsignificance'] not in self.FalseList:
+                    pscore, distance, geodistance, sd_geodistance = self.calculateGeographicSolutionPValue(minMaxGraphByWeight)
+                    print "Geographic p-value for the frequency seriation minmax solution: ", pscore
+                    ## create output file for the geographic value
+                    filename=self.outputDirectory + self.inputFile[0:-4]+"-geography.txt"
+                    with open(filename, "a") as myfile:
+                        text=self.inputFile[0:-4]+"\t"+str(pscore)+"\t"+str(distance)+"\t"+str(geodistance)+"\t" \
+                             + str(sd_geodistance)+"\t"+str(self.totalAssemblageSize)+"\n"
+                        myfile.write(text)
+
+            ## This version of the minmax graph uses the # of times edges appear in solutions to weight the minmax creation
+            ## the results are not intuitive. So this is  OPTIONAL output
+            if self.args['minmaxbycount'] not in self.FalseList:
+                minMaxGraphByCount = self.createMinMaxGraphByCount(input_graph=sumGraphByCount, weight='weight')
+                self.graphOutput(minMaxGraphByCount,
                         self.outputDirectory + self.inputFile[0:-4] + "-minmax-by-count.png")
 
             #################################################### MST SECTION ####################################################
