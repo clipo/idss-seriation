@@ -2237,7 +2237,7 @@ class IDSS():
                             help="Will create excel files with the assemblages in seriation order.")
         parser.add_argument('--noheader',default=None,
                             help="If you do not use type names as the first line of the input file, use this option to read the data.")
-        parser.add_argument('--frequencyseriation', default=1, help="Generates graphical output for the results in a frequency seriation form.")
+        parser.add_argument('--frequencyseriation', default=None, help="Generates graphical output for the results in a frequency seriation form.")
         parser.add_argument('--verbose',default=True, help='Provides output for your information')
         parser.add_argument('--occurrence', default=None, help="Treats data as just occurrence information and produces valid occurrence solutions.")
         parser.add_argument('--occurrenceseriation', default=None, help="Generates graphical output for occurrence seriation.")
