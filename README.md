@@ -64,8 +64,6 @@ packages listed in `requirements.txt` installed.  The easiest way to do this is 
 mark:~/ $ pip install -r requirements.txt
 ```
 
-
-
 If you are using Anaconda Scientific Python, some of the dependencies will already have been installed.  This is 
 fine.  But there are many small packages that we rely upon, so installation could take several minutes.  Be patient.  
 
@@ -74,7 +72,8 @@ environment and its command line tools installed.  On Ubuntu Linux, for example,
 On Windows, you will need a minimal GCC or other command line compiler environment.  http://www.mingw.org/ is a good
 place to start.
  
- 
+ You will also need to install the GraphViz libraries. GraphViz is available for Mac OS X, Windows, Linux and
+  can be installed by going to http://www.graphviz.org/Download.php.
 
 
 3.  After dependencies are installed, run the installation script:
@@ -89,7 +88,7 @@ This script will:
 2.  Install the command line script to a suitable directory (e.g., `/usr/local/bin` or the Anaconda distribution's `bin` directory.
 
 At this point, if the installation directory is in your path, you should be able to run the main seriation script and 
-get a help message:
+get a help message that looks something like this:
 
 ```shell
 mark:~/ $ idss-seriation.py
@@ -112,12 +111,16 @@ usage: idss-seriation.py [-h] [--debug DEBUG] [--bootstrapCI BOOTSTRAPCI]
                          [--frequencyseriation FREQUENCYSERIATION]
                          [--verbose VERBOSE] [--occurrence OCCURRENCE]
                          [--occurrenceseriation OCCURRENCESERIATION]
+                         [--spatialsignificance SPATIALSIGNIFICANCE]
+                         [--spatialbootstrapN SPATIALBOOTSTRAPN]
+                         [--minmaxbycount MINMAXBYCOUNT]
 idss-seriation.py: error: argument --inputfile is required
 
 ```
 
-The first line of output is a warning from the python `NetworkX` package, and does not affect any part of the operation
-of the IDSS seriation library.  It's just that we can't suppress the warning.  
+If the first line of output comments on that the system "Couldn't import dot_parser..." do not worry. This is just 
+is a warning from the python `NetworkX` package, and does not affect any part of the operation
+of the IDSS seriation library.  At this time we cannot suppress the warning.  
 
 The rest of the help message lists the command line options for the `idss-seriation.py` program.  
 
@@ -145,15 +148,27 @@ mark:~/ $ sudo pip install -r requirements.txt
 We do not regularly work with Windows systems and cannot answer questions about getting specific Python packages compiled
 and installed in a Windows environment.  You are **especially** recommended to use Anaconda Scientific Python on 
 Windows, since it ships with an already compiled version of NumPy and SciPy libraries, which require significant effort 
-to compile and install on Windows.  
+to compile and install on Windows.
 
-
+One feature that may not work well (or at all) on a Windows machine is the --screen flag.
+This flag has the code use the curses library to draw a simple updating screen that shows the progress of the processing.
 
 
 ## Data Input Format ##
 
-(TBD)
+We use a basic ascii text format for the input file.  In this format, columns are tab-delimited.  Please note that on Mac OS X
+you may need to save .txt files using "Windows tab delimited" rather than the default "tab limited" especially if you are exporting 
+from Microsoft Excel. The default Mac OS X version of "tab delimited" often does not have the correct end of line character that is assumed
+in python resulting in a botched import. 
 
+The first row of the file is always assumed to be the header. The header should include a label for each of the columns. The first column 
+is the name of the rows (i.e., assemblages or collections, etc.) The rest of the columns should be the names of the types/classes. The rows
+after the first should contain the data with the first column containing the name and the rest of the columns the counts of the types/classes.
+Note that we assume that you will provide the raw count data (not percentages). 
+
+If you have the locations of the assemblages and want to look at how the results appear on geographic space, provide a 
+separate file that lists the assemblage/collection name and the X and Y coordinates for each. This files should have a header 
+(e.g., Assemblage\tNorthing\tEasting) and be tab delimited. Use the --xyfile flag to set the name/location for this file. 
 
 ## Command Line Options ##
 
