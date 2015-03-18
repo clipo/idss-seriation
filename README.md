@@ -168,9 +168,20 @@ Note that we assume that you will provide the raw count data (not percentages).
 
 If you have the locations of the assemblages and want to look at how the results appear on geographic space, provide a 
 separate file that lists the assemblage/collection name and the X and Y coordinates for each. This files should have a header 
-(e.g., Assemblage\tNorthing\tEasting) and be tab delimited. Use the --xyfile flag to set the name/location for this file. 
+(e.g., Assemblage<tab>Northing<tab>Easting) and be tab delimited. Use the --xyfile flag to set the name/location for this file. 
 
 ## Command Line Options ##
+
+If you run IDSS without any options you will get a help message with the various options that are possible. 
+To run IDSS you must set at least one  options on the command line.  The most imporant (and required) option is 
+--inputfile=<filename>). This option specifies the data file that contains the raw data that describes the 
+assemblages that are to be seriated.   Other useful options include:
+
+** --output=  <name/location of directory that will be used for output. The default is ./output
+** --bootstrapCI=1 Use a bootstrap determined confidence interval for making comparisons. Default significance is 0.95.
+** --bootstrapSignificance=0.95 Set the confidence interval significance value. Default is 0.95.
+** --yxfile=<filename> If you have spatial coordinates for your assemblages and want the results shown in geographic space
+  set this option to the name of the file with the coordinates (format: assemblage<tab>X<tab>Y<return>).
 
 (TBD)
 
