@@ -99,7 +99,6 @@ class IDSS():
                     'filtered': None,
                     'largestonly': None,
                     'individualfileoutput': None,
-                    'xyfile':None,
                     'excel': None,
                     'threshold': None,
                     'noscreen': None,
@@ -316,7 +315,8 @@ class IDSS():
             sys.exit('file %s does not open: %s') % ( filename, e)
 
         reader = csv.reader(xyf, delimiter='\t', quotechar='|')
-
+        ## skip the first line as it is the header (or should be)
+        next(reader, None)
         for row in reader:
             label = row[0]
             self.xyAssemblages.append(label)
