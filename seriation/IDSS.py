@@ -54,7 +54,6 @@ class IDSS():
         self.pairGraph = nx.Graph(is_directed=False)
         self.nodeSizeFactor = 500 # factor to scale the size of the nodes when drawing
         self.solutionCount=0
-        self.args={}
         self.inputFile = ""
         self.solutionCount=0
         self.outputDirectory = ""
@@ -87,9 +86,56 @@ class IDSS():
         self.FalseList=[None,0,False,"None","0","False"]
         logger.debug("Start time:  %s ", self.start)
         self.scr = None
-        self.args={}
         self.totalAssemblageSize = 0 ## total for all assemblages
         self.solutionsChecked = 0 ## total # of seriations evaluated to find the final subset
+
+
+    def _setup_defaults(self):
+        self.defaults = {'debug': None,
+                    'bootstrapCI': True,
+                    'bootstrapSignificance': None,
+                    'filtered': None,
+                    'largestonly': None,
+                    'individualfileoutput': None,
+                    'excel': None,
+                    'threshold': None,
+                    'noscreen': None,
+                    'xyfile': None,
+                    'pairwisefile': None,
+                    'mst': None,
+                    'stats': None,
+                    'screen': None,
+                    'allsolutions': None,
+                    'inputfile': None,
+                    'outputdirectory': None,
+                    'shapefile': None,
+                    'frequency': None,
+                    'continuity': None,
+                    'graphs': None,
+                    'graphroot': None,
+                    'continuityroot': None,
+                    'verbose':None,
+                    'occurrenceseriation':None,
+                    'occurrences':None,
+                    'frequency':None,
+                    'occurrence':None,
+                    'frequencyseriation':None,
+                    'pdf':None,
+                    'atlas': None,
+                    'spatialsignificance':None,
+                    'spatialbootstrapN':None,
+                    'minmaxbycount':None
+                    }
+        return self.defaults
+
+
+    def initialize(self, parsed_args):
+        args_map = vars(parsed_args)
+        self.args = self._setup_defaults()
+        self.args.update(args_map)
+        self.initialized = True
+        print "self.args: %s" % self.args
+
 
     def saveGraph(self, graph, filename):
         nx.write_gml(graph, filename)
@@ -267,7 +313,8 @@ class IDSS():
             sys.exit('file %s does not open: %s') % ( filename, e)
 
         reader = csv.reader(xyf, delimiter='\t', quotechar='|')
-
+        ## skip the first line as it is the header (or should be)
+        next(reader, None)
         for row in reader:
             label = row[0]
             self.xyAssemblages.append(label)
@@ -1627,7 +1674,7 @@ class IDSS():
 
     def calculateGeographicSolutionPValue(self,graph):
 
-        bootstrap=1000
+        bootstrap=int(self.args['spatialbootstrapN'])
         solutionDistance=0
         assemblagesInSolution=[]
         edges=0
@@ -1726,7 +1773,12 @@ class IDSS():
         #print "length of final solution set: ", len(solutionSet)
         return solutionSet
 
-    def seriate(self,args):
+    def seriate(self):
+
+        if self.initialized == False:
+            print "You must call this method after calling initialize() with a list of arguments for the seriation"
+            sys.exit(1)
+
 
         self.checkMinimumRequirements()
         #####################################DEBUG OUTPUT#############################################################
@@ -1799,6 +1851,9 @@ class IDSS():
         else:
             self.outputDirectory = "output/"
 
+        ## create directory if it does not exist already
+        if not os.path.exists(self.outputDirectory):
+            os.makedirs(self.outputDirectory)
 
         # make sure the outputdirectory ends with a slash since we assume that throughout the remainder of the code
         if self.outputDirectory.endswith("/"):
@@ -1845,7 +1900,7 @@ class IDSS():
         logger.debug("Now calculate the bootstrap comparisons based ")
         logger.debug("on specified confidence interval, if in the arguments.")
 
-        if self.args['bootstrapCI'] is not None:
+        if self.args['bootstrapCI'] == True:
             if self.args['bootstrapSignificance'] not in self.FalseList:
                 confidenceInterval = self.args['bootstrapSignificance']
             else:
@@ -1855,8 +1910,6 @@ class IDSS():
         ###########################################################################################################
         ### setup the output files. Do this now so that if it fails, its not AFTER all the seriation stuff
         OUTFILE, OUTPAIRSFILE, OUTMSTFILE, OUTMSTDISTANCEFILE = self.setupOutput()
-
-
 
         ###########################################################################################################
         logger.debug("Now pre-calculating all the combinations between pairs of assemblages. ")
@@ -2043,8 +2096,10 @@ class IDSS():
             sumGraphByWeight = self.sumGraphsByWeight(frequencyArray)
             self.sumGraphOutput(sumGraphByWeight, self.outputDirectory + self.inputFile[0:-4] + "-sumgraph-by-weight")
 
-            sumGraphByCount = self.sumGraphsByCount(frequencyArray)
-            self.sumGraphOutput(sumGraphByCount, self.outputDirectory + self.inputFile[0:-4] + "-sumgraph-by-count")
+            ## optional output. Summing graph by count (and then minmax) is very confusing at this point and not very useful. Making optional.
+            if self.args['minmaxbycount'] not in self.FalseList:
+                sumGraphByCount = self.sumGraphsByCount(frequencyArray)
+                self.sumGraphOutput(sumGraphByCount, self.outputDirectory + self.inputFile[0:-4] + "-sumgraph-by-count")
 
             if self.args['excel'] not in self.FalseList:
                 excelFileName,textFileName=self.outputExcel(frequencyArray, self.outputDirectory+self.inputFile[0:-4], "frequency")
@@ -2067,20 +2122,23 @@ class IDSS():
             #################################################### MinMax Graph ############################################
             #print self.args
             minMaxGraphByWeight = self.createMinMaxGraphByWeight(input_graph=sumGraphByWeight, weight='weight')
-            if self.args['xyfile'] not in self.FalseList:
-                pscore, distance, geodistance, sd_geodistance = self.calculateGeographicSolutionPValue(minMaxGraphByWeight)
-                print "Geographic p-value for the frequency seriation minmax solution: ", pscore
-                filename=self.outputDirectory + "geography.txt"
-                with open(filename, "a") as myfile:
-                    text=self.inputFile[0:-4]+"\t"+str(pscore)+"\t"+str(distance)+"\t"+str(geodistance)+"\t" \
-                         + str(sd_geodistance)+"\t"+str(self.totalAssemblageSize)+"\n"
-                    myfile.write(text)
-
-            minMaxGraphByCount = self.createMinMaxGraphByCount(input_graph=sumGraphByCount, weight='weight')
-            #if self.args['graphs'] not in self.FalseList:
             self.graphOutput(minMaxGraphByWeight,
                         self.outputDirectory + self.inputFile[0:-4] + "-minmax-by-weight.png")
-            self.graphOutput(minMaxGraphByCount,
+
+            if self.args['xyfile'] not in self.FalseList:
+                if self.args['spatialsignificance'] not in self.FalseList:
+                    pscore, distance, geodistance, sd_geodistance = self.calculateGeographicSolutionPValue(minMaxGraphByWeight)
+                    print "Geographic p-value for the frequency seriation minmax solution: ", pscore
+                    filename=self.outputDirectory + self.inputFile[0:-4]+"-geography.txt"
+                    with open(filename, "a") as myfile:
+                        text=self.inputFile[0:-4]+"\t"+str(pscore)+"\t"+str(distance)+"\t"+str(geodistance)+"\t" \
+                             + str(sd_geodistance)+"\t"+str(self.totalAssemblageSize)+"\n"
+                        myfile.write(text)
+
+            ## optional output. Minmax by count is very confusing at this point and not very useful.
+            if self.args['minmaxbycount'] not in self.FalseList:
+                minMaxGraphByCount = self.createMinMaxGraphByCount(input_graph=sumGraphByCount, weight='weight')
+                self.graphOutput(minMaxGraphByCount,
                         self.outputDirectory + self.inputFile[0:-4] + "-minmax-by-count.png")
 
             #################################################### MST SECTION ####################################################
@@ -2154,13 +2212,14 @@ class IDSS():
                 seriation.makeGraph(argument)
 
             if self.args['xyfile'] not in self.FalseList:
-                pscore ,distance, geodistance, sd_geodistance = self.calculateGeographicSolutionPValue(minMaxGraphByWeight)
-                print "Geographic p-value for the continuity seriation minmax solution: ", pscore
-                filename=self.outputDirectory + "geography.txt"
-                with open(filename, "a") as myfile:
-                    text=self.inputFile[0:-4]+"\t"+str(pscore)+"\t"+str(distance)+"\t"+str(geodistance)+"\t" \
-                         + str(sd_geodistance)+"\t"+str(self.totalAssemblageSize)+"\n"
-                    myfile.write(text)
+                if self.args['spatialsignificance'] not in self.FalseList:
+                    pscore ,distance, geodistance, sd_geodistance = self.calculateGeographicSolutionPValue(minMaxGraphByWeight)
+                    print "Geographic p-value for the continuity seriation minmax solution: ", pscore
+                    filename=self.outputDirectory + "geography.txt"
+                    with open(filename, "a") as myfile:
+                        text=self.inputFile[0:-4]+"\t"+str(pscore)+"\t"+str(distance)+"\t"+str(geodistance)+"\t" \
+                             + str(sd_geodistance)+"\t"+str(self.totalAssemblageSize)+"\n"
+                        myfile.write(text)
 
         ## determine time elapsed
         #time.sleep(5)
@@ -2177,76 +2236,6 @@ class IDSS():
 
         return frequencyArray, continuityArray, notPartOfSeriationsList
 
-    def addOptions(self):
-        self.args = {'debug': None, 'bootstrapCI': None, 'bootstrapSignificance': None,
-                'filtered': None, 'largestonly': None, 'individualfileoutput': None, 'xyfile':None,
-                'excel': None, 'threshold': None, 'noscreen': None, 'xyfile': None, 'pairwisefile': None, 'mst': None,
-                'stats': None, 'screen': None, 'allsolutions': None, 'inputfile': None, 'outputdirectory': None,
-                'shapefile': None, 'frequency': None, 'continuity': None, 'graphs': None, 'graphroot': None, ''
-                'continuityroot': None, 'verbose':None, 'occurrenceseriation':None,'occurrences':None,'frequency':None,
-                'occurrence':None,'frequencyseriation':None, 'pdf':None, 'atlas':None}
-
-    def parse_arguments(self):
-        self.addOptions()
-        parser = argparse.ArgumentParser(description='Conduct an iterative deterministic seriation analysis')
-        parser.add_argument('--debug', '-d', default=None, help='Sets the DEBUG flag for massive amounts of annotated output.')
-        parser.add_argument('--bootstrapCI', '-b', default=None,
-                            help="Sets whether you want to use the bootstrap confidence intervals for the comparisons between assemblage type frequencies. Set's to on or off.")
-        parser.add_argument('--bootstrapSignificance', '-bs', default=0.95, type=float,
-                            help="The significance to which the confidence intervals are calculated. Default is 0.95.")
-        parser.add_argument('--filtered','-f', default=1,
-                            help="The script will complete by checking to see if smaller valid solutions are included in the larger sets. If not, they are added to the final set. Default is true. ")
-        parser.add_argument('--largestonly','-lo', default=None,
-                            help="If set, the results will only include the results from the last and largest successful series of solutions. Smaller solutions will be excluded. Default is false.")
-        parser.add_argument('--individualfileoutput', default=None,
-                            help="If true, a .VNA files will be created for every solution.")
-        parser.add_argument('--threshold', default=None,
-                            help="Sets the maximum difference between the frequencies of types that will be examine. This has the effect of keeping one from evaluating trivial solutions or solutions in which there is limited warrant for establishing continuity. Default is false.")
-        parser.add_argument('--noscreen', default=1,
-                            help="If true, there will be no text output (i.e., runs silently). Default is false.")
-        parser.add_argument('--xyfile', default=None,
-                            help="Enter the name of the XY file that contains the name of the assemblage and the X and Y coordinates for each.")
-        parser.add_argument('--pairwisefile', default=None,
-                            help="If you have precalculated the bootstrap comparative p-value, enter the name of the file here and it will be used as the basis of the graphical output for showing significance of comparisons. Default is false.")
-        parser.add_argument('--mst', default=None,
-                            help="If true, will produce a minimum spanning tree diagram from the set of final solutions.")
-        parser.add_argument('--stats', default=None,
-                            help="(Not implemented). If true, a histogram of the solutions will be shown in terms of the #s of time pairs are included. Default is false.")
-        parser.add_argument('--screen', default=None,
-                            help="Sets whether the output will be sent all to the screen or not. Default is false. When true, the screen output is all captured through curses.")
-        parser.add_argument('--allsolutions', default=None,
-                            help="If set, all of the valid solutions are produced even if they are subsets of larger solutions.")
-        parser.add_argument('--inputfile',
-                            help="<REQUIRED> Enter the name of the data file with the assemblage data to process.", required=True)
-        parser.add_argument('--outputdirectory', default=None,
-                            help="If you want the output to go someplace other than the /output directory, specify that here.")
-        parser.add_argument('--shapefile', default=None,
-                            help="Produces a shapefile as part of the output. You must have specified the --xyfile (coordinates for each point) as well.")
-        parser.add_argument('--graphs', default=0,
-                            help="If true, the program will display the graphs that are created. If not, the graphs are just saved as .png files.")
-        parser.add_argument('--frequency', default=1,
-                            help="Conduct a standard frequency seriation analysis. Default is None.")
-        parser.add_argument('--continuity', default=None, help="Conduct a continuity seriation analysis. Default is None.")
-        parser.add_argument('--graphroot', default=None,
-                            help="The root of the graph figures (i.e., name of assemblage you want to treat as one end in the graphs.")
-        parser.add_argument('--continuityroot', default=None,
-                            help="If you have a outgroup or root of the graph, set that here.")
-        parser.add_argument('--atlas', default=1,
-                            help="If you want to have a figure that shows all of the results independently, set that here.")
-        parser.add_argument('--excel', default=1,
-                            help="Will create excel files with the assemblages in seriation order.")
-        parser.add_argument('--noheader',default=None,
-                            help="If you do not use type names as the first line of the input file, use this option to read the data.")
-        parser.add_argument('--frequencyseriation', default=1, help="Generates graphical output for the results in a frequency seriation form.")
-        parser.add_argument('--verbose',default=True, help='Provides output for your information')
-        parser.add_argument('--occurrence', default=None, help="Treats data as just occurrence information and produces valid occurrence solutions.")
-        parser.add_argument('--occurrenceseriation', default=None, help="Generates graphical output for occurrence seriation.")
-        try:
-            self.args = vars(parser.parse_args())
-        except IOError, msg:
-            parser.error(str(msg))
-            sys.exit()
-        return self.args
 
 
 
