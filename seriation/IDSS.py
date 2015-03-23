@@ -31,6 +31,8 @@ import scipy as sp
 import scipy.stats
 import networkx as nx
 from pylab import *
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import xlsxwriter
 from networkx.algorithms.isomorphism.isomorph import graph_could_be_isomorphic as isomorphic
