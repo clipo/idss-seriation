@@ -23,6 +23,7 @@ if __name__ == "__main__":
                         help="Flag to show what the script will do without executing anything.  Set to zero (0) to actually execute the batch",
                         type=int, default=1)
     parser.add_argument("--execpath", help="Path to the IDSS executable script (optional)")
+    parser.add_argument("--parallelbackground", help="Start the seriations in the background, all at once (don't do this with big batches, use Grid Engine!)", type=int, default=0)
 
     args = parser.parse_args()
 
@@ -33,7 +34,12 @@ if __name__ == "__main__":
 
     print "WARNING:  At the moment, this script should only be used to process a directory of input files associated with a single XY file\n"
 
-    base_cmd = "idss-seriation.py --debug 0 --graphs 0 --spatialbootstrapN 100 --bootstrapSignificance=0.95 --spatialsignificance=1 --bootstrapCI=1 "
+    if args.parallelbackground == 1:
+        base_cmd = "( nohup "
+    else:
+        base_cmd = ''
+
+    base_cmd += "idss-seriation.py --debug 0 --graphs 0 --spatialbootstrapN 100 --bootstrapSignificance=0.95 --spatialsignificance=1 --bootstrapCI=1 "
 
     for file in os.listdir(args.inputdirectory):
         if fnmatch.fnmatch(file, '*.txt'):
@@ -59,6 +65,9 @@ if __name__ == "__main__":
             cmd += base_cmd + " --inputfile " + inputfile
             cmd += " --outputdirectory " + outdir
             cmd += " --xyfile " + args.xyfile
+
+            if args.parallelbackground == 1:
+                cmd += " & ) &"
 
             log.debug("cmd: %s", cmd)
             if args.dryrun == 0:
