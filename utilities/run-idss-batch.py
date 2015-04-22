@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
             inputfile = args.inputdirectory + "/" + file
 
-            outdir = os.getcwd() + args.outputdirectory + "/" + root
+            outdir = os.getcwd() + '/' + args.outputdirectory + "/" + root
             if args.dryrun == 0:
                 os.mkdir(outdir)
 
