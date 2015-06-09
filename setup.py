@@ -7,6 +7,7 @@ setup(name="idss-seriation",
       ],
       scripts = [
           'idss-seriation.py',
+          'idss-seriation-mongodb.py',
 	  'utilities/run-idss-batch.py'
       ],
       author='Carl P. Lipo and Mark E. Madsen',

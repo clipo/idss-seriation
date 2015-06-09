@@ -93,6 +93,8 @@ class IDSS():
         self.scr = None
         self.totalAssemblageSize = 0 ## total for all assemblages
         self.solutionsChecked = 0 ## total # of seriations evaluated to find the final subset
+        # for returning execution statistics and diagnostics to the caller
+        self.statsMap = dict()
 
 
     def _setup_defaults(self):
@@ -2091,12 +2093,15 @@ class IDSS():
             logger.debug("Process complete at seriation size %d with %d solutions after filtering.",
                          self.maxSeriationSize, len(frequencyArray))
 
+            self.statsMap['max_seriation_size'] = self.maxSeriationSize
+            self.statsMap['total_number_solutions'] = len(frequencyArray)
+
             if self.args['verbose'] not in self.FalseList:
                 ## determine time elapsed
                 #time.sleep(5)
                 timeNow = time.time()
-                timeElapsed = timeNow - self.start
-                print "Time elapsed for frequency seriation processing: %d seconds" % timeElapsed
+                self.statsMap["processing_time"] = timeNow - self.start
+                print "Time elapsed for frequency seriation processing: %d seconds" % self.statsMap["processing_time"]
 
             #################################################### OUTPUT SECTION ####################################################
             self.output(frequencyArray, OUTFILE, OUTPAIRSFILE, OUTMSTFILE, OUTMSTDISTANCEFILE, maxNodes)
@@ -2237,9 +2242,9 @@ class IDSS():
         ## determine time elapsed
         #time.sleep(5)
         timeNow = time.time()
-        timeElapsed = timeNow - self.start
+        self.statsMap["execution_time"] = timeNow - self.start
         if self.args['verbose'] not in self.FalseList:
-            print "Time elapsed for completion of program: %d seconds" % timeElapsed
+            print "Time elapsed for completion of program: %d seconds" % self.statsMap["execution_time"]
 
         if self.args['graphs'] not in self.FalseList:
             plt.show() # display
@@ -2247,7 +2252,7 @@ class IDSS():
         ## say goodbye and clean up the screen stuff #########################
         self.finalGoodbye()
 
-        return frequencyArray, continuityArray, notPartOfSeriationsList
+        return frequencyArray, continuityArray, notPartOfSeriationsList, self.statsMap
 
 
 

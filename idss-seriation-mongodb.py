@@ -9,6 +9,7 @@ Wrapper script for running an IDSS seriation from the command line on a Mac OS X
 """
 
 from seriation import IDSS
+from seriation.database import SeriationDatabase
 import argparse
 
 
@@ -72,6 +73,12 @@ def parse_arguments():
     parser.add_argument('--spatialbootstrapN',default=100, help='Set the number of resamples used for calculating the spatial significance. Default is 100.')
     parser.add_argument('--minmaxbycount',default=None, help='Create a minmax solution from the aggregate set by weighting on the basis of # of times edges appear in solutions. Default is None.')
 
+    # arguments for database instance
+    parser.add_argument("--dbhost", help="MongoDB database hostname, defaults to localhost", default="localhost")
+    parser.add_argument("--dbport", help="MongoDB database port, defaults to 27017", type=int, default="27017")
+    parser.add_argument("--database", help="Name of Mongodb database to use for saving metadata", required=True)
+    parser.add_argument("--dbuser", help="Username on MongoDB database server, optional")
+    parser.add_argument("--dbpassword", help="Password on MongoDB database server, optional")
 
     return parser.parse_args()
 
@@ -79,9 +86,11 @@ def parse_arguments():
 
 if __name__ == "__main__":
 
+
     seriation = IDSS()
     args = parse_arguments()
+    db = SeriationDatabase(args)
     seriation.initialize(args)
     (frequencyResults, continuityResults, exceptionList, statsMap) = seriation.seriate()
-
+    db.store_run_metadata(statsMap)
 
