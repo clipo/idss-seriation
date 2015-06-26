@@ -89,7 +89,6 @@ class IDSS():
         self.sumOfDifferencesBetweenPairs = {}
         self.typeNames=[]
         self.FalseList=[None,0,False,"None","0","False"]
-        logger.debug("Start time:  %s ", self.start)
         self.scr = None
         self.totalAssemblageSize = 0 ## total for all assemblages
         self.solutionsChecked = 0 ## total # of seriations evaluated to find the final subset
@@ -141,7 +140,15 @@ class IDSS():
         self.args = self._setup_defaults()
         self.args.update(args_map)
         self.initialized = True
+
         print "self.args: %s" % self.args
+
+        if int(self.args['debug']) == 1:
+            logger.basicConfig(level=logger.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
+        else:
+            logger.basicConfig(level=logger.INFO, format='%(asctime)s %(levelname)s: %(message)s')
+
+
 
 
     def saveGraph(self, graph, filename):
@@ -424,7 +431,6 @@ class IDSS():
             ## create an array of arrays - one for each type
             arrayOfStats = []
             for c in range(0, types):
-                array = []
                 arrayOfStats.append([])
 
             ## size of bootstrapping (how many assemblages to create)
@@ -446,6 +452,8 @@ class IDSS():
                     ## index should be total # of types at end
                     count += 1
 
+                logger.debug("cumulate: %s", cumulate)
+
                 ## set new_assemblage
                 new_assemblage = []
                 for c in range(0, types):
@@ -453,33 +461,34 @@ class IDSS():
 
                 for sherd in range(0, int(currentAssemblageSize)):
                     rand = random()             ## random number from 0-1
-                    classVar = 0
                     typeIndex = types - 1
                     found = 0
-                    total = sum(cumulate)
                     for t in reversed(cumulate):
                         if rand <= t:
                             found = typeIndex
                         typeIndex -= 1
                     new_assemblage[found] += 1
 
+                logger.debug("new_assemblage: %s", new_assemblage)
+
                 ## count new assemblage frequencies
                 counter = 0
-                new_assemblage_freq = []
+                # PERF:  Following line appears unused
+                #new_assemblage_freq = []
                 newassemblage_size=sum(new_assemblage)
                 for g in new_assemblage:
-                    new_assemblage_freq.append(float(g / float(newassemblage_size)))
+                    # PERF:  Following line appears unused
+                    #new_assemblage_freq.append(float(g / float(newassemblage_size)))
                     arrayOfStats[counter].append(float(g / float(newassemblage_size)))
                     counter += 1
                     ## this should result in a new assemblage of the same size
+
+                logger.debug("arrayOfStats at end of boot sample: %s", arrayOfStats)
 
             lowerCI = []
             upperCI = []
             meanCI = []
             for freq in arrayOfStats:
-                upper = 0.0
-                lower = 0.0
-                mean = 0.0
                 if sum(freq) > 0.0:
                     mean, lower, upper = self.confidence_interval(freq, confidence=float(confidenceInterval))
                 else:
@@ -499,6 +508,56 @@ class IDSS():
             self.typeFrequencyMeanCI[currentLabel] = meanCI
 
         return True
+
+    def bootstrap_CI_calculation_numpy(self, bootsize = 1000, confidenceInterval = 0.05):
+        if self.args['screen']:
+            self.scr.addstr(1, 40, "STEP: Bootstrap CIs...        ")
+            self.scr.refresh()
+
+        ## for each assemblage
+        logger.debug("Calculating bootstrap confidence intervals")
+        # for each assemblage
+
+        # We're going to still do this one assemblage at a time, but in reality the
+        # number of types should be the same across all assemblages, so we ought to be
+        # able to allocate one numpy array and reuse it, not pay the penalty of the allocation
+        # but N-of-assemblages allocations is 10-100x fewer than allocating memory for each
+        # bootstrap iteration (or more).
+
+        for currentLabel in sorted(self.assemblages.iterkeys()):
+            assemblage = self.assemblages[currentLabel]
+            currentAssemblageSize = self.assemblageSize[currentLabel]
+            bootstrap_shape = (bootsize, currentAssemblageSize)
+            sampled = np.random.multinomial(currentAssemblageSize, assemblage, size=bootsize)
+            bootstrap_sample = sampled / float(currentAssemblageSize)
+
+            lowerCI = []
+            upperCI = []
+            meanCI = []
+            for col in xrange(0, bootstrap_sample.shape[1]):
+                col_data = bootstrap_sample[:,col]
+                if sum(col_data) > 0.0:
+                    mean, lower, upper = self.confidence_interval(col_data, confidence=float(confidenceInterval))
+                else:
+                    mean = lower = upper = 0
+                if math.isnan(lower) is True:
+                    lower = 0.0
+                if math.isnan(upper) is True:
+                    upper = 0.0
+                if math.isnan(mean) is True:
+                    mean = 0.0
+                lowerCI.append(lower)
+                upperCI.append(upper)
+                meanCI.append(mean)
+
+            self.typeFrequencyLowerCI[currentLabel] = lowerCI
+            self.typeFrequencyUpperCI[currentLabel] = upperCI
+            self.typeFrequencyMeanCI[currentLabel] = meanCI
+
+        # END loop across assemblages
+        return True
+
+
 
     ########################################### FIND ALL THE VALID TRIPLES  ####################################
     ########################################### #################################### ###########################
@@ -1914,11 +1973,26 @@ class IDSS():
         logger.debug("on specified confidence interval, if in the arguments.")
 
         if self.args['bootstrapCI'] == True:
+            bootsize = 1000
+
             if self.args['bootstrapSignificance'] not in self.FalseList:
                 confidenceInterval = self.args['bootstrapSignificance']
             else:
                 confidenceInterval = 0.95
-            self.bootstrapCICalculation( 100, float(confidenceInterval))
+            # time_start_manual_bootstrap = time.time()
+            # self.bootstrapCICalculation( 100, float(confidenceInterval))
+            # time_end_manual_bootstrap = time.time()
+            time_start_numpy_bootstrap = time.time()
+            self.bootstrap_CI_calculation_numpy(bootsize, float(confidenceInterval))
+            time_end_numpy_bootstrap = time.time()
+
+            # manual_elapsed = time_end_manual_bootstrap - time_start_manual_bootstrap
+            numpy_elapsed = time_end_numpy_bootstrap - time_start_numpy_bootstrap
+
+            print "Bootstrap CI calculation using %s samples - elapsed time: %s sec" % (bootsize, numpy_elapsed)
+
+
+
 
         ###########################################################################################################
         ### setup the output files. Do this now so that if it fails, its not AFTER all the seriation stuff
