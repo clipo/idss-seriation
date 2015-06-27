@@ -6,8 +6,12 @@ from pylab import *
 import networkx as nx
 import re
 import pickle
-import time
-import multiprocessing
+# import time
+# import multiprocessing
+# import pprofile
+
+#profiler = pprofile.Profile()
+
 
 def filter_list(full_list, excludes):
     s = set(excludes)
@@ -18,7 +22,24 @@ def worker(networks, out_q):
     """ The worker function, invoked in a process. The results are placed in
         a dictionary that's pushed to a queue.
     """
+    global validComparisonsHash
+    global pairGraph
+    global assemblages
+    global args
+    global typeFrequencyUpperCI
+    global typeFrequencyLowerCI
+
+    validComparisonsHash=pickle.load(open('.p/validComparisonsHash.p','rb'))
+    pairGraph=pickle.load(open('.p/pairGraph.p','rb'))
+    assemblages=pickle.load(open('.p/assemblages.p','rb'))
+    args=pickle.load(open('.p/args.p','rb'))
+    typeFrequencyUpperCI=pickle.load(open('.p/typeFrequencyUpperCI.p','rb'))
+    typeFrequencyLowerCI=pickle.load(open('.p/typeFrequencyLowerCI.p','rb'))
+
+
+
     outdict = []
+
     for n in networks:
         output=[]
         output=checkForValidAdditions(n)
@@ -27,26 +48,30 @@ def worker(networks, out_q):
     out_q.put(outdict)
 
 
+
 def checkForValidAdditions(nnetwork):
-    start_time = time.time()
+    # start_time = time.time()
     ## create the hashes
-    validComparisonsHash = {}
-    pairGraph = {}
-    assemblages={}
-    args={}
-    args={}
-    typeFrequencyUpperCI={}
-    typeFrequencyLowerCI={}
+    # validComparisonsHash = {}
+    # pairGraph = {}
+    # assemblages={}
+    # args={}
+    # args={}
+    # typeFrequencyUpperCI={}
+    # typeFrequencyLowerCI={}
     solutionsChecked=0
     pattern_to_find = re.compile('DU|DM*U')
 
-    ## pickle the stuff I need for parallel processing
-    validComparisonsHash=pickle.load(open('.p/validComparisonsHash.p','rb'))
-    pairGraph=pickle.load(open('.p/pairGraph.p','rb'))
-    assemblages=pickle.load(open('.p/assemblages.p','rb'))
-    args=pickle.load(open('.p/args.p','rb'))
-    typeFrequencyUpperCI=pickle.load(open('.p/typeFrequencyUpperCI.p','rb'))
-    typeFrequencyLowerCI=pickle.load(open('.p/typeFrequencyLowerCI.p','rb'))
+    ## unpickle the stuff I need for parallel processing, but only do it the first
+    ## time worker is called for this process, otherwise we do a slow operation everytime
+
+        # validComparisonsHash=pickle.load(open('.p/validComparisonsHash.p','rb'))
+        # pairGraph=pickle.load(open('.p/pairGraph.p','rb'))
+        # assemblages=pickle.load(open('.p/assemblages.p','rb'))
+        # args=pickle.load(open('.p/args.p','rb'))
+        # typeFrequencyUpperCI=pickle.load(open('.p/typeFrequencyUpperCI.p','rb'))
+        # typeFrequencyLowerCI=pickle.load(open('.p/typeFrequencyLowerCI.p','rb'))
+
 
     array_of_new_networks = []  ## a list of all the valid new networks that we run into
     maxnodes = len(nnetwork.nodes())
@@ -159,10 +184,10 @@ def checkForValidAdditions(nnetwork):
                 if len(new_network) > maxnodes:
                     maxnodes = len(new_network)
 
-    end_time = time.time()
-    elapsed = end_time - start_time
-    proc_name = multiprocessing.current_process().name
-    print "seriationEvaluation in process: %s elapsed: %s" % (proc_name, elapsed)
+    # end_time = time.time()
+    # elapsed = end_time - start_time
+    # proc_name = multiprocessing.current_process().name
+    # print "seriationEvaluation in process: %s elapsed: %s" % (proc_name, elapsed)
     return array_of_new_networks
 
 

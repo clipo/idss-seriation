@@ -2052,6 +2052,11 @@ class IDSS():
             flci=open('.p/typeFrequencyLowerCI.p','wb')
             pickle.dump(self.typeFrequencyLowerCI,open('.p/typeFrequencyLowerCI.p','wb'))
             #flci.close()
+
+            timeNow = time.time()
+            prewhile_loop = timeNow - self.start
+            print "Elapsed time prior to while loop: %d seconds" % prewhile_loop
+
             while currentMaxSeriationSize <= self.maxSeriationSize:
                 currentMaxSeriationSize += 1
                 ### first time through copy the triples, else get the previous new ones.
@@ -2090,6 +2095,11 @@ class IDSS():
                 match = 0      ## set the current match to zero for this step (sees if there are any new solutions for step)
                 ## look through the set of existing valid networks.
                 validNewNetworks = []
+
+
+                # timeNow = time.time()
+                # preparallel_time = timeNow - self.start
+                # print "Elapsed time through while loop for curmaxsize: %s = %d seconds" % (currentMaxSeriationSize,preparallel_time)
 
                 try:
                     cpus = multiprocessing.cpu_count()
