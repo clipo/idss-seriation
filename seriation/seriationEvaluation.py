@@ -6,10 +6,13 @@ from pylab import *
 import networkx as nx
 import re
 import pickle
+import time
+import multiprocessing
 
 def filter_list(full_list, excludes):
     s = set(excludes)
     return (x for x in full_list if x not in s)
+
 
 def worker(networks, out_q):
     """ The worker function, invoked in a process. The results are placed in
@@ -23,7 +26,9 @@ def worker(networks, out_q):
             outdict.append(o)
     out_q.put(outdict)
 
+
 def checkForValidAdditions(nnetwork):
+    start_time = time.time()
     ## create the hashes
     validComparisonsHash = {}
     pairGraph = {}
@@ -33,6 +38,7 @@ def checkForValidAdditions(nnetwork):
     typeFrequencyUpperCI={}
     typeFrequencyLowerCI={}
     solutionsChecked=0
+    pattern_to_find = re.compile('DU|DM*U')
 
     ## pickle the stuff I need for parallel processing
     validComparisonsHash=pickle.load(open('.p/validComparisonsHash.p','rb'))
@@ -128,7 +134,7 @@ def checkForValidAdditions(nnetwork):
 
                     previousAssemblage = compareAssemblage
 
-                test = re.compile('DU|DM*U').search(c)
+                test = pattern_to_find.search(c)
                 if test not in (None, ""):
                     error += 1
 
@@ -153,7 +159,10 @@ def checkForValidAdditions(nnetwork):
                 if len(new_network) > maxnodes:
                     maxnodes = len(new_network)
 
-
+    end_time = time.time()
+    elapsed = end_time - start_time
+    proc_name = multiprocessing.current_process().name
+    print "seriationEvaluation in process: %s elapsed: %s" % (proc_name, elapsed)
     return array_of_new_networks
 
 
