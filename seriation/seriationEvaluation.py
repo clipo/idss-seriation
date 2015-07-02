@@ -8,10 +8,6 @@ import re
 import pickle
 # import time
 # import multiprocessing
-# import pprofile
-
-#profiler = pprofile.Profile()
-
 
 def filter_list(full_list, excludes):
     s = set(excludes)

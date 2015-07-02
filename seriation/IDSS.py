@@ -136,7 +136,15 @@ class IDSS():
 
 
     def initialize(self, parsed_args):
-        args_map = vars(parsed_args)
+        """
+
+        :param parsed_args: Can either be an object arising from argparse or a raw dict
+        :return:
+        """
+        if isinstance(parsed_args,dict) == False:
+            args_map = vars(parsed_args)
+        else:
+            args_map = parsed_args
         self.args = self._setup_defaults()
         self.args.update(args_map)
         self.initialized = True
@@ -2323,6 +2331,7 @@ class IDSS():
                         myfile.write(text)
 
 
+
         ## determine time elapsed
         #time.sleep(5)
         timeNow = time.time()
@@ -2335,6 +2344,7 @@ class IDSS():
 
         ## say goodbye and clean up the screen stuff #########################
         self.finalGoodbye()
+
 
         return frequencyArray, continuityArray, notPartOfSeriationsList, self.statsMap
 
