@@ -18,6 +18,10 @@ def worker(networks, out_q):
     """ The worker function, invoked in a process. The results are placed in
         a dictionary that's pushed to a queue.
     """
+
+    ## unpickle the stuff I need for parallel processing, but only do it the first
+    ## time worker is called for this process, otherwise we do a slow operation everytime
+
     global validComparisonsHash
     global pairGraph
     global assemblages
@@ -37,7 +41,6 @@ def worker(networks, out_q):
     outdict = []
 
     for n in networks:
-        output=[]
         output=checkForValidAdditions(n)
         for o in output:
             outdict.append(o)
@@ -46,28 +49,8 @@ def worker(networks, out_q):
 
 
 def checkForValidAdditions(nnetwork):
-    # start_time = time.time()
-    ## create the hashes
-    # validComparisonsHash = {}
-    # pairGraph = {}
-    # assemblages={}
-    # args={}
-    # args={}
-    # typeFrequencyUpperCI={}
-    # typeFrequencyLowerCI={}
     solutionsChecked=0
     pattern_to_find = re.compile('DU|DM*U')
-
-    ## unpickle the stuff I need for parallel processing, but only do it the first
-    ## time worker is called for this process, otherwise we do a slow operation everytime
-
-        # validComparisonsHash=pickle.load(open('.p/validComparisonsHash.p','rb'))
-        # pairGraph=pickle.load(open('.p/pairGraph.p','rb'))
-        # assemblages=pickle.load(open('.p/assemblages.p','rb'))
-        # args=pickle.load(open('.p/args.p','rb'))
-        # typeFrequencyUpperCI=pickle.load(open('.p/typeFrequencyUpperCI.p','rb'))
-        # typeFrequencyLowerCI=pickle.load(open('.p/typeFrequencyLowerCI.p','rb'))
-
 
     array_of_new_networks = []  ## a list of all the valid new networks that we run into
     maxnodes = len(nnetwork.nodes())
@@ -80,11 +63,8 @@ def checkForValidAdditions(nnetwork):
 
         endAssemblage = nnetwork.graph[assEnd]
 
-        list1 = [validComparisonsHash[endAssemblage]]
-        list2 = [nnetwork.nodes()]
-        #validAssemblages = list(filter_list(list1, list2))
         validAssemblages=validComparisonsHash[endAssemblage]
-        #print "valid assemblages: ", validAssemblages
+
 
         ######################################################################################
         for testAssemblage in validAssemblages:
