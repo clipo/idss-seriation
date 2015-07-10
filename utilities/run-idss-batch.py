@@ -24,6 +24,7 @@ if __name__ == "__main__":
                         type=int, default=1)
     parser.add_argument("--execpath", help="Path to the IDSS executable script (optional)")
     parser.add_argument("--parallelbackground", help="Start the seriations in the background, all at once (don't do this with big batches, use Grid Engine!)", type=int, default=0)
+    parser.add_argument("--dobootstrapsignificance", type=int, default=1, help="Perform bootstrap significance tests with a 95% CI")
 
     args = parser.parse_args()
 
@@ -39,7 +40,16 @@ if __name__ == "__main__":
     else:
         base_cmd = ''
 
-    base_cmd += "idss-seriation.py --debug 0 --graphs 0 --spatialbootstrapN 100 --bootstrapSignificance=0.95 --spatialsignificance=1 --bootstrapCI=1 "
+    base_cmd += "idss-seriation.py --debug 0 --graphs 0 --spatialbootstrapN 100 --spatialsignificance=1 "
+
+    if args.dobootstrapsignificance == 1:
+        base_cmd += " --bootstrapCI=1 --bootstrapSignificance=0.95 "
+    elif args.dobootstrapsignificance == 0:
+        log.debug("Turning off bootstrap significance testing")
+        base_cmd += " --bootstrapCI=0 "
+    else:
+        log.error("Bad value for turning on/off bootstrap significance testing")
+        os._exit(1)
 
     for file in os.listdir(args.inputdirectory):
         if fnmatch.fnmatch(file, '*.txt'):

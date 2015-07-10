@@ -103,7 +103,8 @@ def checkForValidAdditions(nnetwork):
                 previousAssemblage = testAssemblage
                 for compareAssemblage in p:
                     oldVal = assemblages[compareAssemblage][i]
-                    if args['bootstrapCI'] not in (None, ""):
+
+                    if args['bootstrapCI'] not in (None, 0, ""):
                         upperCI_test = typeFrequencyUpperCI[previousAssemblage][i]
                         lowerCI_test = typeFrequencyLowerCI[previousAssemblage][i]
                         upperCI_end = typeFrequencyUpperCI[compareAssemblage][i]
