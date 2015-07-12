@@ -631,9 +631,9 @@ class IDSS():
 
                     ## compare 2 and 3
                     if high2 < low3:
-                        comparison23 = "U"
-                    elif low2 > high3:
                         comparison23 = "D"
+                    elif low2 > high3:
+                        comparison23 = "U"
                     else:
                         comparison23 = "M"
 
@@ -641,8 +641,8 @@ class IDSS():
                     if comparison12 == "D" and comparison23 == "D":
                         comparison12 += "X"
                         comparison23 += "X"
-                    elif comparison12 == "U" and comparison23 == "U":
-                        error += 1
+                    # elif comparison12 == "U" and comparison23 == "U":
+                    #     error += 1
 
                 else:     ### not bootstrap
                     if ass1 < ass2 < ass3:
