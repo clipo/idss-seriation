@@ -180,7 +180,7 @@ class IDSS():
         useable_tuples = []
         # for e in tuples:
         #     useable_tuples.append(e)
-        return self.__cached_triples
+        return self._cached_triples
 
     def openFile(self, filename):
         try:
