@@ -94,6 +94,8 @@ class IDSS():
         self.solutionsChecked = 0 ## total # of seriations evaluated to find the final subset
         # for returning execution statistics and diagnostics to the caller
         self.statsMap = dict()
+        # memoize the tuples
+        self._cached_triples = None
 
 
     def _setup_defaults(self):
