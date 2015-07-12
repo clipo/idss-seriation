@@ -166,11 +166,19 @@ class IDSS():
         return list((itertools.permutations(lst, 2)))
 
     def all_tuples(self, lst):
-        tuples = list(itertools.combinations(lst, 3))
+        """
+        Returns a list of triples of assemblages, generating it upon first call, and memoizing
+        it for future calls since the list of assemblages does not change.
+
+        :param list of assemblages:
+        :return: list of triples of assemblages
+        """
+        if self._cached_triples == None:
+            self._cached_triples = list(itertools.combinations(lst, 3))
         useable_tuples = []
-        for e in tuples:
-            useable_tuples.append(e)
-        return useable_tuples
+        # for e in tuples:
+        #     useable_tuples.append(e)
+        return self.__cached_triples
 
     def openFile(self, filename):
         try:
