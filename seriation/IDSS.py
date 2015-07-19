@@ -58,10 +58,8 @@ class IDSS():
     def __init__(self):
         self.pairGraph = nx.Graph(is_directed=False)
         self.nodeSizeFactor = 500 # factor to scale the size of the nodes when drawing
-        self.solutionCount=0
         self.inputFile = ""
         self.delimiter = ""
-        self.solutionCount=0
         self.outputDirectory = ""
         # if os.name != "nt":
         #     self.mem = memory.Memory()
@@ -92,7 +90,6 @@ class IDSS():
         self.FalseList=[None,0,False,"None","0","False"]
         self.scr = None
         self.totalAssemblageSize = 0 ## total for all assemblages
-        self.solutionsChecked = 0 ## total # of seriations evaluated to find the final subset
         # for returning execution statistics and diagnostics to the caller
         self.statsMap = dict()
 
@@ -158,9 +155,6 @@ class IDSS():
         else:
             logger.basicConfig(level=logger.INFO, format='%(asctime)s %(levelname)s: %(message)s')
 
-
-
-
     def saveGraph(self, graph, filename):
         nx.write_gml(graph, filename)
 
@@ -184,7 +178,9 @@ class IDSS():
         #     useable_tuples.append(e)
         return self.__cached_triples
         """
-        return list(itertools.permutations(lst, 3))
+        tuples = list(itertools.permutations(lst, 3))
+        logger.debug('potential combinations: '+str(len(tuples)))
+        return tuples
 
     def openFile(self, filename):
         try:
@@ -244,30 +240,23 @@ class IDSS():
             combined=""
             for val in self.assemblages[e]:
                 combined += str(val)
-            #print "combined:", combined
             self.occurrenceSeriationList[e]=combined
             val = tempList.get(combined, 0)
             if val==0:
                 newval = []
                 newval.append(e)
                 tempList[combined]=newval
-                #print "combined: ", combined, " value: ", tempList[combined]
             else:
                 tempList[combined].append(e)
-                #print "now combined: ", combined, "now value: ", tempList[combined]
         self.assemblages={}
         self.assemblageFrequencies = {}
         self.labels=[]
 
         for t in tempList:
             newval = str("/".join(tempList[t]))
-            #print "t:", t
             newarray = []
             for s in t:
-                #print "s:", s
                 newarray.append(float(s))
-            #print "new array:", newarray
-            #print "NewKey:", newval, "Value:", t
             self.assemblages[newval]=newarray
             self.assemblageFrequencies[newval]=newarray
             self.labels.append(newval)
@@ -687,10 +676,10 @@ class IDSS():
 
                     logger.debug("Comparison12: %s Comparison23: %s", comparison12, comparison23)
 
-            comparison = comparison12 + comparison23
-            test = re.compile('DU').search(comparison)
-            if test not in self.FalseList:
-                error += 1
+                comparison = comparison12 + comparison23
+                test = re.compile('DU').search(comparison)
+                if test not in self.FalseList:
+                    error += 1
 
             if error == 0:
                 logger.debug('\tcorrect solution: '+permu[0]+'/'+permu[1]+'/'+permu[2])
@@ -698,11 +687,11 @@ class IDSS():
                 graphID = uuid.uuid4().urn
                 net = nx.Graph(name=str(numberOfTriplets), GraphID=graphID, End1=permu[0], End2=permu[2],
                                Middle=permu[1], is_directed=False)
-                net.add_node(permu[0], name=permu[0], site="end", end=1, connectedTo=permu[1])
-                net.add_node(permu[1], name=permu[1], site="middle", end=0, connectedTo="middle")
-                net.add_node(permu[2], name=permu[2], site="end", end=1, connectedTo=permu[1])
-                net.add_edge(permu[0], permu[1], weight=comparison12, GraphID=graphID, end=1)
-                net.add_edge(permu[2], permu[1], weight=comparison23, GraphID=graphID, end=1)
+                net.add_node(permu[0], name=permu[0])
+                net.add_node(permu[1], name=permu[1])
+                net.add_node(permu[2], name=permu[2])
+                net.add_edge(permu[0], permu[1], weight=comparison12, GraphID=graphID)
+                net.add_edge(permu[2], permu[1], weight=comparison23, GraphID=graphID)
                 logger.debug("VALID TRIPLE SOLUTION: %s * %s * %s ", permu[0], permu[1], permu[2])
                 logger.debug("VALID TRIPLE SOLUTION: %s  <--->   %s", comparison12, comparison23)
                 logger.debug("VALID TRIPLE SOLUTION: %s ", net.adjacency_list())
@@ -946,18 +935,13 @@ class IDSS():
     def createAtlasOfSolutions(self, filteredarray, type):
         plt.rcParams['font.family']='sans-serif'
         plt.figure(self.inputFile[0:-4] + "-" + str(type) + "-atlas.png", figsize=(8, 8))
-        num = 0
         for g in filteredarray:
-            t = 0
             for n in g.nodes():
-                g.node[n]['label'] = g.node[n]['name'] ##+" ("+str(num)+")"
-                #print "label: ", g.node[n]['label']
-                t += 1
-            num += 1
+                g.node[n]['label'] = g.node[n]['name']
         UU = nx.Graph(is_directed=False)
         # do quick isomorphic-like check, not a true isomorphism checker
-        nlist = self.iso_filter_graphs(filteredarray) # list of nonisomorphic graphs
-        atlasGraph = nx.disjoint_union_all(nlist)
+        #nlist = self.iso_filter_graphs(filteredarray) # list of nonisomorphic graphs
+        atlasGraph = nx.disjoint_union_all(filteredarray)
         os.environ["PATH"] += ":/usr/local/bin:"
         pos = nx.graphviz_layout(atlasGraph, prog="twopi")
         #labels=nx.draw_networkx_labels(filteredarray,pos)
@@ -2040,7 +2024,6 @@ class IDSS():
 
         frequencyArray = []
         continuityArray = []
-        maxNodes = 3
         notPartOfSeriationsList = []
 
         if self.args['frequency'] not in self.FalseList or self.args['occurrence'] not in self.FalseList:
@@ -2142,7 +2125,7 @@ class IDSS():
                         continue
                     end_solutions += s
                     all_solutions += s
-                print('\tevaluation finished with ' + str(len(end_solutions)) + ' new solutions and '+str(len(all_solutions))+' previous solutions. time: '+str('%.2f'%(time.time()-self.start))+' seconds')
+                print('\tevaluation finished with ' + str(len(end_solutions)) + ' new solutions and '+str(len(all_solutions))+' global solutions. time: '+str('%.2f'%(time.time()-self.start))+' seconds')
 
                 if self.args['screen'] not in self.FalseList:
                     msg = "Current Max Nodes:  %d " % maxNodes
@@ -2253,15 +2236,15 @@ class IDSS():
             if self.args['verbose'] not in self.FalseList:
                 print "Seriation complete."
                 print "Maximum size of seriation: %d" % maxNodes
-                print "Number of frequency seriation solutions at last step: %d" % len(frequencyArray)
-                print "Assemblages not part of final solution:"
+                print "Number of frequency seriation solutions at last step: %d" % len(end_solutions)
                 nodeList = sumGraphByWeight.nodes()
                 for a in self.assemblages:
                     if a not in nodeList:
                         notPartOfSeriationsList.append(a)
-                        print a
                 if len(notPartOfSeriationsList) == 0:
-                    print "*** All assemblages used in seriations.***"
+                    print("*** All assemblages used in seriations.***")
+                else:
+                    print("Assemblages not part of final solution: "+str(len(notPartOfSeriationsList))+' list: '+str(notPartOfSeriationsList))
 
         if self.args['continuity'] not in self.FalseList:
             # experimental
