@@ -629,9 +629,9 @@ class IDSS():
 
                     # compare 1 and 2
                     if high1 < low2:
-                        comparison12 = "D"
-                    elif low1 > high2:
                         comparison12 = "U"
+                    elif low1 > high2:
+                        comparison12 = "D"
                     else:
                         comparison12 = "M"
 
@@ -647,8 +647,6 @@ class IDSS():
                     if comparison12 == "D" and comparison23 == "D":
                         comparison12 += "X"
                         comparison23 += "X"
-                    elif comparison12 == "U" and comparison23 == "U":
-                        error += 1
 
                 else:     ### not bootstrap
                     if ass1 < ass2 < ass3:
@@ -695,6 +693,7 @@ class IDSS():
                 error += 1
 
             if error == 0:
+                logger.debug('\tcorrect solution: '+permu[0]+'/'+permu[1]+'/'+permu[2])
                 # uses NetworkX
                 graphID = uuid.uuid4().urn
                 net = nx.Graph(name=str(numberOfTriplets), GraphID=graphID, End1=permu[0], End2=permu[2],
