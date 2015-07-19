@@ -790,18 +790,18 @@ class IDSS():
 
         ## first find global max weight and global min weight
         globalMaxWeight=0
-        globalMinWeight=1000
+        globalMinWeight= sys.float_info.max
+        # TODO XRC this can be optimized as several comparisons are performed multiple times
         for g in filteredarray:
             for e in g.edges():
                 fromAssemblage = e[0]
                 toAssemblage = e[1]
                 currentWeight = self.sumOfDifferencesBetweenPairs[fromAssemblage+"*"+toAssemblage]
-                if currentWeight>globalMaxWeight:
-                    globalMaxWeight=currentWeight
-                if currentWeight<globalMinWeight:
-                    globalMinWeight=currentWeight
+                globalMaxWeight = max(globalMaxWeight, currentWeight)
+                globalMinWeight = min(globalMinWeight, currentWeight)
 
         ## Now create the summary graph by going through the edges of all the graphs
+        # TODO XRC this can be optimized as several comparisons are performed multiple times
         for g in filteredarray:
             ## go through all the edges for each graph
             for e in g.edges_iter():
@@ -810,8 +810,8 @@ class IDSS():
                 fromAssemblage = e[0]
                 toAssemblage = e[1]
                 currentWeight = self.sumOfDifferencesBetweenPairs[fromAssemblage+"*"+toAssemblage]
-                normalizedWeight = ((globalMaxWeight-currentWeight)/((globalMaxWeight-globalMinWeight)+1))+1
-                sumGraph.add_path([fromAssemblage, toAssemblage], sumDiffWeight=currentWeight, weight=normalizedWeight, inverseweight=(1/normalizedWeight))
+                normalizedWeight = (currentWeight-globalMinWeight)/(globalMaxWeight-globalMinWeight)
+                sumGraph.add_path([fromAssemblage, toAssemblage], sumDiffWeight=currentWeight, weight=normalizedWeight, inverseweight=1-normalizedWeight)
 
         return sumGraph
 
