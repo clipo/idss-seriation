@@ -1069,7 +1069,7 @@ class IDSS():
             addList = True
             for h in newlist:
                 #print "g: ",g.nodes(),"--- h: ",h.nodes(), "----> ", compare(g.nodes(),h.nodes())
-                if compare(g.nodes(), h.nodes()) == True:
+                if compare(g.nodes(), h.nodes()) == True and compare(g.edges(),h.edges()) == True:
                     addList = False
             if addList == True:
                 newlist.append(g)
