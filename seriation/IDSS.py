@@ -58,9 +58,8 @@ class IDSS():
     def __init__(self):
         self.pairGraph = nx.Graph(is_directed=False)
         self.nodeSizeFactor = 500 # factor to scale the size of the nodes when drawing
-        self.solutionCount=0
         self.inputFile = ""
-        self.solutionCount=0
+        self.delimiter = ""
         self.outputDirectory = ""
         # if os.name != "nt":
         #     self.mem = memory.Memory()
@@ -91,7 +90,6 @@ class IDSS():
         self.FalseList=[None,0,False,"None","0","False"]
         self.scr = None
         self.totalAssemblageSize = 0 ## total for all assemblages
-        self.solutionsChecked = 0 ## total # of seriations evaluated to find the final subset
         # for returning execution statistics and diagnostics to the caller
         self.statsMap = dict()
 
@@ -113,6 +111,7 @@ class IDSS():
                     'screen': None,
                     'allsolutions': None,
                     'inputfile': None,
+                    'delimiter': None,
                     'outputdirectory': None,
                     'shapefile': None,
                     'frequency': None,
@@ -156,9 +155,6 @@ class IDSS():
         else:
             logger.basicConfig(level=logger.INFO, format='%(asctime)s %(levelname)s: %(message)s')
 
-
-
-
     def saveGraph(self, graph, filename):
         nx.write_gml(graph, filename)
 
@@ -173,12 +169,18 @@ class IDSS():
         :param list of assemblages:
         :return: list of triples of assemblages
         """
+        # TODO XRC _cached_triples is not initialized
+        """
         if self._cached_triples == None:
             self._cached_triples = list(itertools.combinations(lst, 3))
         useable_tuples = []
         # for e in tuples:
         #     useable_tuples.append(e)
         return self.__cached_triples
+        """
+        tuples = list(itertools.permutations(lst, 3))
+        logger.debug('potential combinations: '+str(len(tuples)))
+        return tuples
 
     def openFile(self, filename):
         try:
@@ -188,7 +190,7 @@ class IDSS():
             logger.error("Cannot open %s. Error: %s", filename, e)
             sys.exit('file %s does not open: %s') % ( filename, e)
 
-        reader = csv.reader(file, delimiter='\t', quotechar='|')
+        reader = csv.reader(file, delimiter=self.args['delimiter'], quotechar='|')
         values = []
         rowcount=0
         for row in reader:
@@ -238,30 +240,23 @@ class IDSS():
             combined=""
             for val in self.assemblages[e]:
                 combined += str(val)
-            #print "combined:", combined
             self.occurrenceSeriationList[e]=combined
             val = tempList.get(combined, 0)
             if val==0:
                 newval = []
                 newval.append(e)
                 tempList[combined]=newval
-                #print "combined: ", combined, " value: ", tempList[combined]
             else:
                 tempList[combined].append(e)
-                #print "now combined: ", combined, "now value: ", tempList[combined]
         self.assemblages={}
         self.assemblageFrequencies = {}
         self.labels=[]
 
         for t in tempList:
             newval = str("/".join(tempList[t]))
-            #print "t:", t
             newarray = []
             for s in t:
-                #print "s:", s
                 newarray.append(float(s))
-            #print "new array:", newarray
-            #print "NewKey:", newval, "Value:", t
             self.assemblages[newval]=newarray
             self.assemblageFrequencies[newval]=newarray
             self.labels.append(newval)
@@ -623,9 +618,9 @@ class IDSS():
 
                     # compare 1 and 2
                     if high1 < low2:
-                        comparison12 = "D"
-                    elif low1 > high2:
                         comparison12 = "U"
+                    elif low1 > high2:
+                        comparison12 = "D"
                     else:
                         comparison12 = "M"
 
@@ -641,8 +636,6 @@ class IDSS():
                     if comparison12 == "D" and comparison23 == "D":
                         comparison12 += "X"
                         comparison23 += "X"
-                    elif comparison12 == "U" and comparison23 == "U":
-                        error += 1
 
                 else:     ### not bootstrap
                     if ass1 < ass2 < ass3:
@@ -683,21 +676,22 @@ class IDSS():
 
                     logger.debug("Comparison12: %s Comparison23: %s", comparison12, comparison23)
 
-            comparison = comparison12 + comparison23
-            test = re.compile('DU').search(comparison)
-            if test not in self.FalseList:
-                error += 1
+                comparison = comparison12 + comparison23
+                test = re.compile('DU').search(comparison)
+                if test not in self.FalseList:
+                    error += 1
 
             if error == 0:
+                logger.debug('\tcorrect solution: '+permu[0]+'/'+permu[1]+'/'+permu[2])
                 # uses NetworkX
                 graphID = uuid.uuid4().urn
                 net = nx.Graph(name=str(numberOfTriplets), GraphID=graphID, End1=permu[0], End2=permu[2],
                                Middle=permu[1], is_directed=False)
-                net.add_node(permu[0], name=permu[0], site="end", end=1, connectedTo=permu[1])
-                net.add_node(permu[1], name=permu[1], site="middle", end=0, connectedTo="middle")
-                net.add_node(permu[2], name=permu[2], site="end", end=1, connectedTo=permu[1])
-                net.add_edge(permu[0], permu[1], weight=comparison12, GraphID=graphID, end=1)
-                net.add_edge(permu[2], permu[1], weight=comparison23, GraphID=graphID, end=1)
+                net.add_node(permu[0], name=permu[0])
+                net.add_node(permu[1], name=permu[1])
+                net.add_node(permu[2], name=permu[2])
+                net.add_edge(permu[0], permu[1], weight=comparison12, GraphID=graphID)
+                net.add_edge(permu[2], permu[1], weight=comparison23, GraphID=graphID)
                 logger.debug("VALID TRIPLE SOLUTION: %s * %s * %s ", permu[0], permu[1], permu[2])
                 logger.debug("VALID TRIPLE SOLUTION: %s  <--->   %s", comparison12, comparison23)
                 logger.debug("VALID TRIPLE SOLUTION: %s ", net.adjacency_list())
@@ -785,18 +779,18 @@ class IDSS():
 
         ## first find global max weight and global min weight
         globalMaxWeight=0
-        globalMinWeight=1000
+        globalMinWeight= sys.float_info.max
+        # TODO XRC this can be optimized as several comparisons are performed multiple times
         for g in filteredarray:
             for e in g.edges():
                 fromAssemblage = e[0]
                 toAssemblage = e[1]
                 currentWeight = self.sumOfDifferencesBetweenPairs[fromAssemblage+"*"+toAssemblage]
-                if currentWeight>globalMaxWeight:
-                    globalMaxWeight=currentWeight
-                if currentWeight<globalMinWeight:
-                    globalMinWeight=currentWeight
+                globalMaxWeight = max(globalMaxWeight, currentWeight)
+                globalMinWeight = min(globalMinWeight, currentWeight)
 
         ## Now create the summary graph by going through the edges of all the graphs
+        # TODO XRC this can be optimized as several comparisons are performed multiple times
         for g in filteredarray:
             ## go through all the edges for each graph
             for e in g.edges_iter():
@@ -805,8 +799,8 @@ class IDSS():
                 fromAssemblage = e[0]
                 toAssemblage = e[1]
                 currentWeight = self.sumOfDifferencesBetweenPairs[fromAssemblage+"*"+toAssemblage]
-                normalizedWeight = ((globalMaxWeight-currentWeight)/((globalMaxWeight-globalMinWeight)+1))+1
-                sumGraph.add_path([fromAssemblage, toAssemblage], sumDiffWeight=currentWeight, weight=normalizedWeight, inverseweight=(1/normalizedWeight))
+                normalizedWeight = (currentWeight-globalMinWeight)/(globalMaxWeight-globalMinWeight)
+                sumGraph.add_path([fromAssemblage, toAssemblage], sumDiffWeight=currentWeight, weight=normalizedWeight, inverseweight=1-normalizedWeight)
 
         return sumGraph
 
@@ -941,18 +935,13 @@ class IDSS():
     def createAtlasOfSolutions(self, filteredarray, type):
         plt.rcParams['font.family']='sans-serif'
         plt.figure(self.inputFile[0:-4] + "-" + str(type) + "-atlas.png", figsize=(8, 8))
-        num = 0
         for g in filteredarray:
-            t = 0
             for n in g.nodes():
-                g.node[n]['label'] = g.node[n]['name'] ##+" ("+str(num)+")"
-                #print "label: ", g.node[n]['label']
-                t += 1
-            num += 1
+                g.node[n]['label'] = g.node[n]['name']
         UU = nx.Graph(is_directed=False)
         # do quick isomorphic-like check, not a true isomorphism checker
-        nlist = self.iso_filter_graphs(filteredarray) # list of nonisomorphic graphs
-        atlasGraph = nx.disjoint_union_all(nlist)
+        #nlist = self.iso_filter_graphs(filteredarray) # list of nonisomorphic graphs
+        atlasGraph = nx.disjoint_union_all(filteredarray)
         os.environ["PATH"] += ":/usr/local/bin:"
         pos = nx.graphviz_layout(atlasGraph, prog="twopi")
         #labels=nx.draw_networkx_labels(filteredarray,pos)
@@ -1064,7 +1053,7 @@ class IDSS():
             addList = True
             for h in newlist:
                 #print "g: ",g.nodes(),"--- h: ",h.nodes(), "----> ", compare(g.nodes(),h.nodes())
-                if compare(g.nodes(), h.nodes()) == True:
+                if compare(g.nodes(), h.nodes()) == True and compare(g.edges(),h.edges()) == True:
                     addList = False
             if addList == True:
                 newlist.append(g)
@@ -1528,6 +1517,7 @@ class IDSS():
 
         pairsHash={}
 
+        # TODO XRC pairsHash is created with normalized weights, but then absolute weights are added to the output graph
         for e in input_graph.edges_iter():
             d = input_graph.get_edge_data(*e)
             fromAssemblage = e[0]
@@ -1538,13 +1528,17 @@ class IDSS():
             #value = self.sumOfDifferencesBetweenPairs[key]
             pairsHash[key]=value
 
-        for key, value in sorted(pairsHash.iteritems(), key=operator.itemgetter(1), reverse=True ):
+        logger.debug('pairs hash:'+str(pairsHash))
+        logger.debug('sorteds:'+str(sorted(pairsHash.iteritems(), key=operator.itemgetter(1))))       
+        for key, value in sorted(pairsHash.iteritems(), key=operator.itemgetter(1)):
             ass1, ass2 = key.split("*")
             #print ass1, "-", ass2, "---",value
             edgesToAdd={}
+            # if nodes ass1-ass2 still not in output graph
             if nx.has_path(output_graph, ass1, ass2) == False:
                 edgesToAdd[key]=value
                  ## check to see if any other pairs NOT already represented that have the same value
+                # XRC TODO '==' with floating point arithmetic will not work (maybe use a delta difference?)
                 for p in pairsHash:
                     if pairsHash[p] == value:
                         k1,k2 = p.split("*")
@@ -1556,7 +1550,7 @@ class IDSS():
                     weight = self.sumOfDifferencesBetweenPairs[newEdge]
                     if weight in self.FalseList:
                         weight=0.000000000001
-                    output_graph.add_path([a1, a2], weight=weight, inverseweight=(1/weight))
+                    output_graph.add_path([a1, a2], weight=weight, label=str('%.2f'%weight), inverseweight=(1/weight))
         return output_graph
 
     # from a "summed" graph, create a "min max" solution -- using Counts
@@ -1583,7 +1577,7 @@ class IDSS():
 
         matchOnThisLevel = False
         currentValue = 0
-        for key, value in sorted(pairsHash.iteritems(), key=operator.itemgetter(1), reverse=True):
+        for key, value in sorted(pairsHash.iteritems(), key=operator.itemgetter(1)):
             #print key, "->", value
             if value==0:
                 value=.0000000000001
@@ -1867,6 +1861,8 @@ class IDSS():
 
         self.checkMinimumRequirements()
         #####################################DEBUG OUTPUT#############################################################
+        # avoid any problem due to previous code
+        logger.getLogger('').handlers = []
         if self.args['debug'] is not None:
             ## Logging
             logger.basicConfig(stream=sys.stderr, level=logger.DEBUG)
@@ -2028,23 +2024,15 @@ class IDSS():
 
         frequencyArray = []
         continuityArray = []
-        maxNodes = 3
         notPartOfSeriationsList = []
 
         if self.args['frequency'] not in self.FalseList or self.args['occurrence'] not in self.FalseList:
             ###########################################################################################################
             logger.debug("Calculate all the valid triples.")
             triples = self.findAllValidTriples()
+            logger.debug('num. valid triples: '+str(len(triples)))
             ###########################################################################################################
-            stepcount = 0
-            currentMaxSeriationSize = 2
-            newNetworks = []
-            self.solutionCount = len(triples)     ## the current # of solutions that will be checked
-            self.solutionsChecked = len(triples)  ## set the total solutions checked value
-            currentTotal = len(triples)
-            solutions = []
-            all_solutions = []
-            all_solutions = all_solutions + triples  ## add the triples to the initial solution
+            currentMaxSeriationSize = 4
 
             ## create a directory for the processing of the pickle files if it doesnt exist already
             if not os.path.exists(".p"):
@@ -2067,33 +2055,23 @@ class IDSS():
             #fuci.close()
             flci=open('.p/typeFrequencyLowerCI.p','wb')
             pickle.dump(self.typeFrequencyLowerCI,open('.p/typeFrequencyLowerCI.p','wb'))
-            #flci.close()
+            #flci.close()         
+           
+            networks = triples
+            solutions = triples
+            end_solutions = triples
+            ## add the triples to the initial solution
+            all_solutions = triples
+            maxNodes = 3
 
             timeNow = time.time()
             prewhile_loop = timeNow - self.start
             print "Elapsed time prior to while loop: %d seconds" % prewhile_loop
+            print('\tstarting with '+str(len(triples)) + ' triple solutions')
 
             while currentMaxSeriationSize <= self.maxSeriationSize:
-                currentMaxSeriationSize += 1
-                ### first time through copy the triples, else get the previous new ones.
-                if currentMaxSeriationSize == 3:  ## first time through. Just copy the triples to the working arrays
-                    networks = triples
-                    solutions = triples # clear the
-                else:
-                    i = 0
-                    #print("Currently have %d solutions at step %d"%( len(newNetworks), currentMaxSeriationSize))
-                    if len(newNetworks) > 0:
-                        # there were no networks the previous times so nothing to do.
-                        logger.debug("These solutions are ---  ")
-                        for sol in newNetworks:
-                            logger.debug("solution %d: %s", i, nx.shortest_path(sol, sol.graph["End1"], sol.graph["End2"]))
-                            i += 1
-                        networks = []
-                        networks += newNetworks  # copy the array of previous new ones for this round
-                        solutions.append(newNetworks) # append the new list to the previous one
-                        newNetworks = []         # clear the array of new solutions
+                logger.debug('current ser. size: '+str(currentMaxSeriationSize)+' max: '+str(self.maxSeriationSize))
 
-                stepcount += 1
                 logger.debug("_______________________________________________________________________________________")
                 logger.debug("Step number:  %d", currentMaxSeriationSize)
                 logger.debug("_______________________________________________________________________________________")
@@ -2103,38 +2081,29 @@ class IDSS():
                     msg = "Step number:   %d" % currentMaxSeriationSize
                     self.scr.addstr(4, 0, msg)
                     self.scr.addstr(5, 0, "Number of solutions from previous step:         ")
-                    msg = "Number of solutions from previous step: %d" % len(networks)
+                    msg = "Number of solutions from previous step: %d" % len(end_solutions)
                     self.scr.addstr(5, 0, msg)
                     self.scr.refresh()
-
-                logger.debug("Number of solutions from previous step: %d", len(networks))
-                match = 0      ## set the current match to zero for this step (sees if there are any new solutions for step)
-                ## look through the set of existing valid networks.
-                validNewNetworks = []
-
-
-                # timeNow = time.time()
-                # preparallel_time = timeNow - self.start
-                # print "Elapsed time through while loop for curmaxsize: %s = %d seconds" % (currentMaxSeriationSize,preparallel_time)
 
                 try:
                     cpus = multiprocessing.cpu_count()
                 except NotImplementedError:
                     cpus = 2   # arbitrary default
-
                 # Each process will get 'chunksize' nums and a queue to put his out
                 # dict into
-
                 out_q = multiprocessing.Queue()
-                chunksize = int(math.ceil(len(networks) / float(cpus)))
+                chunksize = int(math.ceil(len(end_solutions) / float(cpus)))
                 procs = []
+                print('\tevaluating seriation size: '+str(currentMaxSeriationSize)+' with: '+str(cpus)+' cpus')
 
                 for i in range(cpus):
+                    logger.debug('cpu:'+str(i)+' processing: '+str(range(chunksize*i,chunksize*(i+1))))
                     p = multiprocessing.Process(
                     target=seriationEvaluation.worker,
-                    args=(networks[chunksize * i:chunksize * (i + 1)],out_q))
+                    args=(end_solutions[chunksize * i:chunksize * (i + 1)],out_q))
                     procs.append(p)
                     p.start()
+
 
                 # Collect all results into a single result dict. We know how many dicts
                 # with results to expect.
@@ -2146,62 +2115,56 @@ class IDSS():
                 for p in procs:
                     p.join()
 
-                #validNewNetworks = [x for x in result if not x is False]
+                # if there is at least one solution then end_solutions will have currentMaxSeriationSize
+                if len(resultdict)!=0:
+                    end_solutions = []
+                    maxNodes = currentMaxSeriationSize 
 
                 for s in resultdict:
-                    if s is not False:
-                        #for sol in s:
-                        newNetworks += s
-                        all_solutions += s
-                        self.solutionCount += len(s)
-                        logger.debug("Added %d new solutions. Solution count is now:  %d", len(validNewNetworks),
-                                 self.solutionCount)
-                        if len(s) > maxNodes:
-                            maxNodes = len(s)
-                        currentTotal = len(newNetworks)
+                    if s is False:
+                        continue
+                    end_solutions += s
+                    all_solutions += s
+                print('\tevaluation finished with ' + str(len(end_solutions)) + ' new solutions and '+str(len(all_solutions))+' global solutions. time: '+str('%.2f'%(time.time()-self.start))+' seconds')
 
                 if self.args['screen'] not in self.FalseList:
                     msg = "Current Max Nodes:  %d " % maxNodes
                     self.scr.addstr(6, 0, msg)
-                    msg = "Total number of seriation solutions and sub-solutions: %d" % self.solutionCount
+                    msg = "Total number of seriation solutions and sub-solutions: %d" % len(all_solutions)
                     self.scr.addstr(7, 0, msg)
                     self.scr.addstr(8, 43, "                                           ")
-                    msg = "Number of seriation solutions at this step: %d" % currentTotal
+                    msg = "Number of seriation solutions at this step: %d" %len(end_solutions)
                     self.scr.addstr(8, 0, msg)
                     # if os.name != "nt":
                     #     msg = "Memory used:        " + str(self.mem.memory())
                     self.scr.addstr(9, 0, msg)
                     self.scr.refresh()
 
-                if len(newNetworks) > 0:
-                    end_solutions = newNetworks
-                else:
-                    end_solutions = networks
+                logger.debug('\tseriation for size: '+str(currentMaxSeriationSize)+' finished with: '+str(len(end_solutions))+' new solutions')     
+                for solution in end_solutions:
+                    logger.debug('\t\t'+str(solution.nodes())+' edges: '+str(solution.edges()))
+                currentMaxSeriationSize += 1
 
-            logger.debug("Process complete at seriation size %d with %d solutions before filtering.",
-                         self.maxSeriationSize, len(end_solutions))
+            logger.debug("Process complete at seriation size %d with %d solutions before filtering.", self.maxSeriationSize, len(end_solutions))
 
-            all_solutions += end_solutions
+            logger.debug('all solutions: '+str(len(all_solutions)))
+            for solution in all_solutions:
+                logger.debug('\t'+str(solution.nodes())+' edges: '+str(solution.edges()))
+
             ###########################################################################################################
-            frequencyArray = self.filterSolutions(end_solutions, all_solutions)
-            #if self.args['allsolutions'] not in self.FalseList:
-            #frequencyArray = self.filterInclusiveSolutions(all_solutions,end_solutions)
-            #else:
-            #    frequencyArray = self.filterInclusiveSolutions(end_solutions)
-            #filteredarray = all_solutions
+            # XRC remove duplicated solutions 
+            frequencyArray = self.filterTwinSolutions(all_solutions)
 
             logger.debug("Process complete at seriation size %d with %d solutions after filtering.",
                          self.maxSeriationSize, len(frequencyArray))
 
-            self.statsMap['max_seriation_size'] = self.maxSeriationSize
-            self.statsMap['total_number_solutions'] = len(frequencyArray)
-
+ 
             if self.args['verbose'] not in self.FalseList:
                 ## determine time elapsed
                 #time.sleep(5)
                 timeNow = time.time()
                 self.statsMap["processing_time"] = timeNow - self.start
-                print "Time elapsed for frequency seriation processing: %d seconds" % self.statsMap["processing_time"]
+                print "Time elapsed for frequency seriation processing: %.2f seconds" % self.statsMap["processing_time"]
 
             #################################################### OUTPUT SECTION ####################################################
             self.output(frequencyArray, OUTFILE, OUTPAIRSFILE, OUTMSTFILE, OUTMSTDISTANCEFILE, maxNodes)
@@ -2273,15 +2236,15 @@ class IDSS():
             if self.args['verbose'] not in self.FalseList:
                 print "Seriation complete."
                 print "Maximum size of seriation: %d" % maxNodes
-                print "Number of frequency seriation solutions at last step: %d" % len(frequencyArray)
-                print "Assemblages not part of final solution:"
+                print "Number of frequency seriation solutions at last step: %d" % len(end_solutions)
                 nodeList = sumGraphByWeight.nodes()
                 for a in self.assemblages:
                     if a not in nodeList:
                         notPartOfSeriationsList.append(a)
-                        print a
                 if len(notPartOfSeriationsList) == 0:
-                    print "*** All assemblages used in seriations.***"
+                    print("*** All assemblages used in seriations.***")
+                else:
+                    print("Assemblages not part of final solution: "+str(len(notPartOfSeriationsList))+' list: '+str(notPartOfSeriationsList))
 
         if self.args['continuity'] not in self.FalseList:
             # experimental
@@ -2345,7 +2308,7 @@ class IDSS():
         timeNow = time.time()
         self.statsMap["execution_time"] = timeNow - self.start
         if self.args['verbose'] not in self.FalseList:
-            print "Time elapsed for completion of program: %d seconds" % self.statsMap["execution_time"]
+            print "Time elapsed for completion of program: %.2f seconds" % self.statsMap["execution_time"]
 
         if self.args['graphs'] not in self.FalseList:
             plt.show() # display
@@ -2356,12 +2319,18 @@ class IDSS():
 
         return frequencyArray, continuityArray, notPartOfSeriationsList, self.statsMap
 
-
-
-
-
-
-
+    def filterTwinSolutions(self, solutions):
+        frequencyArray = [] 
+        for solution in solutions:
+            repeated = False
+            for final in frequencyArray:
+                if solution.nodes()==final.nodes() and solution.edges()==final.edges():
+                    repeated = True
+                    break
+            if not repeated:
+                frequencyArray.append(solution)
+        print('filtering of '+str(len(solutions)) + ' solutions has left '+str(len(frequencyArray))+' final solutions')
+        return frequencyArray   
 
 class AutoVivification(dict):
     """Implementation of perl's autovivification feature."""
