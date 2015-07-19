@@ -45,6 +45,8 @@ def parse_arguments():
                         help="If set, all of the valid solutions are produced even if they are subsets of larger solutions.")
     parser.add_argument('--inputfile',
                         help="<REQUIRED> Enter the name of the data file with the assemblage data to process.", required=True)
+    parser.add_argument('--delimiter',
+                        help="character delimiting the fields in inputfile", default='\t')
     parser.add_argument('--outputdirectory', default=None,
                         help="If you want the output to go someplace other than the /output directory, specify that here.")
     parser.add_argument('--shapefile', default=None,

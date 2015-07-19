@@ -60,6 +60,7 @@ class IDSS():
         self.nodeSizeFactor = 500 # factor to scale the size of the nodes when drawing
         self.solutionCount=0
         self.inputFile = ""
+        self.delimiter = ""
         self.solutionCount=0
         self.outputDirectory = ""
         # if os.name != "nt":
@@ -113,6 +114,7 @@ class IDSS():
                     'screen': None,
                     'allsolutions': None,
                     'inputfile': None,
+                    'delimiter': None,
                     'outputdirectory': None,
                     'shapefile': None,
                     'frequency': None,
@@ -188,7 +190,7 @@ class IDSS():
             logger.error("Cannot open %s. Error: %s", filename, e)
             sys.exit('file %s does not open: %s') % ( filename, e)
 
-        reader = csv.reader(file, delimiter='\t', quotechar='|')
+        reader = csv.reader(file, delimiter=self.args['delimiter'], quotechar='|')
         values = []
         rowcount=0
         for row in reader:
