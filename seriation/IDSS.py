@@ -175,12 +175,16 @@ class IDSS():
         :param list of assemblages:
         :return: list of triples of assemblages
         """
+        # TODO XRC _cached_triples is not initialized
+        """
         if self._cached_triples == None:
             self._cached_triples = list(itertools.combinations(lst, 3))
         useable_tuples = []
         # for e in tuples:
         #     useable_tuples.append(e)
         return self.__cached_triples
+        """
+        return list(itertools.permutations(lst, 3))
 
     def openFile(self, filename):
         try:
