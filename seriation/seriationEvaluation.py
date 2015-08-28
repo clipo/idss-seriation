@@ -36,8 +36,6 @@ def worker(networks, out_q):
     typeFrequencyUpperCI=pickle.load(open('.p/typeFrequencyUpperCI.p','rb'))
     typeFrequencyLowerCI=pickle.load(open('.p/typeFrequencyLowerCI.p','rb'))
 
-
-
     outdict = []
 
     for n in networks:
@@ -97,46 +95,42 @@ def checkForValidAdditions(nnetwork):
 
             error = 0  ## set the error check to 0
             for i in oneToColumns:
-                c = ""
+                newstring = ""
                 p = nx.shortest_path(nnetwork, nnetwork.graph[assEnd], nnetwork.graph[otherEnd])
                 newVal = assemblages[testAssemblage][i]
                 previousAssemblage = testAssemblage
                 for compareAssemblage in p:
                     oldVal = assemblages[compareAssemblage][i]
 
-                    if args['bootstrapCI'] not in (None, 0, ""):
+                    if args['bootstrapCI'] not in (None, 0, "", "0", False ):
                         upperCI_test = typeFrequencyUpperCI[previousAssemblage][i]
                         lowerCI_test = typeFrequencyLowerCI[previousAssemblage][i]
                         upperCI_end = typeFrequencyUpperCI[compareAssemblage][i]
                         lowerCI_end = typeFrequencyLowerCI[compareAssemblage][i]
 
                         if upperCI_test < lowerCI_end:
-                            c += "D"
+                            newstring += "D"
                         elif lowerCI_test > upperCI_end:
-                            c += "U"
+                            newstring += "U"
                         else:
-                            c += "M"
+                            newstring += "M"
                     else:
                         #print("Outer value: %f Inner value: %f"%(oldVal, newVal))
                         if newVal < oldVal:
-                            c += "U"
-                            c1 = "U"
+                            newstring += "U"
                         elif newVal > oldVal:
-                            c += "D"
-                            c1 = "U"
+                            newstring += "D"
                         elif newVal == oldVal:
-                            c += "M"
-                            c1 = "U"
+                            newstring += "M"
                         else:
                             logger.debug("Error. Quitting.")
                             sys.exit("got null value in comparison of value for type %d in the comparison of %s", i,
                                      compareAssemblage)
-                        logger.debug("Comparison %s is now %s", c1, c)
                         newVal = oldVal
 
                     previousAssemblage = compareAssemblage
 
-                test = pattern_to_find.search(c)
+                test = pattern_to_find.search(newstring)
                 if test not in (None, ""):
                     error += 1
 

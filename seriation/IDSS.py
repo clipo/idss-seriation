@@ -26,6 +26,7 @@ import multiprocessing
 import pickle
 import os
 import collections
+import MST
 
 import scipy as sp
 import scipy.stats
@@ -574,7 +575,6 @@ class IDSS():
         return True
 
 
-
     ########################################### FIND ALL THE VALID TRIPLES  ####################################
     ########################################### #################################### ###########################
     def findAllValidTriples(self):
@@ -601,14 +601,16 @@ class IDSS():
             error = 0
             columns = len(self.assemblages[permu[0]])
             logger.debug("Columns: %d", columns)
-            difscore = 0
-            difscore2 = 0
+
+            ## the idea here is that you are have 3 assemblages in order 1<->2<->3
+            ## what we want to do is see if the %s go up or down from 1 to 2 and 2 to 3
             comparison12 = ""
             comparison23 = ""
             for i in range(0, columns):
                 ass1 = self.assemblages[permu[0]][i]
                 ass2 = self.assemblages[permu[1]][i]
                 ass3 = self.assemblages[permu[2]][i]
+
                 logger.debug("ass1: %f ass2: %f ass3: %f", ass1, ass2, ass3)
                 if self.args['bootstrapCI'] not in self.FalseList:
                     low1 = self.typeFrequencyLowerCI[permu[0]][i]
@@ -617,67 +619,45 @@ class IDSS():
                     high1 = self.typeFrequencyUpperCI[permu[0]][i]
                     high2 = self.typeFrequencyUpperCI[permu[1]][i]
                     high3 = self.typeFrequencyUpperCI[permu[2]][i]
-                    #mean1 = self.typeFrequencyMeanCI[permu[0]][i]
-                    #mean2 = self.typeFrequencyMeanCI[permu[1]][i]
-                    #mean3 = self.typeFrequencyMeanCI[permu[2]][i]
 
-                    # compare 1 and 2
-                    if high1 < low2:
-                        comparison12 = "D"
-                    elif low1 > high2:
+                    # compare 1 and 2 -- comparing left to right
+                    if low2 > high1:
                         comparison12 = "U"
+                    elif high2 > low1:
+                        comparison12 = "D"
                     else:
                         comparison12 = "M"
 
-                    ## compare 2 and 3
-                    if high2 < low3:
+                    ## compare 2 and 3 -- comparing left to right
+                    if low3 > high2:
                         comparison23 = "U"
-                    elif low2 > high3:
+                    elif  high3 < low2:
                         comparison23 = "D"
                     else:
                         comparison23 = "M"
 
-                    ## check for problems
-                    if comparison12 == "D" and comparison23 == "D":
-                        comparison12 += "X"
-                        comparison23 += "X"
-                    elif comparison12 == "U" and comparison23 == "U":
-                        error += 1
-
                 else:     ### not bootstrap
-                    if ass1 < ass2 < ass3:
+                    if ass2 > ass1:
                         comparison12 += "U"
-                        comparison23 += "U"
-                    elif ass1 < ass2 > ass3:
-                        comparison12 += "X"
-                        comparison23 += "X"
-                    elif ass1 < ass2 == ass3:
-                        comparison12 += "U"
-                        comparison23 += "M"
-                    elif ass1 > ass2 < ass3:
+                    elif ass2 < ass1:
                         comparison12 += "D"
-                        comparison23 += "U"
-                        error += 1
-                    elif ass1 > ass2 > ass3:
-                        comparison12 += "D"
-                        comparison23 += "D"
-                    elif ass1 > ass2 == ass3:
-                        comparison12 += "D"
-                        comparison23 += "M"
-                    elif ass1 == ass2 == ass3:
+                    elif ass2 == ass1:
                         comparison12 += "M"
-                        comparison23 += "M"
-                    elif ass1 == ass2 > ass3:
-                        comparison12 += "M"
-                        comparison23 += "D"
-                    elif ass1 == ass2 < ass3:
-                        comparison12 += "M"
-                        comparison23 += "U"
                     else:
-                        logger.debug(
-                            "\n\rNo match to our possibility of combinations. ass1: %f ass2: %f  ass3: %f" % ass1, ass2,
-                            ass3)
-                        print "\n\rNo match to our possibility of combinations. ass1: %f ass2: %f  ass3: %f \n\r" % ass1, ass2, ass3
+                        logger.debug("\n\rNo match to our possibility of combinations. ass1: %f ass2: %f" % ass1, ass2)
+                        print "\n\rNo match to our possibility of combinations.  ass1: %f  ass2: %f \n\r" % ass1, ass2
+                        print "I must quit. Debugging required.\n\r"
+                        sys.exit()
+
+                    if ass3 > ass2:
+                        comparison23 += "U"
+                    elif ass3 < ass2:
+                        comparison23 += "D"
+                    elif ass2 == ass3:
+                        comparison23 = "M"
+                    else:
+                       logger.debug("\n\rNo match to our possibility of combinations. ass2: %f ass3: %f" % ass2, ass3)
+                        print "\n\rNo match to our possibility of combinations.  ass2: %f  ass3: %f \n\r" % ass2, ass3
                         print "I must quit. Debugging required.\n\r"
                         sys.exit()
 
@@ -707,6 +687,7 @@ class IDSS():
                 triples.append(net)
                 numberOfTriplets += 1
                 logger.debug("Current number of triplets: %d", numberOfTriplets)
+
         return triples
 
     def filter_list(self, full_list, excludes):
@@ -761,7 +742,7 @@ class IDSS():
         plt.savefig(filename, dpi=75)
         self.saveGraph(sGraph, filename + ".gml")
         if self.args['shapefile'] is not None and self.args['xyfile'] is not None:
-            self.createShapefile(M, self.outputDirectory + filename + ".shp")
+            self.createShapefile(M,  filename + ".shp")
 
     def iso(self, G1, glist):
         """Quick and dirty nonisomorphism checker used to check isomorphisms."""
@@ -805,6 +786,9 @@ class IDSS():
                 fromAssemblage = e[0]
                 toAssemblage = e[1]
                 currentWeight = self.sumOfDifferencesBetweenPairs[fromAssemblage+"*"+toAssemblage]
+
+                ## I believe this is the original normalized weight - this is needed to make sure that the minmax graph is created correctly.
+                ## it currently assumes that low weights are big differences between assemblages (thus low similarity)
                 normalizedWeight = ((globalMaxWeight-currentWeight)/((globalMaxWeight-globalMinWeight)+1))+1
                 sumGraph.add_path([fromAssemblage, toAssemblage], sumDiffWeight=currentWeight, weight=normalizedWeight, inverseweight=(1/normalizedWeight))
 
@@ -882,8 +866,7 @@ class IDSS():
             sys.exit(msg)
 
         outmstFile = self.outputDirectory + self.inputFile[0:-4] + "-mst.vna"
-        outmst2File = self.outputDirectory + self.inputFile[0:-4] + "-mst-distance.vna"
-
+        outmst2File = s
         if self.args['mst'] not in self.FalseList:
             try:
                 OUTMSTFILE = open(outmstFile, 'w')
@@ -1209,7 +1192,7 @@ class IDSS():
         gmlfilename = sumgraphfilename + ".gml"
         self.saveGraph(sumGraph, gmlfilename)
         if self.args['shapefile'] is not None and self.args['xyfile'] is not None:
-            self.createShapefile(sumGraph, self.outputDirectory + newfilename[0:-4] + ".shp")
+            self.createShapefile(sumGraph,  newfilename[0:-4] + ".shp")
         plt.figure(newfilename, figsize=(8, 8))
         os.environ["PATH"] += ":/usr/local/bin:"
         pos = nx.graphviz_layout(sumGraph)
