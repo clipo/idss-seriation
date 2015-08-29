@@ -1,0 +1,6 @@
+functional test for IDSS
+Six assemblages linearly ordered until a split in two different branches (one is A-B-C-D-E and the other is A-B-C-D-F)
+
+To run the example:
+../../../idss-seriation.py --inputfile twobranches.csv --delimiter ';' -bs 0.95 --debug 1 2>idss.log
+

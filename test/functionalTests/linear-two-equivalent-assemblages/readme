@@ -1,0 +1,6 @@
+functional test for IDSS
+Five assemblages linearly ordered, with two identical in the middle. Longest solutions are (A-B-C-D-E) and (A-B-C-D-E)
+
+To run the example:
+../../../idss-seriation.py --inputfile repeated.csv --delimiter ';' -bs 0.95 --debug 1 2>idss.log
+
