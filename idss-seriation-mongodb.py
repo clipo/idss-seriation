@@ -72,6 +72,7 @@ def parse_arguments():
     parser.add_argument('--spatialsignificance', default=None, help="Calculate the significance of the spatial aspect of the final solution. Default is None.")
     parser.add_argument('--spatialbootstrapN',default=100, help='Set the number of resamples used for calculating the spatial significance. Default is 100.')
     parser.add_argument('--minmaxbycount',default=None, help='Create a minmax solution from the aggregate set by weighting on the basis of # of times edges appear in solutions. Default is None.')
+    parser.add_argument('--delimiter', help="character delimiting the fields in inputfile", default='\t')
 
     # arguments for database instance
     parser.add_argument("--dbhost", help="MongoDB database hostname, defaults to localhost", default="localhost")

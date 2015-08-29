@@ -9,7 +9,7 @@ __author__ = 'carllipo'
 
 import shapefile
 
-import networkx as nxx
+import networkx as nx
 from pylab import *
 import matplotlib.pyplot as plt
 import argparse
@@ -52,8 +52,9 @@ class MST():
 
     def openFileHandles(self):
         ## Read in all of the data from the .vna file Reconstruct the graphs.
+        vnafile = self.outputdirectory + self.filename
         try:
-            file = open(self.filename)
+            file = open(vnafile)
         except IOError:
             print "can't open %s. I will now exit." % self.filename
             sys.exit()

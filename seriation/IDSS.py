@@ -97,6 +97,7 @@ class IDSS():
         self.statsMap = dict()
         # memoize the tuples
         self._cached_triples = None
+        self.delimiter = ""
 
 
     def _setup_defaults(self):
@@ -133,7 +134,8 @@ class IDSS():
                     'atlas': None,
                     'spatialsignificance':None,
                     'spatialbootstrapN':None,
-                    'minmaxbycount':None
+                    'minmaxbycount':None,
+                    'delimiter': None
                     }
         return self.defaults
 
@@ -181,6 +183,7 @@ class IDSS():
         useable_tuples = []
         # for e in tuples:
         #     useable_tuples.append(e)
+        logger.debug('potential combinations: '+str(len(self._cached_triples)))
         return self._cached_triples
 
     def openFile(self, filename):
@@ -191,7 +194,7 @@ class IDSS():
             logger.error("Cannot open %s. Error: %s", filename, e)
             sys.exit('file %s does not open: %s') % ( filename, e)
 
-        reader = csv.reader(file, delimiter='\t', quotechar='|')
+        reader = csv.reader(file, delimiter=self.args['delimiter'], quotechar='|')
         values = []
         rowcount=0
         for row in reader:
@@ -867,8 +870,8 @@ class IDSS():
             msg = "Can't open file %s to write: %s" % outpairsFile, e
             sys.exit(msg)
 
-        outmstFile = self.outputDirectory + self.inputFile[0:-4] + "-mst.vna"
-        outmst2File = self.outputDirectory + self.inputFile[0:-4] + "mst-dist.vna"
+        outmstFile = self.inputFile[0:-4] + "-mst.vna"
+        outmst2File = self.inputFile[0:-4] + "mst-dist.vna"
         if self.args['mst'] not in self.FalseList:
             try:
                 OUTMSTFILE = open(outmstFile, 'w')
@@ -2244,7 +2247,7 @@ class IDSS():
 
             #################################################### MST SECTION ####################################################
             if self.args['mst'] not in self.FalseList:
-                outputFile = self.outputDirectory + self.inputFile[0:-4] + ".vna"
+                outputFile = self.inputFile[0:-4] + ".vna"
                 # Need to have the shapefile flag and the XY file in order to create a valid shapefile.
                 if self.args['shapefile'] is not None and self.args['xyfile'] is not None:
                     shapefile = 1
