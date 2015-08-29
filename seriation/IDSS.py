@@ -95,6 +95,8 @@ class IDSS():
         self.solutionsChecked = 0 ## total # of seriations evaluated to find the final subset
         # for returning execution statistics and diagnostics to the caller
         self.statsMap = dict()
+        # memoize the tuples
+        self._cached_triples = None
 
 
     def _setup_defaults(self):
@@ -179,7 +181,7 @@ class IDSS():
         useable_tuples = []
         # for e in tuples:
         #     useable_tuples.append(e)
-        return self.__cached_triples
+        return self._cached_triples
 
     def openFile(self, filename):
         try:
@@ -866,7 +868,7 @@ class IDSS():
             sys.exit(msg)
 
         outmstFile = self.outputDirectory + self.inputFile[0:-4] + "-mst.vna"
-        outmst2File = s
+        outmst2File = self.outputDirectory + self.inputFile[0:-4] + "mst-dist.vna"
         if self.args['mst'] not in self.FalseList:
             try:
                 OUTMSTFILE = open(outmstFile, 'w')
