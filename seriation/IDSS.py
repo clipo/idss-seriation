@@ -656,7 +656,7 @@ class IDSS():
                     elif ass2 == ass3:
                         comparison23 = "M"
                     else:
-                       logger.debug("\n\rNo match to our possibility of combinations. ass2: %f ass3: %f" % ass2, ass3)
+                        logger.debug("\n\rNo match to our possibility of combinations. ass2: %f ass3: %f" % ass2, ass3)
                         print "\n\rNo match to our possibility of combinations.  ass2: %f  ass3: %f \n\r" % ass2, ass3
                         print "I must quit. Debugging required.\n\r"
                         sys.exit()
