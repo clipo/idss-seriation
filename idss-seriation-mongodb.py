@@ -11,6 +11,7 @@ Wrapper script for running an IDSS seriation from the command line on a Mac OS X
 from seriation import IDSS
 from seriation.database import SeriationDatabase
 import argparse
+from seriation import idss_version
 
 
 
@@ -86,7 +87,7 @@ def parse_arguments():
 
 
 if __name__ == "__main__":
-
+    print "IDSS seriation Version %s" % idss_version.__version__
 
     seriation = IDSS()
     args = parse_arguments()

@@ -25,8 +25,8 @@ from distutils.command.sdist import sdist as _sdist
 #         # all tests os.exit(1) upon failure
 
 VERSION_PY = """
-# This file is originally generated from Git information by running 'setup.py
-# version'. Distribution tarballs contain a pre-generated copy of this file.
+# This file is updated from Git information by running 'python setup.py
+# version'.
 __version__ = '%s'
 """
 
@@ -47,14 +47,14 @@ def update_version_py():
         return
     # our tags are like:  v2.2
     ver = stdout[len("v"):].strip()
-    f = open("_version.py", "w")
+    f = open("seriation/idss_version.py", "w")
     f.write(VERSION_PY % ver)
     f.close()
     print "set _version.py to '%s'" % ver
 
 def get_version():
     try:
-        f = open("_version.py")
+        f = open("seriation/idss_version.py")
     except EnvironmentError:
         return None
     for line in f.readlines():

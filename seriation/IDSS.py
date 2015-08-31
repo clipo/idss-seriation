@@ -49,7 +49,7 @@ import shapefile
 from seriation.frequencySeriationMaker import frequencySeriationMaker
 import seriation.seriationEvaluation as seriationEvaluation
 from seriation.occurrenceSeriationMaker import occurrenceSeriationMaker
-
+from seriation import idss_version
 
 
 class IDSS():
@@ -854,6 +854,18 @@ class IDSS():
 
     #################################################### set up all the output files ####################################################
     def setupOutput(self):
+
+        # record version of software used to outputdirectory
+        versionFile = self.outputDirectory + self.inputFile[0:-4] + "-version.txt"
+        try:
+            VERFILE = open(versionFile, 'w')
+        except (OSError, IOError) as e:
+            msg = "Cannot open version file %s to write" % versionFile
+            sys.exit(msg)
+
+        VERFILE.write("%s" % idss_version.__version__)
+        VERFILE.close()
+
 
         outputFile = self.outputDirectory + self.inputFile[0:-4] + ".vna"
         OUTMSTFILE = OUTMSTDISTANCEFILE = ""
