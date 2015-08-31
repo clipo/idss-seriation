@@ -9,6 +9,7 @@ Description here
 """
 
 from mongoengine import *
+from seriation import idss_version
 
 
 
@@ -30,7 +31,7 @@ class SeriationRun(Document):
     total_number_solutions = IntField()
     max_solution_size = IntField()
     parameters = EmbeddedDocumentField(SeriationParameters)
-
+    version_used = StringField(required=True)
     meta = {'allow_inheritance': True}
 
 
@@ -83,6 +84,7 @@ class SeriationDatabase(object):
         srun.total_number_solutions = stats_map['total_number_solutions']
         srun.total_processing_time = stats_map['processing_time']
         srun.total_runtime = stats_map['execution_time']
+        srun.version_used = idss_version.__version__
 
         srun.save()
 
