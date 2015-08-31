@@ -1,7 +1,94 @@
-from distutils.core import setup
+
+import os, subprocess, re
+from distutils.core import setup, Command
+from distutils.command.sdist import sdist as _sdist
+
+# class Test(Command):
+#     description = "run unit tests"
+#     user_options = []
+#     boolean_options = []
+#     def initialize_options(self):
+#         pass
+#     def finalize_options(self):
+#         pass
+#     def run(self):
+#         pass
+#         # EXAMPLE - needs customization here
+#         # from ecdsa import numbertheory
+#         # numbertheory.__main__()
+#         # from ecdsa import ellipticcurve
+#         # ellipticcurve.__main__()
+#         # from ecdsa import ecdsa
+#         # ecdsa.__main__()
+#         # from ecdsa import test_pyecdsa
+#         # test_pyecdsa.unittest.main(module=test_pyecdsa, argv=["dummy"])
+#         # all tests os.exit(1) upon failure
+
+VERSION_PY = """
+# This file is originally generated from Git information by running 'setup.py
+# version'. Distribution tarballs contain a pre-generated copy of this file.
+__version__ = '%s'
+"""
+
+def update_version_py():
+    if not os.path.isdir(".git"):
+        print "This does not appear to be a Git repository."
+        return
+    try:
+        p = subprocess.Popen(["git", "describe",
+                              "--tags", "--dirty", "--always"],
+                             stdout=subprocess.PIPE)
+    except EnvironmentError:
+        print "unable to run git, leaving idss-seration/_version.py alone"
+        return
+    stdout = p.communicate()[0]
+    if p.returncode != 0:
+        print "unable to run git, leaving idss-seriation/_version.py alone"
+        return
+    # our tags are like:  v2.2
+    ver = stdout[len("v"):].strip()
+    f = open("_version.py", "w")
+    f.write(VERSION_PY % ver)
+    f.close()
+    print "set _version.py to '%s'" % ver
+
+def get_version():
+    try:
+        f = open("_version.py")
+    except EnvironmentError:
+        return None
+    for line in f.readlines():
+        mo = re.match("__version__ = '([^']+)'", line)
+        if mo:
+            ver = mo.group(1)
+            return ver
+    return None
+
+class Version(Command):
+    description = "update _version.py from Git repo"
+    user_options = []
+    boolean_options = []
+    def initialize_options(self):
+        pass
+    def finalize_options(self):
+        pass
+    def run(self):
+        update_version_py()
+        print "Version is now", get_version()
+
+class sdist(_sdist):
+    def run(self):
+        update_version_py()
+        # unless we update this, the sdist command will keep using the old
+        # version
+        self.distribution.metadata.version = get_version()
+        return _sdist.run(self)
+
+
 
 setup(name="idss-seriation",
-      version="2.1",
+      version=get_version(),
+      description="Iterative Deterministic Seriation Solution program for archaeological seriation",
       packages = [
         'seriation',
       ],
@@ -21,5 +108,7 @@ setup(name="idss-seriation",
           'Operating System :: POSIX',
           'Programming Language :: Python :: 2.7',
           'Topic :: Scientific/Engineering',
-      ]
+      ],
+      license="APACHE",
+      cmdclass={ "version": Version, "sdist": sdist },
       )
