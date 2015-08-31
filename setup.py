@@ -36,7 +36,7 @@ def update_version_py():
         return
     try:
         p = subprocess.Popen(["git", "describe",
-                              "--tags", "--dirty", "--always"],
+                              "--tags", "--always"],
                              stdout=subprocess.PIPE)
     except EnvironmentError:
         print "unable to run git, leaving idss-seration/_version.py alone"
