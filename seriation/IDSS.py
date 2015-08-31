@@ -2253,9 +2253,46 @@ class IDSS():
                     shapefile = 1
                 else:
                     shapefile = None
-                mst = MST.MST(outputFile, self.outputDirectory, shapefile)
-                mst.createMST()
-                #minimumSpanningTree(all_solutions,xAssemblage,yAssemblage,distanceBetweenAssemblages,assemblageSize,outputDirectory,inputFile)
+                #mst = MST.MST(outputFile, self.outputDirectory, shapefile)
+                #mst.createMST()
+
+                mst=nx.minimum_spanning_tree(sumGraphByWeight,weight='weight')
+                pos=nx.graphviz_layout(mst,prog="neato")
+                # edge width is proportional number of games played
+                edgewidth=[]
+                weights = nx.get_edge_attributes(mst, 'weight')
+                for w in weights:
+                    edgewidth.append(weights[w]*10)
+
+                maxValue = np.max(edgewidth)
+                widths=[]
+                for w in edgewidth:
+                    widths.append(((maxValue-w)+1)*5)
+
+                assemblageSizes=[]
+                sizes = nx.get_node_attributes(mst, 'size')
+                #print sizes
+                for s in sizes:
+                    #print sizes[s]
+                    assemblageSizes.append(sizes[s])
+
+                nx.draw_networkx_edges(mst,pos,alpha=0.3,width=widths)
+                sizes = nx.get_node_attributes(mst,'size')
+                nx.draw_networkx_nodes(mst,pos,node_size=assemblageSizes,node_color='w',alpha=0.4)
+                nx.draw_networkx_edges(mst,pos,alpha=0.4,node_size=0,width=1,edge_color='k')
+                nx.draw_networkx_labels(mst,pos,fontsize=10)
+                font = {'fontname'   : 'Helvetica',
+                    'color'      : 'k',
+                    'fontweight' : 'bold',
+                    'fontsize'   : 14}
+                edgelist = list(mst) # make a list of the edges
+                #print edgelist
+                #nx.draw(mst)
+                #plt.savefig("path.png")
+                plt.axis('off')
+                pngfile= self.outputDirectory+"/"+self.inputFile[0:-4]+"-mst.png"
+                plt.savefig(pngfile,dpi=75)
+
             #################################################### END SECTION ####################################################
 
             if self.args['verbose'] not in self.FalseList:
