@@ -32,6 +32,7 @@ class SeriationRun(Document):
     max_solution_size = IntField()
     parameters = EmbeddedDocumentField(SeriationParameters)
     version_used = StringField(required=True)
+    seriation_run_id = StringField(required=True)
     meta = {'allow_inheritance': True}
 
 
@@ -85,6 +86,7 @@ class SeriationDatabase(object):
         srun.total_processing_time = stats_map['processing_time']
         srun.total_runtime = stats_map['execution_time']
         srun.version_used = idss_version.__version__
+        srun.seriation_run_id = stats_map['seriation_run_id']
 
         srun.save()
 

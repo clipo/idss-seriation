@@ -867,16 +867,21 @@ class IDSS():
     def setupOutput(self):
 
         # record version of software used to outputdirectory
-        versionFile = self.outputDirectory + self.inputFile[0:-4] + "-version.txt"
+        versionFile = self.outputDirectory + self.inputFile[0:-4] + "-metadata.txt"
         try:
             VERFILE = open(versionFile, 'w')
         except (OSError, IOError) as e:
             msg = "Cannot open version file %s to write" % versionFile
             sys.exit(msg)
 
-        VERFILE.write("%s" % idss_version.__version__)
+        VERFILE.write("SWVersion: %s" % idss_version.__version__)
+        VERFILE.write("\n")
+
+        VERFILE.write("RunID: %s" % self.seriation_run_identifier)
+        VERFILE.write("\n")
         VERFILE.close()
 
+        # record
 
         outputFile = self.outputDirectory + self.inputFile[0:-4] + ".vna"
         OUTMSTFILE = OUTMSTDISTANCEFILE = ""
@@ -2376,6 +2381,9 @@ class IDSS():
         #time.sleep(5)
         timeNow = time.time()
         self.statsMap["execution_time"] = timeNow - self.start
+        # record the seriation UUID
+        self.statsMap["seriation_run_id"] = self.seriation_run_identifier
+
         if self.args['verbose'] not in self.FalseList:
             print "Time elapsed for completion of program: %d seconds" % self.statsMap["execution_time"]
 
