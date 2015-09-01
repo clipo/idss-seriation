@@ -46,7 +46,7 @@ def calculateGeographicSolutionPValue(graph,num_bootstrap,self_xassem,self_yasse
         assemblagesInSolution.append(fromAssemblage)
         assemblagesInSolution.append(toAssemblage)
     assemblageSet = set(assemblagesInSolution)
-    #print "solution Distance: %s" % solutionDistance
+    print "solution Distance: %s" % solutionDistance
 
     rnd.seed()  # uses system time to initialize random number generator, or you can pass in a deterministic seed as an argument if you want
     x = []
@@ -58,19 +58,28 @@ def calculateGeographicSolutionPValue(graph,num_bootstrap,self_xassem,self_yasse
     rnd.shuffle(random_pairs)
     bootstrap_pairs = itertools.cycle(random_pairs)
 
+    # there are a much smaller number of pairs of assemblages than bootstrap iterations, typically,
+    # so pre-calculate the distances and then just look them up while going through the bootstrap
+    # loop itself.
+    distances = dict()
+    for pair in random_pairs:
+        p1 = pair[0]
+        p2 = pair[1]
+        dist = math.sqrt(pow((int(self_xassem[p1]) - int(self_xassem[p2])), 2)
+                        + pow((int(self_yassem[p1]) - int(self_yassem[p2])), 2))
+        distances[pair] = dist
+
     for i in xrange(0, num_bootstraps):
         testDistance = 0.0
         for e in xrange(0, edges):
             pair = bootstrap_pairs.next()
-            p1 = pair[0]
-            p2 = pair[1]
-            #print "Pair: ", p1, "-", p2
-            testDistance += math.sqrt(pow((int(self_xassem[p1]) - int(self_xassem[p2])), 2)
-                                          + pow((int(self_yassem[p1]) - int(self_yassem[p2])), 2))
-            #print "Test Distance: ", testDistance
 
+            #print "Pair: ", p1, "-", p2
+            testDistance += distances[pair]
+
+        #print "Test Distance: ", testDistance
         if testDistance <= solutionDistance:
-            # print "TEST is less than solutionDistance: ",testDistance
+            #print "TEST is less than solutionDistance: ",testDistance
             pvalueScore += 1
         x.append(testDistance)
 
@@ -100,6 +109,8 @@ def calculateGeographicSolutionPValue(graph,num_bootstrap,self_xassem,self_yasse
 
     if pvalue == 0:
         pvalue = "0.000"
+
+    #print "pvalue: %s" % pvalue
     return pvalue, solutionDistance, mean(x), std(x)
 
 
