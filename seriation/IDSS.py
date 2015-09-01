@@ -878,7 +878,7 @@ class IDSS():
         VERFILE.write("\n")
 
         VERFILE.write("RunID: %s" % self.seriation_run_identifier)
-        VERFILE.write("\n")
+
         VERFILE.close()
 
         # record
@@ -2257,6 +2257,12 @@ class IDSS():
 
             if self.args['xyfile'] not in self.FalseList:
                 if self.args['spatialsignificance'] not in self.FalseList:
+
+                    pickle.dump(minMaxGraphByWeight,open("mmg.pickle", 'w'))
+                    pickle.dump(self.xAssemblage, open("xassem.pickle", 'w'))
+                    pickle.dump(self.yAssemblage, open("yassem.pickle", 'w'))
+                    pickle.dump(self.labels, open("labels.pickle", 'w'))
+
                     pscore, distance, geodistance, sd_geodistance = self.calculateGeographicSolutionPValue(minMaxGraphByWeight)
                     print "Geographic p-value for the frequency seriation minmax solution: ", pscore
                     filename=self.outputDirectory + self.inputFile[0:-4]+"-geography.txt"

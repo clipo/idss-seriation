@@ -1,0 +1,6 @@
+Assemblage	Easting	Northing
+Assemblage-1	1	1
+Assemblage-2	2	2
+Assemblage-3	3	3
+Assemblage-4	4	4
+Assemblage-5	5	5
