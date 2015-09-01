@@ -105,7 +105,7 @@ def calculateGeographicSolutionPValue(graph,num_bootstrap,self_xassem,self_yasse
 
 if __name__ == "__main__":
     (mmg,self_xassem,self_yassem,plot_filename,labels) = setup()
-    num_bootstraps = 1000000
+    num_bootstraps = 1000
 
     start_time = time.clock()
     calculateGeographicSolutionPValue(mmg, num_bootstraps,self_xassem,self_yassem,plot_filename,labels)

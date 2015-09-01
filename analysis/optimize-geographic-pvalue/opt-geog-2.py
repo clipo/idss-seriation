@@ -17,6 +17,7 @@ import scipy.stats
 from pylab import *
 import pprint as pp
 import itertools
+import numpy as np
 
 import matplotlib
 matplotlib.use('Agg')
@@ -32,7 +33,12 @@ def setup():
     return (mmg,self_xassem,self_yassem,plot_filename,labels)
 
 def calculateGeographicSolutionPValue(graph,num_bootstrap,self_xassem,self_yassem,plot_filename,labels):
-    solutionDistance = 0
+
+    # First calculate our reference distance -- the total euclidean distance along the edges of
+    # the minmax solution graph.  this is the sum of the distances along each edge where the
+    # node XY coordinates from the XY file are used as the position of each assemblage.
+
+    solutionDistance = 0.
     assemblagesInSolution = []
     edges = 0
     for e in graph.edges_iter():
@@ -41,47 +47,68 @@ def calculateGeographicSolutionPValue(graph,num_bootstrap,self_xassem,self_yasse
         fromAssemblage = e[0]
         toAssemblage = e[1]
         solutionDistance += math.sqrt(
-            pow((int(self_xassem[fromAssemblage]) - int(self_xassem[toAssemblage])), 2)
-            + pow((int(self_yassem[fromAssemblage]) - int(self_yassem[toAssemblage])), 2))
+            pow((self_xassem[fromAssemblage] - self_xassem[toAssemblage]), 2)
+            + pow((self_yassem[fromAssemblage] - self_yassem[toAssemblage]), 2))
+
         assemblagesInSolution.append(fromAssemblage)
         assemblagesInSolution.append(toAssemblage)
-    assemblageSet = set(assemblagesInSolution)
-    print "solution Distance: %s" % solutionDistance
 
-    rnd.seed()  # uses system time to initialize random number generator, or you can pass in a deterministic seed as an argument if you want
+    #print "solution Distance: %s" % solutionDistance
+
     x = []
     pvalueScore = 0.000
 
     # we pre-calculate unique pairs of assemblages, randomize the list, take the first num_bootstrap entries
     # so we can eliminate doing any unnecessary loops
-    random_pairs = list(itertools.permutations(labels, 2))
-    rnd.shuffle(random_pairs)
-    bootstrap_pairs = itertools.cycle(random_pairs)
+    random_pairs = list(itertools.combinations(labels, 2))
+    #np.random.shuffle(random_pairs)
+    #bootstrap_pairs = itertools.cycle(random_pairs)
 
     # there are a much smaller number of pairs of assemblages than bootstrap iterations, typically,
     # so pre-calculate the distances and then just look them up while going through the bootstrap
     # loop itself.
+
+    # SCALING NOTE:  With 10K bootstrap permutations, the list of combinations is longer than 10K around 150
+    # assemblages, and you could gain very slightly by not bothering with the cycle() call and just slicing
+    # the first 10K out of the shuffled list.  At 100K iterations, you need 450 assemblages before such a
+    # change matters.  So for the moment, this is the most efficient solution that doesn't involve
+    # explicit parallelization.
     distances = dict()
     for pair in random_pairs:
         p1 = pair[0]
         p2 = pair[1]
-        dist = math.sqrt(pow((int(self_xassem[p1]) - int(self_xassem[p2])), 2)
-                        + pow((int(self_yassem[p1]) - int(self_yassem[p2])), 2))
+        dist = math.sqrt(pow((self_xassem[p1] - self_xassem[p2]), 2)
+                        + pow((self_yassem[p1] - self_yassem[p2]), 2))
         distances[pair] = dist
+
+    # Now, we generate bootstrap samples, by taking len(edges) samples of random
+    # assemblage pairs, and adding their distances together, to form a simulated
+    # total graph distance.  We then compare this total test graph distance
+    # to the actual one from the minmax graph, and if the test graph distance is
+    # lower, we score one for this bootstrap iteration.  At the end of num_bootstraps
+    # iterations, the pvalue_score / num_bootstraps is the significance value of the
+    # actual graph distance.
 
     for i in xrange(0, num_bootstraps):
         testDistance = 0.0
         for e in xrange(0, edges):
-            pair = bootstrap_pairs.next()
+            pair = rnd.choice(random_pairs)
 
-            #print "Pair: ", p1, "-", p2
+            # print "Pair: ", pair[0], "-", pair[1]
             testDistance += distances[pair]
 
         #print "Test Distance: ", testDistance
         if testDistance <= solutionDistance:
             #print "TEST is less than solutionDistance: ",testDistance
-            pvalueScore += 1
+            pvalueScore += 1.
         x.append(testDistance)
+
+    #print "pvalueScore: %s" % pvalueScore
+    pvalue = float(pvalueScore) / float(num_bootstrap)
+    #print "pvalue: %0.4f" % pvalue
+
+    ### End of critical phase of algorithm
+
 
     filename = plot_filename
     f = plt.figure(filename, figsize=(8, 8))
@@ -102,25 +129,27 @@ def calculateGeographicSolutionPValue(graph,num_bootstrap,self_xassem,self_yasse
     plt.subplots_adjust(left=0.15)
     minx = min(x)
     maxx = max(x)
-    pvalue = pvalueScore / num_bootstrap
+
     x1, x2, y1, y2 = plt.axis()
     text = "p-value: " + str(pvalue)
     plt.text(maxx / 3, (y2 - y1) * 2 / 3, text, style='italic')
 
-    if pvalue == 0:
-        pvalue = "0.000"
 
-    #print "pvalue: %s" % pvalue
+
+    # if pvalue == 0:
+    #     pvalue = "0.000"
+
     return pvalue, solutionDistance, mean(x), std(x)
 
 
 if __name__ == "__main__":
     (mmg,self_xassem,self_yassem,plot_filename,labels) = setup()
-    num_bootstraps = 1000000
+    num_bootstraps = 1000
 
     start_time = time.clock()
-    calculateGeographicSolutionPValue(mmg, num_bootstraps,self_xassem,self_yassem,plot_filename,labels)
+    result = calculateGeographicSolutionPValue(mmg, num_bootstraps,self_xassem,self_yassem,plot_filename,labels)
     end_time = time.clock()
+    print result
 
     elapsed = end_time - start_time
     print "elapsed with %s bootstraps: %s secs" % (num_bootstraps, elapsed)
