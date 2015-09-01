@@ -31,6 +31,7 @@ import MST
 import scipy as sp
 import scipy.stats
 import networkx as nx
+import shutil
 
 import matplotlib
 matplotlib.use('Agg')
@@ -98,6 +99,8 @@ class IDSS():
         # memoize the tuples
         self._cached_triples = None
         self.delimiter = ""
+        self.pickledir = ""
+        self.seriation_run_identifier = None
 
 
     def _setup_defaults(self):
@@ -135,9 +138,15 @@ class IDSS():
                     'spatialsignificance':None,
                     'spatialbootstrapN':None,
                     'minmaxbycount':None,
-                    'delimiter': None
+                    'delimiter': None,
+                    'preservepickle' : 0
                     }
         return self.defaults
+
+    def _create_pickle_tempdir(self):
+        self.pickledir = "/tmp/idss-pickle-" + self.seriation_run_identifier
+        if not os.path.exists(self.pickledir):
+            os.makedirs(self.pickledir)
 
 
     def initialize(self, parsed_args):
@@ -161,8 +170,10 @@ class IDSS():
         else:
             logger.basicConfig(level=logger.INFO, format='%(asctime)s %(levelname)s: %(message)s')
 
-
-
+        # create a unique seriation run identifier
+        self.seriation_run_identifier = uuid.uuid1().urn
+        logger.info("seriation run identifier: %s", self.seriation_run_identifier)
+        self._create_pickle_tempdir()
 
     def saveGraph(self, graph, filename):
         nx.write_gml(graph, filename)
@@ -2046,28 +2057,26 @@ class IDSS():
             all_solutions = []
             all_solutions = all_solutions + triples  ## add the triples to the initial solution
 
-            ## create a directory for the processing of the pickle files if it doesnt exist already
-            if not os.path.exists(".p"):
-                os.makedirs(".p")
+
             ## pickle the stuff I need for parallel processing
-            ch = open('.p/validComparisonsHash.p', 'wb')
-            pickle.dump(self.validComparisonsHash,open('.p/validComparisonsHash.p', 'wb'))
-            #ch.close()
-            pg=open('.p/pairGraph.p','wb')
-            pickle.dump(self.pairGraph,open('.p/pairGraph.p','wb'))
-            #pg.close
-            ass=open('.p/assemblages.p','wb')
-            pickle.dump(self.assemblages,open('.p/assemblages.p','wb'))
-            #ass.close()
-            a=open('.p/args.p','wb')
-            pickle.dump(self.args,open('.p/args.p','wb'))
-            #a.close()
-            fuci=open('.p/typeFrequencyUpperCI.p','wb')
-            pickle.dump(self.typeFrequencyUpperCI,open('.p/typeFrequencyUpperCI.p','wb'))
-            #fuci.close()
-            flci=open('.p/typeFrequencyLowerCI.p','wb')
-            pickle.dump(self.typeFrequencyLowerCI,open('.p/typeFrequencyLowerCI.p','wb'))
-            #flci.close()
+            vchashfile = self.pickledir + "/validComparisonsHash.p"
+            pickle.dump(self.validComparisonsHash,open(vchashfile, 'wb'))
+
+            pgfile = self.pickledir + "/pairGraph.p"
+            pickle.dump(self.pairGraph,open(pgfile,'wb'))
+
+            assemfile = self.pickledir + "/assemblages.p"
+            pickle.dump(self.assemblages,open(assemfile,'wb'))
+
+            argsfile = self.pickledir + "/args.p"
+            pickle.dump(self.args,open(argsfile,'wb'))
+
+            fucifile = self.pickledir + "/typeFrequencyUpperCI.p"
+            pickle.dump(self.typeFrequencyUpperCI,open(fucifile,'wb'))
+
+            flcifile = self.pickledir + "/typeFrequencyLowerCI.p"
+            pickle.dump(self.typeFrequencyLowerCI,open(flcifile,'wb'))
+
 
             timeNow = time.time()
             prewhile_loop = timeNow - self.start
@@ -2132,7 +2141,7 @@ class IDSS():
                 for i in range(cpus):
                     p = multiprocessing.Process(
                     target=seriationEvaluation.worker,
-                    args=(networks[chunksize * i:chunksize * (i + 1)],out_q))
+                    args=(self.pickledir,networks[chunksize * i:chunksize * (i + 1)],out_q))
                     procs.append(p)
                     p.start()
 
@@ -2372,6 +2381,9 @@ class IDSS():
 
         if self.args['graphs'] not in self.FalseList:
             plt.show() # display
+
+        if self.args['preservepickle'] == 0:
+            shutil.rmtree(self.pickledir)
 
         ## say goodbye and clean up the screen stuff #########################
         self.finalGoodbye()

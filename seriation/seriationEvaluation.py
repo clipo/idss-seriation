@@ -14,7 +14,7 @@ def filter_list(full_list, excludes):
     return (x for x in full_list if x not in s)
 
 
-def worker(networks, out_q):
+def worker(pickledir, networks, out_q):
     """ The worker function, invoked in a process. The results are placed in
         a dictionary that's pushed to a queue.
     """
@@ -29,12 +29,20 @@ def worker(networks, out_q):
     global typeFrequencyUpperCI
     global typeFrequencyLowerCI
 
-    validComparisonsHash=pickle.load(open('.p/validComparisonsHash.p','rb'))
-    pairGraph=pickle.load(open('.p/pairGraph.p','rb'))
-    assemblages=pickle.load(open('.p/assemblages.p','rb'))
-    args=pickle.load(open('.p/args.p','rb'))
-    typeFrequencyUpperCI=pickle.load(open('.p/typeFrequencyUpperCI.p','rb'))
-    typeFrequencyLowerCI=pickle.load(open('.p/typeFrequencyLowerCI.p','rb'))
+    vchashfile = pickledir + "/validComparisonsHash.p"
+    pgfile = pickledir + "/pairGraph.p"
+    assemfile = pickledir + "/assemblages.p"
+    argsfile = pickledir + "/args.p"
+    fucifile = pickledir + "/typeFrequencyUpperCI.p"
+    flcifile = pickledir + "/typeFrequencyLowerCI.p"
+
+
+    validComparisonsHash=pickle.load(open(vchashfile,'rb'))
+    pairGraph=pickle.load(open(pgfile,'rb'))
+    assemblages=pickle.load(open(assemfile,'rb'))
+    args=pickle.load(open(argsfile,'rb'))
+    typeFrequencyUpperCI=pickle.load(open(fucifile,'rb'))
+    typeFrequencyLowerCI=pickle.load(open(flcifile,'rb'))
 
     outdict = []
 
