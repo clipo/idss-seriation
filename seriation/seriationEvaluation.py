@@ -163,7 +163,7 @@ def checkForValidAdditions(nnetwork):
                 if len(new_network) > maxnodes:
                     maxnodes = len(new_network)
 
-    # end_time = time.time()
+    # end_time = time.clock()
     # elapsed = end_time - start_time
     # proc_name = multiprocessing.current_process().name
     # print "seriationEvaluation in process: %s elapsed: %s" % (proc_name, elapsed)

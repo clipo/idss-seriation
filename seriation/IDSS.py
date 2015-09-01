@@ -66,7 +66,7 @@ class IDSS():
         self.outputDirectory = ""
         # if os.name != "nt":
         #     self.mem = memory.Memory()
-        self.start = time.time()
+        self.start = time.clock()
         self.assemblageSize = {}
         self.assemblageFrequencies = {}
         self.assemblages = {}
@@ -163,7 +163,7 @@ class IDSS():
         self.args.update(args_map)
         self.initialized = True
 
-        print "self.args: %s" % self.args
+        #print "self.args: %s" % self.args
 
         if int(self.args['debug']) == 1:
             logger.basicConfig(level=logger.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
@@ -1772,11 +1772,18 @@ class IDSS():
         return seriationList
 
     def calculateGeographicSolutionPValue(self,graph):
+        """
 
+        :param graph:
+        :return:
+        """
 
-        bootstrap=int(self.args['spatialbootstrapN'])
+        num_bootstrap=int(self.args['spatialbootstrapN'])
 
-        solutionDistance=0
+        # First calculate our reference distance -- the total euclidean distance along the edges of
+        # the minmax solution graph.  this is the sum of the distances along each edge where the
+        # node XY coordinates from the XY file are used as the position of each assemblage.
+        solutionDistance=0.
         assemblagesInSolution=[]
         edges=0
         for e in graph.edges_iter():
@@ -1784,38 +1791,85 @@ class IDSS():
             edges +=1
             fromAssemblage = e[0]
             toAssemblage = e[1]
-            solutionDistance += math.sqrt(pow((int(self.xAssemblage[fromAssemblage])-int(self.xAssemblage[toAssemblage])),2)
-                                +pow((int(self.yAssemblage[fromAssemblage])-int(self.yAssemblage[toAssemblage])),2))
+            solutionDistance += math.sqrt(pow((self.xAssemblage[fromAssemblage] - self.xAssemblage[toAssemblage]),2)
+                                +pow((self.yAssemblage[fromAssemblage] - self.yAssemblage[toAssemblage]),2))
             assemblagesInSolution.append(fromAssemblage)
             assemblagesInSolution.append(toAssemblage)
-        assemblageSet=set(assemblagesInSolution)
 
-        rnd.seed() # uses system time to initialize random number generator, or you can pass in a deterministic seed as an argument if you want
         x=[]
-        pvalueScore=0.000
-        for b in range(0,bootstrap):
-            # code to use to generate K pairs
-            list1 = self.labels
-            list2 = self.labels
+        pvalueScore=0.0
 
-            testDistance=0
-            for p in range(0,edges-1):
-                test = False
-                p1 = p2 = ""
-                while test is False:
-                    p1 = rnd.choice(list1)
-                    p2 = rnd.choice(list2)
-                    if p1 != p2:
-                        test = True
-                #print "Pair: ", p1, "-", p2
-                testDistance += math.sqrt(pow((int(self.xAssemblage[p1])-int(self.xAssemblage[p2])),2)
-                            +pow((int(self.yAssemblage[p1])-int(self.yAssemblage[p2])),2))
-                #print "Test Distance: ", testDistance
+        # we pre-calculate unique pairs of assemblages, randomize the list, take the first num_bootstrap entries
+        # so we can eliminate doing any unnecessary loops
+        random_pairs = list(itertools.combinations(self.labels, 2))
+        #np.random.shuffle(random_pairs)
+        #bootstrap_pairs = itertools.cycle(random_pairs)
 
+        # there are a much smaller number of pairs of assemblages than bootstrap iterations, typically,
+        # so pre-calculate the distances and then just look them up while going through the bootstrap
+        # loop itself.
+
+        # SCALING NOTE:  With 10K bootstrap permutations, the list of combinations is longer than 10K around 150
+        # assemblages, and you could gain very slightly by not bothering with the cycle() call and just slicing
+        # the first 10K out of the shuffled list.  At 100K iterations, you need 450 assemblages before such a
+        # change matters.  So for the moment, this is the most efficient solution that doesn't involve
+        # explicit parallelization.
+        distances = dict()
+        for pair in random_pairs:
+            p1 = pair[0]
+            p2 = pair[1]
+            dist = math.sqrt(pow((self.xAssemblage[p1] - self.xAssemblage[p2]), 2)
+                            + pow((self.yAssemblage[p1] - self.yAssemblage[p2]), 2))
+            distances[pair] = dist
+
+        # Now, we generate bootstrap samples, by taking len(edges) samples of random
+        # assemblage pairs, and adding their distances together, to form a simulated
+        # total graph distance.  We then compare this total test graph distance
+        # to the actual one from the minmax graph, and if the test graph distance is
+        # lower, we score one for this bootstrap iteration.  At the end of num_bootstraps
+        # iterations, the pvalue_score / num_bootstraps is the significance value of the
+        # actual graph distance.
+
+        for i in xrange(0, num_bootstrap):
+            testDistance = 0.0
+            for e in xrange(0, edges):
+                pair = rnd.choice(random_pairs)
+
+                # print "Pair: ", pair[0], "-", pair[1]
+                testDistance += distances[pair]
+
+            #print "Test Distance: ", testDistance
             if testDistance <= solutionDistance:
                 #print "TEST is less than solutionDistance: ",testDistance
-                pvalueScore += 1
+                pvalueScore += 1.0
             x.append(testDistance)
+
+        pvalue = float(pvalueScore) / float(num_bootstrap)
+
+        # for b in range(0,bootstrap):
+        #     # code to use to generate K pairs
+        #     list1 = self.labels
+        #     list2 = self.labels
+        #
+        #     testDistance=0
+        #     for p in range(0,edges-1):
+        #         test = False
+        #         p1 = p2 = ""
+        #         while test is False:
+        #             p1 = rnd.choice(list1)
+        #             p2 = rnd.choice(list2)
+        #             if p1 != p2:
+        #                 test = True
+        #         #print "Pair: ", p1, "-", p2
+        #         testDistance += math.sqrt(pow((int(self.xAssemblage[p1])-int(self.xAssemblage[p2])),2)
+        #                     +pow((int(self.yAssemblage[p1])-int(self.yAssemblage[p2])),2))
+        #         #print "Test Distance: ", testDistance
+        #
+        #     if testDistance <= solutionDistance:
+        #         #print "TEST is less than solutionDistance: ",testDistance
+        #         pvalueScore += 1
+        #     x.append(testDistance)
+
         filename=self.outputDirectory+self.inputFile[0:-4]+"-geographic-distance.png"
         f=plt.figure(filename, figsize=(8, 8))
         plt.rcParams['font.family']='sans-serif'
@@ -1835,13 +1889,13 @@ class IDSS():
         plt.subplots_adjust(left=0.15)
         minx =min(x)
         maxx=max(x)
-        pvalue = pvalueScore/bootstrap
+
         x1,x2,y1,y2 = plt.axis()
         text="p-value: "+ str(pvalue)
         plt.text(maxx/3, (y2-y1)*2/3, text, style='italic')
 
-        if pvalue == 0:
-            pvalue ="0.000"
+        # if pvalue == 0:
+        #     pvalue ="0.000"
         return pvalue, solutionDistance, mean(x), std(x)
 
     #Prints everything in set b that's not in set a
@@ -2011,12 +2065,12 @@ class IDSS():
                 confidenceInterval = self.args['bootstrapSignificance']
             else:
                 confidenceInterval = 0.95
-            # time_start_manual_bootstrap = time.time()
+            # time_start_manual_bootstrap = time.clock()
             # self.bootstrapCICalculation( 100, float(confidenceInterval))
-            # time_end_manual_bootstrap = time.time()
-            time_start_numpy_bootstrap = time.time()
+            # time_end_manual_bootstrap = time.clock()
+            time_start_numpy_bootstrap = time.clock()
             self.bootstrap_CI_calculation_numpy(bootsize, float(confidenceInterval))
-            time_end_numpy_bootstrap = time.time()
+            time_end_numpy_bootstrap = time.clock()
 
             # manual_elapsed = time_end_manual_bootstrap - time_start_manual_bootstrap
             numpy_elapsed = time_end_numpy_bootstrap - time_start_numpy_bootstrap
@@ -2083,9 +2137,9 @@ class IDSS():
             pickle.dump(self.typeFrequencyLowerCI,open(flcifile,'wb'))
 
 
-            timeNow = time.time()
+            timeNow = time.clock()
             prewhile_loop = timeNow - self.start
-            print "Elapsed time prior to while loop: %d seconds" % prewhile_loop
+            #print "Elapsed time prior to while loop: %d seconds" % prewhile_loop
 
             while currentMaxSeriationSize <= self.maxSeriationSize:
                 currentMaxSeriationSize += 1
@@ -2127,7 +2181,7 @@ class IDSS():
                 validNewNetworks = []
 
 
-                # timeNow = time.time()
+                # timeNow = time.clock()
                 # preparallel_time = timeNow - self.start
                 # print "Elapsed time through while loop for curmaxsize: %s = %d seconds" % (currentMaxSeriationSize,preparallel_time)
 
@@ -2213,7 +2267,7 @@ class IDSS():
             if self.args['verbose'] not in self.FalseList:
                 ## determine time elapsed
                 #time.sleep(5)
-                timeNow = time.time()
+                timeNow = time.clock()
                 self.statsMap["processing_time"] = timeNow - self.start
                 print "Time elapsed for frequency seriation processing: %d seconds" % self.statsMap["processing_time"]
 
@@ -2353,7 +2407,7 @@ class IDSS():
             if self.args['verbose'] not in self.FalseList:
                 ## determine time elapsed
                 #time.sleep(5)
-                timeNow = time.time()
+                timeNow = time.clock()
                 timeElapsed = timeNow - self.start
                 print "Number of continuity seriation solutions at end: %d " % len(continuityArray)
                 print "Time elapsed for continuity seriation processing: %d seconds" % timeElapsed
@@ -2385,7 +2439,7 @@ class IDSS():
 
         ## determine time elapsed
         #time.sleep(5)
-        timeNow = time.time()
+        timeNow = time.clock()
         self.statsMap["execution_time"] = timeNow - self.start
         # record the seriation UUID
         self.statsMap["seriation_run_id"] = self.seriation_run_identifier
