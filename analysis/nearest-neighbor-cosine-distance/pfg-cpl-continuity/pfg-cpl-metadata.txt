@@ -1,2 +1,0 @@
-SWVersion: 2.3
-RunID: urn:uuid:2ba558f2-5264-11e5-a087-b8f6b1154c9b
