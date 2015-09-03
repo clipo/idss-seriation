@@ -10,6 +10,8 @@ __author__ = 'carllipo'
 ##      reportlab
 ##      curses       for windows use:http://www.lfd.uci.edu/~gohlke/pythonlibs/#curses
 ##      svgwrite
+import matplotlib
+matplotlib.use('Agg')
 
 import csv
 import argparse
@@ -33,8 +35,7 @@ import scipy.stats
 import networkx as nx
 import shutil
 
-import matplotlib
-matplotlib.use('Agg')
+
 
 # now import the rest, so they see the backend.
 from pylab import *
@@ -2386,7 +2387,7 @@ class IDSS():
             #self.outputGraphArray(array)
             sGraphByCount = self.sumGraphsByCount(continuityArray)
             sGraphByWeight = self.sumGraphsByWeight(continuityArray)
-            self.graphOutput(sGraphByCount, self.inputFile[0:-4] + "-continuity-sumgraph.png")
+            self.graphOutput(sGraphByCount, self.outputDirectory + self.inputFile[0:-4] + "-continuity-sumgraph.png")
             self.MST(sGraphByCount, self.outputDirectory + self.inputFile[0:-4] + "-mst-of-min.png")
             minMaxGraphByWeight = self.createMinMaxGraphByWeight(input_graph=sGraphByWeight, weight='weight')
             self.graphOutput(minMaxGraphByWeight, self.outputDirectory +  self.inputFile[0:-4] + "-continuity-minmax-by-weight.png")
