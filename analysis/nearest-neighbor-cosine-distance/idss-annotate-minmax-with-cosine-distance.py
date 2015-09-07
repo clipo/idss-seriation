@@ -23,7 +23,7 @@ def setup():
     parser.add_argument("--delimiter",help="Delimiter to use in parsing input file",default='\t')
     args = parser.parse_args()
 
-    if int(args.debug) == 1:
+    if args.debug is not None and int(args.debug) == 1:
         log.basicConfig(level=log.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
     else:
         log.basicConfig(level=log.INFO, format='%(asctime)s %(levelname)s: %(message)s')
@@ -118,7 +118,6 @@ def annotate_nx_graph_with_distances(input_graph,pairwise_dist_map,label_to_id):
         elif tup2 in pairwise_dist_map:
             dist = pairwise_dist_map[tup2]
         else:
-            print "error finding distance for edge between %s and %s" % (assem1, assem2)
             sys.exit(1)
 
         edata['cosine_dist'] = dist
@@ -180,8 +179,6 @@ def remove_exponent(d):
 def get_graphics_title(root, sample_type):
     import re
 
-    log.debug("root: %s", root)
-
     occur = 12  # get the UUID and sampling fractions, and whether it's a minmax graph
     indices = [x.start() for x in re.finditer("-", root)]
     uuid_part = root[0:indices[occur-1]]
@@ -210,8 +207,6 @@ def write_ordered_dot(N,path,dist_to_rank,name="minmax seriation graph"):
     except ImportError:
         raise ImportError("write_dot() requires pydot",
                           "http://code.google.com/p/pydot/")
-
-    log.debug("Plot title: %s", name)
 
     P=generate_ordered_dot(N, dist_to_rank,name)
 
@@ -278,7 +273,6 @@ def generate_ordered_dot(N, dist_to_rank, name=None):
         if "name" in str_nodedata:
             del str_nodedata['name']
 
-        #print "str_nodedata: %s" % str_nodedata
         p=pydot.Node(make_str(n),**str_nodedata)
         P.add_node(p)
 
@@ -309,6 +303,151 @@ def generate_ordered_dot(N, dist_to_rank, name=None):
     return P
 
 
+def build_minimum_angular_distance_graph(dist_map,id_to_label,dist_to_rank):
+    """
+    Builds a continuity-style graph using the minimum angular distances between
+    assemblages.  The algorithm is to build the complete graph with the angular
+    distance representing edge weight, and then prune edges
+
+    :param dist_map: dict with tuples of (id1,id2) as keys, angular distance as values
+    :param id_to_label: dict of assemblage ID from edges to their textual labels
+    :param dist_to_rank: dict with distance as key, sorted rank as value (1 being lowest distance)
+    :return: NetworkX graph object
+    """
+    # start with an empty graph
+    g = nx.Graph()
+
+    for w in pairwise_dist.items():
+        log.info("processing edge %s into the first stage complete graph", w)
+        dist = w[1]
+        end1 = w[0][0]
+        end2 = w[0][1]
+
+        if end1 not in g:
+            g.add_node(end1)
+        if end2 not in g:
+            g.add_node(end2)
+        g.node[end1]['label'] = id_to_label[end1]
+        g.node[end2]['label'] = id_to_label[end2]
+        g.add_edge(end1,end2,cosine_dist=dist,rank=dist_to_rank[str(dist)])
+
+    shortest_paths = nx.shortest_path(g, weight="cosine_distance")
+
+    #pp.pprint(shortest_paths)
+
+
+    # g should now contain an annotated graph with the minimum required distances to link all vertices
+    return g
+
+
+
+# def build_minimum_angular_distance_graph(dist_map,id_to_label,dist_to_rank):
+#     """
+#     Builds a continuity-style graph using the minimum angular distances between
+#     assemblages.  The algorithm is as follows:
+#
+#     1.  start with empty graph g, and a sorted list of edge -> distance pairs
+#     2.  for each pair of edge -> distance:
+#         a.  if edge0 and edge1 are not in g yet, create v0 and v1 in g
+#         b.  if one end of the edge exists, but the other does not, add it only if
+#             its edge dist is smaller than another edge with the existing vertex.
+#
+#     :param dist_map: dict with tuples of (id1,id2) as keys, angular distance as values
+#     :param id_to_label: dict of assemblage ID from edges to their textual labels
+#     :param dist_to_rank: dict with distance as key, sorted rank as value (1 being lowest distance)
+#     :return: NetworkX graph object
+#     """
+#     # start with an empty graph
+#     g = nx.Graph()
+#
+#     for w in sorted(pairwise_dist.items(), key=operator.itemgetter(1)):
+#         log.info("processing edge %s", w)
+#         edge = w[0]
+#         dist = w[1]
+#
+#         end1 = edge[0]
+#         end2 = edge[1]
+#         vn = _is_one_vertex_in_graph(g,end1,end2)
+#         if vn == end1:
+#             vm = end2
+#         else:
+#             vm = end1
+#
+#         if vn != None:
+#             """
+#             One of the two vertices exists in g, so we have to check whether
+#             this edge represents a shorter linkage than other existing paths.
+#             """
+#             if _does_shorter_path_exist_with_vertex(vn, vm, dist, pairwise_dist) == False:
+#                 g.add_node(end1)
+#                 g.add_node(end2)
+#                 g.node[end1]['label'] = id_to_label[end1]
+#                 g.node[end2]['label'] = id_to_label[end2]
+#                 g.add_edge(end1,end2,cosine_dist=dist,rank=dist_to_rank[str(dist)])
+#         elif end1 not in g and end2 not in g:
+#             """
+#             Neither vertex exists, so we simply create both and add an edge, annotating as we go
+#             """
+#             g.add_node(end1)
+#             g.add_node(end2)
+#             g.node[end1]['label'] = id_to_label[end1]
+#             g.node[end2]['label'] = id_to_label[end2]
+#             g.add_edge(end1,end2,cosine_dist=dist,rank=dist_to_rank[str(dist)])
+#         else:
+#             pass
+#
+#     # g should now contain an annotated graph with the minimum required distances to link all vertices
+#     return g
+
+def _does_shorter_path_exist_with_vertex(vn,vm,dist,dist_map):
+    """
+    Given two vertices of an edge (vn, vm), one of which exists in graph g (vn),
+    is there an edge in the distance_map that involves vn and another vertex vi
+    which is shorter than dist(vn,vm)?
+
+    :param g: NetworkX graph object
+    :param vn: edge vertex - that exists in g
+    :param vm: edge vertex - that does not exist in g
+    :param dist: distance between vn,vm
+    :param dist_map: dict with tuples of (id1,id2) as keys, angular distance as values
+    :return: boolean
+    """
+    total = 0
+    hits = 0
+    for edge,other_dist in dist_map.items():
+        total += 1
+        if vn in edge:
+            log.debug("comparing %s to edge %s - %s vs edge dist: %s",vn,edge,dist,other_dist)
+            if float(dist) < float(other_dist):
+                log.debug("...could add %s-%s",vn,vm)
+                hits += 1
+    if hits > 0:
+        return True
+    else:
+        return False
+
+
+
+
+
+
+
+def _is_one_vertex_in_graph(g,v1,v2):
+    """
+    Given two vertices (ends of an edge), determines whether only one of the vertices is in graph G.
+    If so, the vertex in the graph is returned.  If both exist, or if neither exist, None is returned.
+
+    :param v1:
+    :param v2:
+    :return: v1 or v2, or None
+    """
+    if v1 in g and v2 not in g:
+        return v1
+    elif v2 in g and v1 not in g:
+        return v2
+    else:
+        return None
+
 
 
 
@@ -322,26 +461,22 @@ if __name__ == '__main__':
     pairs = list(itertools.combinations(id_to_label.keys(),2))
     for pair in pairs:
         dist = index.get_distance(pair[0],pair[1])
-        #print "%s-%s: %s" % (pair[0],pair[1],dist)
         pairwise_dist[pair] = dist
 
-#
     dist_to_rank = dict()
     rank = 1
     for w in sorted(pairwise_dist.items(), key=operator.itemgetter(1)):
         dist_to_rank[str(w[1])] = str(rank)
-        print "rank: %s  pair: %s - %s: dist: %s" % (rank,id_to_label[w[0][0]], id_to_label[w[0][1]], w[1])
+        log.debug("rank: %s  pair: %s - %s: dist: %s",rank,id_to_label[w[0][0]], id_to_label[w[0][1]], w[1])
         rank += 1
 
-
+    # annotate an input GML file (minmax for frequency or continuity) and output as a DOT and PNG
     g = read_gml_and_normalize_floats(args.minmaxgml)
-
     g = annotate_nx_graph_with_distances(g,pairwise_dist,label_to_id)
-    save_gml(g,"cosineweight")
+    save_gml(g,"angulardistance")
 
-    dot_filename = args.outputdirectory + '/' + args.inputfile[0:-4] + "-minmax-cosine-distance.dot"
-    png_filename = args.outputdirectory + '/' + args.inputfile[0:-4] + "-minmax-cosine-distance.png"
-
+    dot_filename = args.outputdirectory + '/' + args.inputfile[0:-4] + "-angular-distance-annotated.dot"
+    png_filename = args.outputdirectory + '/' + args.inputfile[0:-4] + "-angular-distance-annotated.png"
 
     write_ordered_dot(g, dot_filename, dist_to_rank,name=args.inputfile[0:-4])
 
@@ -352,3 +487,19 @@ if __name__ == '__main__':
 
     os.system(cmd)
 
+    # use the pure distances and construct a continuity graph with just the distances, for comparison
+    g_constructed = build_minimum_angular_distance_graph(pairwise_dist,id_to_label,dist_to_rank)
+    save_gml(g_constructed,"constructed-angulardistance")
+
+    dot_filename = args.outputdirectory + '/' + args.inputfile[0:-4] + "-angular-distance-constructed.dot"
+    png_filename = args.outputdirectory + '/' + args.inputfile[0:-4] + "-angular-distance-constructed.png"
+
+
+    write_ordered_dot(g_constructed, dot_filename, dist_to_rank,name=args.inputfile[0:-4])
+
+    cmd = "neato -Tpng "
+    cmd += dot_filename
+    cmd += " -o "
+    cmd += png_filename
+
+    os.system(cmd)

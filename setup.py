@@ -1,56 +1,69 @@
+#!/usr/bin/env python
 
-import os, subprocess, re
-from distutils.core import setup, Command
-from distutils.command.sdist import sdist as _sdist
+from setuptools import setup, find_packages, Command
+from setuptools.command.develop import develop
+from setuptools.command.install import install
 
-# class Test(Command):
-#     description = "run unit tests"
-#     user_options = []
-#     boolean_options = []
-#     def initialize_options(self):
-#         pass
-#     def finalize_options(self):
-#         pass
-#     def run(self):
-#         pass
-#         # EXAMPLE - needs customization here
-#         # from ecdsa import numbertheory
-#         # numbertheory.__main__()
-#         # from ecdsa import ellipticcurve
-#         # ellipticcurve.__main__()
-#         # from ecdsa import ecdsa
-#         # ecdsa.__main__()
-#         # from ecdsa import test_pyecdsa
-#         # test_pyecdsa.unittest.main(module=test_pyecdsa, argv=["dummy"])
-#         # all tests os.exit(1) upon failure
+import subprocess
+import os
+import re
 
-VERSION_PY = """
+from ez_setup import use_setuptools
+use_setuptools()
+
+# create a decorator that wraps the normal develop and
+# install commands to first update the version
+
+def versioned(command_subclass):
+    """
+    A decorator for ensuring that installations, whether through setup.py install
+    or setup.py develop, always update the version number with the Git revision and
+    most recent tag.
+
+    :param command_subclass:
+    :return:
+    """
+    VERSION_PY = """
 # This file is updated from Git information by running 'python setup.py
 # version'.
 __version__ = '%s'
 """
+    orig_callable = command_subclass.run
 
-def update_version_py():
-    if not os.path.isdir(".git"):
-        print "This does not appear to be a Git repository."
-        return
-    try:
-        p = subprocess.Popen(["git", "describe",
-                              "--tags", "--always"],
-                             stdout=subprocess.PIPE)
-    except EnvironmentError:
-        print "unable to run git, leaving idss-seration/_version.py alone"
-        return
-    stdout = p.communicate()[0]
-    if p.returncode != 0:
-        print "unable to run git, leaving idss-seriation/_version.py alone"
-        return
-    # our tags are like:  v2.2
-    ver = stdout[len("v"):].strip()
-    f = open("seriation/idss_version.py", "w")
-    f.write(VERSION_PY % ver)
-    f.close()
-    print "set _version.py to '%s'" % ver
+    def modified_callable(self):
+        if not os.path.isdir(".git"):
+            print "This does not appear to be a Git repository."
+            return
+        try:
+            p = subprocess.Popen(["git", "describe",
+                                  "--tags", "--always"],
+                                 stdout=subprocess.PIPE)
+        except EnvironmentError:
+            print "unable to run git, leaving idss-seration/_version.py alone"
+            return
+        stdout = p.communicate()[0]
+        if p.returncode != 0:
+            print "unable to run git, leaving idss-seriation/_version.py alone"
+            return
+        # our tags are like:  v2.2
+        ver = stdout[len("v"):].strip()
+        f = open("seriation/idss_version.py", "w")
+        f.write(VERSION_PY % ver)
+        f.close()
+        print "updated _version.py to '%s'" % ver
+        orig_callable(self)
+
+    command_subclass.run = modified_callable
+    return command_subclass
+
+
+@versioned
+class CustomDevelopClass(develop):
+    pass
+
+@versioned
+class CustomInstallClass(install):
+    pass
 
 def get_version():
     try:
@@ -64,38 +77,60 @@ def get_version():
             return ver
     return None
 
-class Version(Command):
-    description = "update _version.py from Git repo"
+
+class VersionUpdate(Command):
+    """setuptools Command"""
+    description = "update version number"
     user_options = []
-    boolean_options = []
+
+
     def initialize_options(self):
         pass
+
+
     def finalize_options(self):
         pass
-    def run(self):
-        update_version_py()
-        print "Version is now", get_version()
 
-class sdist(_sdist):
+
     def run(self):
-        update_version_py()
-        # unless we update this, the sdist command will keep using the old
-        # version
-        self.distribution.metadata.version = get_version()
-        return _sdist.run(self)
+        VERSION = """
+# This file is updated from Git information by running 'python setup.py
+# version'.
+__version__ = '%s'
+"""
+        if not os.path.isdir(".git"):
+            print "This does not appear to be a Git repository."
+            return
+        try:
+            p = subprocess.Popen(["git", "describe",
+                                  "--tags", "--always"],
+                                 stdout=subprocess.PIPE)
+        except EnvironmentError:
+            print "unable to run git, leaving idss-seration/_version.py alone"
+            return
+        stdout = p.communicate()[0]
+        if p.returncode != 0:
+            print "unable to run git, leaving idss-seriation/_version.py alone"
+            return
+        # our tags are like:  v2.2
+        ver = stdout[len("v"):].strip()
+        f = open("seriation/idss_version.py", "w")
+        f.write(VERSION % ver)
+        f.close()
+        print "updated _version.py to '%s'" % ver
+
 
 
 
 setup(name="idss-seriation",
+      #version=get_version(),
       version=get_version(),
       description="Iterative Deterministic Seriation Solution program for archaeological seriation",
-      packages = [
-        'seriation',
-      ],
+      packages = find_packages(exclude=["test", "testdata", "utilities", "analysis", "doc", "featurelist"]),
       scripts = [
-          'idss-seriation.py',
-          'idss-seriation-mongodb.py',
-	  'utilities/run-idss-batch.py'
+        'idss-seriation.py',
+        'idss-seriation-mongodb.py',
+	    'utilities/run-idss-batch.py'
       ],
       author='Carl P. Lipo and Mark E. Madsen',
       author_email='clipo@csulb.edu',
@@ -110,5 +145,6 @@ setup(name="idss-seriation",
           'Topic :: Scientific/Engineering',
       ],
       license="APACHE",
-      cmdclass={ "version": Version, "sdist": sdist },
+      cmdclass={ "version": VersionUpdate, "install": CustomInstallClass, "develop": CustomDevelopClass },
+
       )
