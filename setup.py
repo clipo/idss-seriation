@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+from ez_setup import use_setuptools
+use_setuptools()
+
 from setuptools import setup, find_packages, Command
 from setuptools.command.develop import develop
 from setuptools.command.install import install
@@ -7,9 +10,6 @@ from setuptools.command.install import install
 import subprocess
 import os
 import re
-
-from ez_setup import use_setuptools
-use_setuptools()
 
 # create a decorator that wraps the normal develop and
 # install commands to first update the version
