@@ -289,7 +289,9 @@ class IDSS():
         logger.debug("Precalculate differences between pairs")
         pairs = self.all_pairs(self.assemblages)
         for pair in pairs:
-            diff = self.calculateSumOfDifferences(pair[0], pair[1])
+            #diff = self.calculateSumOfDifferences(pair[0], pair[1])
+            diff = self.calculateAssemblageEuclideanDistance(pair[0],pair[1])
+
             key1 = pair[0] + "*" + pair[1]
             key2 = pair[1] + "*" + pair[0]
             self.sumOfDifferencesBetweenPairs[key1] = diff
@@ -761,12 +763,7 @@ class IDSS():
         if self.args['shapefile'] is not None and self.args['xyfile'] is not None:
             self.createShapefile(M,  filename + ".shp")
 
-    def iso(self, G1, glist):
-        """Quick and dirty nonisomorphism checker used to check isomorphisms."""
-        for G2 in glist:
-            if isomorphic(G1, G2):
-                return True
-        return False
+
 
     def sumGraphsByWeight(self, filteredarray):
         sumGraph = nx.Graph(is_directed=False)
@@ -948,12 +945,7 @@ class IDSS():
             w.record(d['name'],'Point')
         w.save(shapefilename[0:-4]+"-points.shp")
 
-    def iso(self, G1, glist):
-        """Quick and dirty nonisomorphism checker used to check isomorphisms."""
-        for G2 in glist:
-            if isomorphic.is_isomorphic(G1, G2):
-                return True
-        return False
+
 
     def createAtlasOfSolutions(self, filteredarray, type):
         plt.rcParams['font.family']='sans-serif'
@@ -1067,11 +1059,31 @@ class IDSS():
         return UU
 
     def calculateSumOfDifferences(self, assemblage1, assemblage2):
+        """
+        DEPRECATED IN FAVOR OF calculateAssemblageEuclideanDistance
+
+        :param assemblage1:
+        :param assemblage2:
+        :return:
+        """
         diff = 0
         for type in range(0, self.numberOfClasses):
             diff += pow((float(self.assemblageFrequencies[assemblage1][type]) - float(
                 self.assemblageFrequencies[assemblage2][type])),2)
         return pow(diff,0.5)
+
+    def calculateAssemblageEuclideanDistance(self, assemblage1, assemblage2):
+        """
+        Efficient calculation of Euclidean distance between two assemblages using Numpy
+        dot product.
+
+        :param assemblage1:
+        :param assemblage2:
+        :return:
+        """
+        a1 = np.array(self.assemblageFrequencies[assemblage1])
+        a2 = np.array(self.assemblageFrequencies[assemblage2])
+        return math.sqrt(np.dot(a1-a2,a1-a2))
 
 
     def iso_filter_graphs(self, list):
@@ -1104,7 +1116,7 @@ class IDSS():
             ## now find the smallest neighbor from the rest of the assemblages.
             for potentialNeighbor in self.assemblages:
                 if potentialNeighbor is not ass:
-                    diff = self.calculateSumOfDifferences(potentialNeighbor, ass)
+                    diff = self.calculateAssemblageEuclideanDistance(potentialNeighbor, ass)
                     if diff < minMatch:
                         minMatch = diff
                         newNeighbor = potentialNeighbor
@@ -1140,7 +1152,7 @@ class IDSS():
                     for assemblage in self.assemblages:
                         if assemblage not in current_graph.nodes():
                             #print "assemblage: ", assemblage, " is not in : ", current_graph.nodes()
-                            diff = self.calculateSumOfDifferences(endAssemblage, assemblage)
+                            diff = self.calculateAssemblageEuclideanDistance(endAssemblage, assemblage)
                             if diff < endMinMatch[assEnd]:
                                 endMinMatch[assEnd] = diff
                                 currentMinimumMatch[assEnd] = assemblage
@@ -1176,7 +1188,7 @@ class IDSS():
                 ## find out if there are others that have the same minimum value
                 for b in self.assemblages:
                     if b not in current_graph.nodes() and b not in assemblagesMatchedToEnd:
-                        diff = self.calculateSumOfDifferences(b, endAssemblage)
+                        diff = self.calculateAssemblageEuclideanDistance(b, endAssemblage)
                         if diff == globalMinMatch:
                             ## add this as a matched equivalent assemblage. We will then deal with more than one match
                             assemblagesMatchedToEnd.append(b)
