@@ -25,6 +25,9 @@ if __name__ == "__main__":
     parser.add_argument("--execpath", help="Path to the IDSS executable script (optional)")
     parser.add_argument("--parallelbackground", help="Start the seriations in the background, all at once (don't do this with big batches, use Grid Engine!)", type=int, default=0)
     parser.add_argument("--dobootstrapsignificance", type=int, default=1, help="Perform bootstrap significance tests with a 95% CI")
+    parser.add_argument("--database", help="Name of database to store seriation run statistics in")
+    parser.add_argument("--continuity",type=int, help="Perform continuity seriation",default=0)
+    parser.add_argument("--frequency",type=int, help="Perform frequency seriation",default=1)
 
     args = parser.parse_args()
 
@@ -40,7 +43,21 @@ if __name__ == "__main__":
     else:
         base_cmd = ''
 
-    base_cmd += "idss-seriation.py --debug 0 --graphs 0 --spatialbootstrapN 100 --spatialsignificance=1 "
+    if args.database is not None:
+        base_cmd += "idss-seriation-mongodb.py --debug 0 --graphs 0 --spatialbootstrapN 100 --spatialsignificance=1 "
+        base_cmd += " --database "
+        base_cmd += args.database
+    else:
+        base_cmd += "idss-seriation.py --debug 0 --graphs 0 --spatialbootstrapN 100 --spatialsignificance=1 "
+
+
+    if args.continuity is not None:
+        base_cmd += " --continuity "
+        base_cmd += str(args.continuity)
+
+    if args.frequency is not None:
+        base_cmd += " --frequency "
+        base_cmd += str(args.frequency)
 
     if args.dobootstrapsignificance == 1:
         base_cmd += " --bootstrapCI=1 --bootstrapSignificance=0.95 "

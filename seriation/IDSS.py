@@ -175,6 +175,8 @@ class IDSS():
         self.seriation_run_identifier = uuid.uuid1().urn
         logger.info("seriation run identifier: %s", self.seriation_run_identifier)
         self._create_pickle_tempdir()
+        self.statsMap["continuity"] = self.args["continuity"]
+        self.statsMap["frequency"] = self.args["frequency"]
 
     def saveGraph(self, graph, filename):
         nx.write_gml(graph, filename)
@@ -243,6 +245,9 @@ class IDSS():
                     self.countOfAssemblages += 1
         self.maxSeriationSize = self.countOfAssemblages
         self.nodeSizeFactor *= self.countOfAssemblages
+        self.statsMap["num_assemblages"] = self.countOfAssemblages
+        self.statsMap["num_classes"] = self.numberOfClasses
+
         return True
 
     def aggregateIdenticalAssemblages(self):
@@ -1058,19 +1063,19 @@ class IDSS():
                 UU = nx.disjoint_union(UU, G) # union the nonisomorphic graphs
         return UU
 
-    def calculateSumOfDifferences(self, assemblage1, assemblage2):
-        """
-        DEPRECATED IN FAVOR OF calculateAssemblageEuclideanDistance
-
-        :param assemblage1:
-        :param assemblage2:
-        :return:
-        """
-        diff = 0
-        for type in range(0, self.numberOfClasses):
-            diff += pow((float(self.assemblageFrequencies[assemblage1][type]) - float(
-                self.assemblageFrequencies[assemblage2][type])),2)
-        return pow(diff,0.5)
+    # def calculateSumOfDifferences(self, assemblage1, assemblage2):
+    #     """
+    #     DEPRECATED IN FAVOR OF calculateAssemblageEuclideanDistance
+    #
+    #     :param assemblage1:
+    #     :param assemblage2:
+    #     :return:
+    #     """
+    #     diff = 0
+    #     for type in range(0, self.numberOfClasses):
+    #         diff += pow((float(self.assemblageFrequencies[assemblage1][type]) - float(
+    #             self.assemblageFrequencies[assemblage2][type])),2)
+    #     return pow(diff,0.5)
 
     def calculateAssemblageEuclideanDistance(self, assemblage1, assemblage2):
         """
@@ -2310,25 +2315,34 @@ class IDSS():
                 seriation.makeGraph(self.args)
 
             if self.args['occurrenceseriation'] not in self.FalseList:
+                occurrence_start = time.clock()
                 excelFileName,textFileName=self.outputExcel(frequencyArray, self.outputDirectory+self.inputFile[0:-4], "occurrence")
                 seriation = occurrenceSeriationMaker()
                 #self.args={'inputfile':textFileName,'pdf':1}
                 self.args['multiple']=1
                 self.args['inputfile']=textFileName
                 seriation.makeGraph(self.args)
+                occurrence_elapsed = time.clock()
+                self.statsMap["occurrence_processing_time"] = occurrence_elapsed
+
             #################################################### MinMax Graph ############################################
             #print self.args
+            minmax_weight_start = time.clock()
             minMaxGraphByWeight = self.createMinMaxGraphByWeight(input_graph=sumGraphByWeight, weight='weight')
             self.graphOutput(minMaxGraphByWeight,
                         self.outputDirectory + self.inputFile[0:-4] + "-minmax-by-weight.png")
 
+            minmax_weight_elapsed = time.clock() - minmax_weight_start
+            self.statsMap["minmax_weight_processing_time"] = minmax_weight_elapsed
+
             if self.args['xyfile'] not in self.FalseList:
+                spatial_start = time.clock()
                 if self.args['spatialsignificance'] not in self.FalseList:
 
-                    pickle.dump(minMaxGraphByWeight,open("mmg.pickle", 'w'))
-                    pickle.dump(self.xAssemblage, open("xassem.pickle", 'w'))
-                    pickle.dump(self.yAssemblage, open("yassem.pickle", 'w'))
-                    pickle.dump(self.labels, open("labels.pickle", 'w'))
+                    # pickle.dump(minMaxGraphByWeight,open("mmg.pickle", 'w'))
+                    # pickle.dump(self.xAssemblage, open("xassem.pickle", 'w'))
+                    # pickle.dump(self.yAssemblage, open("yassem.pickle", 'w'))
+                    # pickle.dump(self.labels, open("labels.pickle", 'w'))
 
                     pscore, distance, geodistance, sd_geodistance = self.calculateGeographicSolutionPValue(minMaxGraphByWeight)
                     print "Geographic p-value for the frequency seriation minmax solution: ", pscore
@@ -2337,6 +2351,9 @@ class IDSS():
                         text=self.inputFile[0:-4]+"\t"+str(pscore)+"\t"+str(distance)+"\t"+str(geodistance)+"\t" \
                              + str(sd_geodistance)+"\t"+str(self.totalAssemblageSize)+"\n"
                         myfile.write(text)
+                spatial_elapsed = time.clock() - spatial_start
+                self.statsMap['spatial_processing_time'] = spatial_elapsed
+
 
             ## optional output. Minmax by count is very confusing at this point and not very useful.
             if self.args['minmaxbycount'] not in self.FalseList:
@@ -2394,6 +2411,7 @@ class IDSS():
                     print "*** All assemblages used in seriations.***"
 
         if self.args['continuity'] not in self.FalseList:
+            continuity_start = time.clock()
             # experimental
             continuityArray = self.continunityMaximizationSeriation()
             #self.outputGraphArray(array)
@@ -2417,13 +2435,13 @@ class IDSS():
                 argument={'inputfile':textFileName, 'multiple':True}
                 seriation.makeGraph(argument)
 
-            if self.args['verbose'] not in self.FalseList:
-                ## determine time elapsed
-                #time.sleep(5)
-                timeNow = time.clock()
-                timeElapsed = timeNow - self.start
-                print "Number of continuity seriation solutions at end: %d " % len(continuityArray)
-                print "Time elapsed for continuity seriation processing: %d seconds" % timeElapsed
+            # if self.args['verbose'] not in self.FalseList:
+            #     ## determine time elapsed
+            #     #time.sleep(5)
+            #     timeNow = time.clock()
+            #     timeElapsed = timeNow - self.start
+            #     print "Number of continuity seriation solutions at end: %d " % len(continuityArray)
+            #     print "Time elapsed for continuity seriation processing: %d seconds" % timeElapsed
 
             validSeriations = self.findValidSeriations(minMaxGraphByWeight)
 
@@ -2448,7 +2466,8 @@ class IDSS():
                              + str(sd_geodistance)+"\t"+str(self.totalAssemblageSize)+"\n"
                         myfile.write(text)
 
-
+            continuity_elapsed = time.clock() - continuity_start
+            self.statsMap["continuity_processing_time"] = continuity_elapsed
 
         ## determine time elapsed
         #time.sleep(5)
