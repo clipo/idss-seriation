@@ -11,6 +11,7 @@ Wrapper script for running an IDSS seriation from the command line on a Mac OS X
 from seriation import IDSS
 from seriation.database import SeriationDatabase
 import argparse
+import sys
 from seriation import idss_version
 
 
@@ -60,9 +61,9 @@ def parse_arguments():
                         help="The root of the graph figures (i.e., name of assemblage you want to treat as one end in the graphs.")
     parser.add_argument('--continuityroot', default=None,
                         help="If you have a outgroup or root of the graph, set that here.")
-    parser.add_argument('--atlas', default=1,
+    parser.add_argument('--atlas', default=0,
                         help="If you want to have a figure that shows all of the results independently, set that here.")
-    parser.add_argument('--excel', default=1,
+    parser.add_argument('--excel', default=0,
                         help="Will create excel files with the assemblages in seriation order.")
     parser.add_argument('--noheader',default=None,
                         help="If you do not use type names as the first line of the input file, use this option to read the data.")
@@ -92,7 +93,7 @@ if __name__ == "__main__":
     seriation = IDSS()
     args = parse_arguments()
     db = SeriationDatabase(args)
-    seriation.initialize(args)
+    seriation.initialize(args,sys.argv)
     (frequencyResults, continuityResults, exceptionList, statsMap) = seriation.seriate()
     db.store_run_metadata(statsMap)
 

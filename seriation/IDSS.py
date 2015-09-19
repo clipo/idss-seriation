@@ -91,7 +91,7 @@ class IDSS():
         self.pairwiseError = {}
         self.sumOfDifferencesBetweenPairs = {}
         self.typeNames=[]
-        self.FalseList=[None,0,False,"None","0","False"]
+        self.FalseList=[0,None,False,"None","0","False"]
         self.scr = None
         self.totalAssemblageSize = 0 ## total for all assemblages
         self.solutionsChecked = 0 ## total # of seriations evaluated to find the final subset
@@ -111,7 +111,7 @@ class IDSS():
                     'filtered': None,
                     'largestonly': None,
                     'individualfileoutput': None,
-                    'excel': None,
+                    'excel': 0,
                     'threshold': None,
                     'noscreen': None,
                     'xyfile': None,
@@ -135,7 +135,7 @@ class IDSS():
                     'occurrence':None,
                     'frequencyseriation':None,
                     'pdf':None,
-                    'atlas': None,
+                    'atlas': 0,
                     'spatialsignificance':None,
                     'spatialbootstrapN':None,
                     'minmaxbycount':None,
@@ -150,7 +150,7 @@ class IDSS():
             os.makedirs(self.pickledir)
 
 
-    def initialize(self, parsed_args):
+    def initialize(self, parsed_args, full_cmdline):
         """
 
         :param parsed_args: Can either be an object arising from argparse or a raw dict
@@ -163,6 +163,7 @@ class IDSS():
         self.args = self._setup_defaults()
         self.args.update(args_map)
         self.initialized = True
+        self.statsMap["cmdline"] = " ".join(full_cmdline)
 
         #print "self.args: %s" % self.args
 
@@ -2077,23 +2078,21 @@ class IDSS():
         logger.debug("on specified confidence interval, if in the arguments.")
 
         if self.args['bootstrapCI'] == True:
-            bootsize = 1000
+            bootstrap_start = time.clock()
+            bootsize = 10000
 
             if self.args['bootstrapSignificance'] not in self.FalseList:
                 confidenceInterval = self.args['bootstrapSignificance']
             else:
                 confidenceInterval = 0.95
-            # time_start_manual_bootstrap = time.clock()
-            # self.bootstrapCICalculation( 100, float(confidenceInterval))
-            # time_end_manual_bootstrap = time.clock()
-            time_start_numpy_bootstrap = time.clock()
+
             self.bootstrap_CI_calculation_numpy(bootsize, float(confidenceInterval))
-            time_end_numpy_bootstrap = time.clock()
+            bootstrap_elapsed = time.clock() - bootstrap_start
 
             # manual_elapsed = time_end_manual_bootstrap - time_start_manual_bootstrap
-            numpy_elapsed = time_end_numpy_bootstrap - time_start_numpy_bootstrap
+            self.statsMap["bootstrap_ci_processing_time"] = bootstrap_elapsed
 
-            print "Bootstrap CI calculation using %s samples - elapsed time: %s sec" % (bootsize, numpy_elapsed)
+            print "Bootstrap CI calculation using %s samples - elapsed time: %s sec" % (bootsize, bootstrap_elapsed)
 
 
 
@@ -2269,7 +2268,11 @@ class IDSS():
 
             all_solutions += end_solutions
             ###########################################################################################################
+            freq_filter_solutions = time.clock()
             frequencyArray = self.filterSolutions(end_solutions, all_solutions)
+            freq_filter_elapsed = time.clock() - freq_filter_solutions
+            self.statsMap["frequency_filter_solutions_time"] = freq_filter_elapsed
+
             #if self.args['allsolutions'] not in self.FalseList:
             #frequencyArray = self.filterInclusiveSolutions(all_solutions,end_solutions)
             #else:
@@ -2282,37 +2285,53 @@ class IDSS():
             self.statsMap['max_seriation_size'] = self.maxSeriationSize
             self.statsMap['total_number_solutions'] = len(frequencyArray)
 
-            if self.args['verbose'] not in self.FalseList:
-                ## determine time elapsed
-                #time.sleep(5)
-                timeNow = time.clock()
-                self.statsMap["processing_time"] = timeNow - self.start
-                print "Time elapsed for frequency seriation processing: %d seconds" % self.statsMap["processing_time"]
+            # if self.args['verbose'] not in self.FalseList:
+            #     ## determine time elapsed
+            #     #time.sleep(5)
+            timeNow = time.clock()
+            self.statsMap["processing_time"] = timeNow - self.start
+            print "Time elapsed for frequency seriation processing: %d seconds" % self.statsMap["processing_time"]
 
             #################################################### OUTPUT SECTION ####################################################
+            output_start = time.clock()
             self.output(frequencyArray, OUTFILE, OUTPAIRSFILE, OUTMSTFILE, OUTMSTDISTANCEFILE, maxNodes)
+            output_elapsed = time.clock() - output_start
+            self.statsMap["frequency_output_processing_time"] = output_elapsed
 
             if self.args['atlas'] not in self.FalseList:
+                atlas_start = time.clock()
                 self.createAtlasOfSolutions(frequencyArray, "frequency")
+                atlas_elapsed = time.clock() - atlas_start
+                self.statsMap["atlas_processing_time"] = atlas_elapsed
 
+            sumgraphweight_start = time.clock()
             sumGraphByWeight = self.sumGraphsByWeight(frequencyArray)
             self.sumGraphOutput(sumGraphByWeight, self.outputDirectory + self.inputFile[0:-4] + "-sumgraph-by-weight")
+            sumgraphweight_elapsed = time.clock() - sumgraphweight_start
+            self.statsMap["sumgraphweight_processing_time"] = sumgraphweight_elapsed
 
             ## optional output. Summing graph by count (and then minmax) is very confusing at this point and not very useful. Making optional.
-            if self.args['minmaxbycount'] not in self.FalseList:
-                sumGraphByCount = self.sumGraphsByCount(frequencyArray)
-                self.sumGraphOutput(sumGraphByCount, self.outputDirectory + self.inputFile[0:-4] + "-sumgraph-by-count")
+            # if self.args['minmaxbycount'] not in self.FalseList:
+            #     sumGraphByCount = self.sumGraphsByCount(frequencyArray)
+            #     self.sumGraphOutput(sumGraphByCount, self.outputDirectory + self.inputFile[0:-4] + "-sumgraph-by-count")
 
             if self.args['excel'] not in self.FalseList:
+                excel_start = time.clock()
                 excelFileName,textFileName=self.outputExcel(frequencyArray, self.outputDirectory+self.inputFile[0:-4], "frequency")
+                excel_elapsed = time.clock() - excel_start
+                self.statsMap["excel_processing_time"] = excel_elapsed
+
 
             if self.args['frequencyseriation'] not in self.FalseList:
+                excel_frequencyseriation_start = time.clock()
                 excelFileName,textFileName=self.outputExcel(frequencyArray, self.outputDirectory+self.inputFile[0:-4], "frequency")
                 seriation = frequencySeriationMaker()
                 #self.args={'inputfile':textFileName,'pdf':1}
                 self.args['inputfile']=textFileName
                 self.args['multiple']=1
                 seriation.makeGraph(self.args)
+                excel_frequencyseriation_elapsed = time.clock() - excel_frequencyseriation_start
+                self.statsMap["excel_freqseriation_processing_time"] = excel_frequencyseriation_elapsed
 
             if self.args['occurrenceseriation'] not in self.FalseList:
                 occurrence_start = time.clock()
@@ -2339,11 +2358,6 @@ class IDSS():
                 spatial_start = time.clock()
                 if self.args['spatialsignificance'] not in self.FalseList:
 
-                    # pickle.dump(minMaxGraphByWeight,open("mmg.pickle", 'w'))
-                    # pickle.dump(self.xAssemblage, open("xassem.pickle", 'w'))
-                    # pickle.dump(self.yAssemblage, open("yassem.pickle", 'w'))
-                    # pickle.dump(self.labels, open("labels.pickle", 'w'))
-
                     pscore, distance, geodistance, sd_geodistance = self.calculateGeographicSolutionPValue(minMaxGraphByWeight)
                     print "Geographic p-value for the frequency seriation minmax solution: ", pscore
                     filename=self.outputDirectory + self.inputFile[0:-4]+"-geography.txt"
@@ -2356,13 +2370,14 @@ class IDSS():
 
 
             ## optional output. Minmax by count is very confusing at this point and not very useful.
-            if self.args['minmaxbycount'] not in self.FalseList:
-                minMaxGraphByCount = self.createMinMaxGraphByCount(input_graph=sumGraphByCount, weight='weight')
-                self.graphOutput(minMaxGraphByCount,
-                        self.outputDirectory + self.inputFile[0:-4] + "-minmax-by-count.png")
+            # if self.args['minmaxbycount'] not in self.FalseList:
+            #     minMaxGraphByCount = self.createMinMaxGraphByCount(input_graph=sumGraphByCount, weight='weight')
+            #     self.graphOutput(minMaxGraphByCount,
+            #             self.outputDirectory + self.inputFile[0:-4] + "-minmax-by-count.png")
 
             #################################################### MST SECTION ####################################################
             if self.args['mst'] not in self.FalseList:
+                mst_start = time.clock()
                 # Need to have the shapefile flag and the XY file in order to create a valid shapefile.
                 if self.args['shapefile'] is not None and self.args['xyfile'] is not None:
                     shapefile = 1
@@ -2394,6 +2409,8 @@ class IDSS():
                 plt.axis('off')
                 pngfile= self.outputDirectory+"/"+self.inputFile[0:-4]+"-mst.png"
                 plt.savefig(pngfile,dpi=75)
+                mst_elapsed = time.clock() - mst_start
+                self.statsMap["mst_processing_time"] = mst_elapsed
 
             #################################################### END SECTION ####################################################
 
