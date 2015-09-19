@@ -860,15 +860,6 @@ class IDSS():
 
 
     def finalGoodbye(self):
-        if self.args['screen'] is not None:
-            curses.endwin()
-            curses.resetty()
-            curses.nl()
-            curses.echo()
-            os.system("reset")
-
-    #################################################### set up all the output files ####################################################
-    def setupOutput(self):
 
         # record version of software used to outputdirectory
         versionFile = self.outputDirectory + self.inputFile[0:-4] + "-metadata.txt"
@@ -882,8 +873,25 @@ class IDSS():
         VERFILE.write("\n")
 
         VERFILE.write("RunID: %s" % self.seriation_run_identifier)
+        VERFILE.write("\n")
+
+        for k,v in self.statsMap.items():
+            VERFILE.write("%s: %s" % (k,v))
+            VERFILE.write("\n")
 
         VERFILE.close()
+
+        if self.args['screen'] is not None:
+            curses.endwin()
+            curses.resetty()
+            curses.nl()
+            curses.echo()
+            os.system("reset")
+
+    #################################################### set up all the output files ####################################################
+    def setupOutput(self):
+
+
 
         # record
 
