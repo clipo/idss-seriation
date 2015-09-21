@@ -74,7 +74,7 @@ class IDSS():
         self.outputDirectory = ""
         # if os.name != "nt":
         #     self.mem = memory.Memory()
-        self.start = time.clock()
+        self.start = time.time()
         self.assemblageSize = {}
         self.assemblageFrequencies = {}
         self.assemblages = {}
@@ -2092,12 +2092,15 @@ class IDSS():
         self.log.trace("Going to create list of valid pairs for comparisons.")
         self.thresholdDetermination(threshold)
 
+
+        self.log.debug("Frequency seriation processing start")
+
         ###########################################################################################################
         self.log.trace("Now calculate the bootstrap comparisons based ")
         self.log.trace("on specified confidence interval, if in the arguments.")
 
         if self.args['bootstrapCI'] == True:
-            bootstrap_start = time.clock()
+            bootstrap_start = time.time()
             bootsize = 10000
 
             if self.args['bootstrapSignificance'] not in self.FalseList:
@@ -2106,7 +2109,7 @@ class IDSS():
                 confidenceInterval = 0.95
 
             self.bootstrap_CI_calculation_numpy(bootsize, float(confidenceInterval))
-            bootstrap_elapsed = time.clock() - bootstrap_start
+            bootstrap_elapsed = time.time() - bootstrap_start
 
             # manual_elapsed = time_end_manual_bootstrap - time_start_manual_bootstrap
             self.statsMap["bootstrap_ci_processing_time"] = bootstrap_elapsed
@@ -2138,7 +2141,7 @@ class IDSS():
         notPartOfSeriationsList = []
 
         if self.args['frequency'] not in self.FalseList or self.args['occurrence'] not in self.FalseList:
-            frequency_start = time.clock()
+            frequency_start = time.time()
             ###########################################################################################################
             self.log.trace("Calculate all the valid triples.")
             triples = self.findAllValidTriples()
@@ -2173,8 +2176,8 @@ class IDSS():
             flcifile = self.pickledir + "/typeFrequencyLowerCI.p"
             pickle.dump(self.typeFrequencyLowerCI,open(flcifile,'wb'))
 
-            prewhile_loop = time.clock() - frequency_start
-            self.log.debug("Elapsed time prior to while loop: %s seconds", prewhile_loop)
+            prewhile_loop = time.time() - frequency_start
+            self.log.debug("...elapsed time prior to parallelized worker loop: %s seconds", prewhile_loop)
 
             while currentMaxSeriationSize <= self.maxSeriationSize:
                 currentMaxSeriationSize += 1
@@ -2216,8 +2219,8 @@ class IDSS():
                 validNewNetworks = []
 
 
-                preparallel_time = time.clock() - frequency_start
-                self.log.debug("Elapsed time prior to parallelized section for curmaxsize: %s = %s seconds", currentMaxSeriationSize,preparallel_time)
+                preparallel_time = time.time() - frequency_start
+                self.log.debug("...elapsed time prior to parallel section for curmaxsize: %s = %s seconds", currentMaxSeriationSize,preparallel_time)
 
                 try:
                     cpus = multiprocessing.cpu_count()
@@ -2280,14 +2283,14 @@ class IDSS():
                 else:
                     end_solutions = networks
 
-            self.log.debug("Process complete at seriation size %s with %s solutions before filtering.",
-                         self.maxSeriationSize, len(end_solutions))
+
 
             all_solutions += end_solutions
+            self.log.debug("...parallel processing complete at seriation size %s with %s solutions before filtering.", self.maxSeriationSize, len(all_solutions))
             ###########################################################################################################
-            freq_filter_solutions = time.clock()
+            freq_filter_solutions = time.time()
             frequencyArray = self.filterSolutions(end_solutions, all_solutions)
-            freq_filter_elapsed = time.clock() - freq_filter_solutions
+            freq_filter_elapsed = time.time() - freq_filter_solutions
             self.statsMap["frequency_filter_solutions_time"] = freq_filter_elapsed
 
             #if self.args['allsolutions'] not in self.FalseList:
@@ -2296,7 +2299,7 @@ class IDSS():
             #    frequencyArray = self.filterInclusiveSolutions(end_solutions)
             #filteredarray = all_solutions
 
-            self.log.debug("Filtering complete at seriation size %s with %s solutions.",
+            self.log.debug("...filtering complete at seriation size %s with %s solutions.",
                          self.maxSeriationSize, len(frequencyArray))
 
             self.statsMap['max_seriation_size'] = self.maxSeriationSize
@@ -2305,29 +2308,29 @@ class IDSS():
             # if self.args['verbose'] not in self.FalseList:
             #     ## determine time elapsed
             #     #time.sleep(5)
-            timeNow = time.clock()
+            timeNow = time.time()
             self.statsMap["processing_time"] = timeNow - frequency_start
-            self.log.debug("Time elapsed for frequency seriation processing: %s seconds", self.statsMap["processing_time"])
+            self.log.debug("...main frequency seriation analysis complete at: %s seconds", self.statsMap["processing_time"])
 
             #################################################### OUTPUT SECTION ####################################################
-            output_start = time.clock()
+            output_start = time.time()
             self.output(frequencyArray, OUTFILE, OUTPAIRSFILE, OUTMSTFILE, OUTMSTDISTANCEFILE, maxNodes)
-            output_elapsed = time.clock() - output_start
+            output_elapsed = time.time() - output_start
             self.statsMap["frequency_output_processing_time"] = output_elapsed
-            self.log.debug("frequency output completed in %s", output_elapsed)
+            self.log.debug("...frequency output completed in %s", output_elapsed)
 
             if self.args['atlas'] not in self.FalseList:
-                atlas_start = time.clock()
+                atlas_start = time.time()
                 self.createAtlasOfSolutions(frequencyArray, "frequency")
-                atlas_elapsed = time.clock() - atlas_start
+                atlas_elapsed = time.time() - atlas_start
                 self.statsMap["atlas_processing_time"] = atlas_elapsed
 
-            sumgraphweight_start = time.clock()
+            sumgraphweight_start = time.time()
             sumGraphByWeight = self.sumGraphsByWeight(frequencyArray)
             self.sumGraphOutput(sumGraphByWeight, self.outputDirectory + self.inputFile[0:-4] + "-sumgraph-by-weight")
-            sumgraphweight_elapsed = time.clock() - sumgraphweight_start
+            sumgraphweight_elapsed = time.time() - sumgraphweight_start
             self.statsMap["sumgraphweight_processing_time"] = sumgraphweight_elapsed
-            self.log.debug("sum graph by weight processing complete: %s", sumgraphweight_elapsed)
+            self.log.debug("...sum graph by weight processing complete: %s", sumgraphweight_elapsed)
 
             ## optional output. Summing graph by count (and then minmax) is very confusing at this point and not very useful. Making optional.
             # if self.args['minmaxbycount'] not in self.FalseList:
@@ -2335,62 +2338,62 @@ class IDSS():
             #     self.sumGraphOutput(sumGraphByCount, self.outputDirectory + self.inputFile[0:-4] + "-sumgraph-by-count")
 
             if self.args['excel'] not in self.FalseList:
-                excel_start = time.clock()
+                excel_start = time.time()
                 excelFileName,textFileName=self.outputExcel(frequencyArray, self.outputDirectory+self.inputFile[0:-4], "frequency")
-                excel_elapsed = time.clock() - excel_start
+                excel_elapsed = time.time() - excel_start
                 self.statsMap["excel_processing_time"] = excel_elapsed
                 self.log.debug("option --excel processing complete: %s", excel_elapsed)
 
 
             if self.args['frequencyseriation'] not in self.FalseList:
-                excel_frequencyseriation_start = time.clock()
+                excel_frequencyseriation_start = time.time()
                 excelFileName,textFileName=self.outputExcel(frequencyArray, self.outputDirectory+self.inputFile[0:-4], "frequency")
                 seriation = frequencySeriationMaker()
                 #self.args={'inputfile':textFileName,'pdf':1}
                 self.args['inputfile']=textFileName
                 self.args['multiple']=1
                 seriation.makeGraph(self.args)
-                excel_frequencyseriation_elapsed = time.clock() - excel_frequencyseriation_start
+                excel_frequencyseriation_elapsed = time.time() - excel_frequencyseriation_start
                 self.statsMap["excel_freqseriation_processing_time"] = excel_frequencyseriation_elapsed
-                self.log.debug("excel frequencyseriation macro output complete: %s", excel_frequencyseriation_elapsed)
+                self.log.debug("...excel frequencyseriation macro output complete: %s", excel_frequencyseriation_elapsed)
 
             if self.args['occurrenceseriation'] not in self.FalseList:
-                occurrence_start = time.clock()
+                occurrence_start = time.time()
                 excelFileName,textFileName=self.outputExcel(frequencyArray, self.outputDirectory+self.inputFile[0:-4], "occurrence")
                 seriation = occurrenceSeriationMaker()
                 #self.args={'inputfile':textFileName,'pdf':1}
                 self.args['multiple']=1
                 self.args['inputfile']=textFileName
                 seriation.makeGraph(self.args)
-                occurrence_elapsed = time.clock()
+                occurrence_elapsed = time.time()
                 self.statsMap["occurrence_processing_time"] = occurrence_elapsed
-                self.log.debug("occurrence seriation processing complete: %s", occurrence_elapsed)
+                self.log.debug("...occurrence seriation processing complete: %s", occurrence_elapsed)
 
             #################################################### MinMax Graph ############################################
             #print self.args
-            minmax_weight_start = time.clock()
+            minmax_weight_start = time.time()
             minMaxGraphByWeight = self.createMinMaxGraphByWeight(input_graph=sumGraphByWeight, weight='weight')
             self.graphOutput(minMaxGraphByWeight,
                         self.outputDirectory + self.inputFile[0:-4] + "-minmax-by-weight.png")
 
-            minmax_weight_elapsed = time.clock() - minmax_weight_start
+            minmax_weight_elapsed = time.time() - minmax_weight_start
             self.statsMap["minmax_weight_processing_time"] = minmax_weight_elapsed
-            self.log.debug("minmax by weight processing complete: %s", minmax_weight_elapsed)
+            self.log.debug("...minmax by weight processing complete: %s", minmax_weight_elapsed)
 
             if self.args['xyfile'] not in self.FalseList:
-                spatial_start = time.clock()
+                spatial_start = time.time()
                 if self.args['spatialsignificance'] not in self.FalseList:
 
                     pscore, distance, geodistance, sd_geodistance = self.calculateGeographicSolutionPValue(minMaxGraphByWeight)
-                    self.log.info("Geographic p-value for the frequency seriation minmax solution: %s ", pscore)
+                    self.log.debug("...Geographic p-value for the frequency seriation minmax solution: %s ", pscore)
                     filename=self.outputDirectory + self.inputFile[0:-4]+"-geography.txt"
                     with open(filename, "a") as myfile:
                         text=self.inputFile[0:-4]+"\t"+str(pscore)+"\t"+str(distance)+"\t"+str(geodistance)+"\t" \
                              + str(sd_geodistance)+"\t"+str(self.totalAssemblageSize)+"\n"
                         myfile.write(text)
-                spatial_elapsed = time.clock() - spatial_start
+                spatial_elapsed = time.time() - spatial_start
                 self.statsMap['spatial_processing_time'] = spatial_elapsed
-                self.log.debug("spatial significance processing complete: %s", spatial_elapsed)
+                self.log.debug("...spatial significance processing complete: %s", spatial_elapsed)
 
 
             ## optional output. Minmax by count is very confusing at this point and not very useful.
@@ -2401,7 +2404,7 @@ class IDSS():
 
             #################################################### MST SECTION ####################################################
             if self.args['mst'] not in self.FalseList:
-                mst_start = time.clock()
+                mst_start = time.time()
                 # Need to have the shapefile flag and the XY file in order to create a valid shapefile.
                 if self.args['shapefile'] is not None and self.args['xyfile'] is not None:
                     shapefile = 1
@@ -2433,9 +2436,9 @@ class IDSS():
                 plt.axis('off')
                 pngfile= self.outputDirectory+"/"+self.inputFile[0:-4]+"-mst.png"
                 plt.savefig(pngfile,dpi=75)
-                mst_elapsed = time.clock() - mst_start
+                mst_elapsed = time.time() - mst_start
                 self.statsMap["mst_processing_time"] = mst_elapsed
-                self.log.debug("MST processing complete: %s", mst_elapsed)
+                self.log.debug("...MST processing complete: %s", mst_elapsed)
 
             #################################################### END SECTION ####################################################
 
@@ -2447,14 +2450,15 @@ class IDSS():
                     self.log.info("not used in solution: %s", a)
 
             unused_assemblages = len(notPartOfSeriationsList)
-
-            self.log.info("Frequency seriation complete - max size: %s  final number of solutions: %s  unused assemblages: %s",
-                          maxNodes, len(frequencyArray), unused_assemblages)
+            frequency_final_elapsed = time.time() - frequency_start
+            self.log.info("Frequency seriation complete at %s: - max size: %s  final number of solutions: %s  unused assemblages: %s",
+                          frequency_final_elapsed, maxNodes, len(frequencyArray), unused_assemblages)
 
             ##### end of --frequency processing
 
         if self.args['continuity'] not in self.FalseList:
-            continuity_start = time.clock()
+            self.log.debug("Continuity seriation processing start")
+            continuity_start = time.time()
             # experimental
             continuityArray = self.continunityMaximizationSeriation()
             #self.outputGraphArray(array)
@@ -2481,17 +2485,17 @@ class IDSS():
             # if self.args['verbose'] not in self.FalseList:
             #     ## determine time elapsed
             #     #time.sleep(5)
-            #     timeNow = time.clock()
+            #     timeNow = time.time()
             #     timeElapsed = timeNow - self.start
             #     print "Number of continuity seriation solutions at end: %d " % len(continuityArray)
             #     print "Time elapsed for continuity seriation processing: %d seconds" % timeElapsed
 
             validSeriations = self.findValidSeriations(minMaxGraphByWeight)
 
-            self.createAtlasOfSolutions(validSeriations, "Valid_Seriations")
+            self.createAtlasOfSolutions(validSeriations, "continuity-valid-seriations")
             filteredSet=self.filterInclusiveSolutions(validSeriations)
             #print "Filtered set:", filteredSet
-            self.createAtlasOfSolutions(filteredSet, "Unique_Valid_Seriations")
+            self.createAtlasOfSolutions(filteredSet, "continuity-unique-valid-seriations")
             if self.args['excel'] not in self.FalseList:
                 excelFileName,textFileName=self.outputExcel(filteredSet, self.outputDirectory+self.inputFile[0:-4], "valid_continuity")
                 seriation = frequencySeriationMaker()
@@ -2502,26 +2506,25 @@ class IDSS():
 
                 if self.args['spatialsignificance'] not in self.FalseList:
                     pscore ,distance, geodistance, sd_geodistance = self.calculateGeographicSolutionPValue(minMaxGraphByWeight)
-                    self.log.debug("Geographic p-value for the continuity seriation minmax solution: ", pscore)
+                    self.log.debug("...geographic p-value for the continuity seriation minmax solution: %s", pscore)
                     filename=self.outputDirectory + "geography.txt"
                     with open(filename, "a") as myfile:
                         text=self.inputFile[0:-4]+"\t"+str(pscore)+"\t"+str(distance)+"\t"+str(geodistance)+"\t" \
                              + str(sd_geodistance)+"\t"+str(self.totalAssemblageSize)+"\n"
                         myfile.write(text)
 
-            continuity_elapsed = time.clock() - continuity_start
+            continuity_elapsed = time.time() - continuity_start
             self.statsMap["continuity_processing_time"] = continuity_elapsed
             self.log.info("Continuity seriation processing complete: %s", continuity_elapsed)
 
         ## determine time elapsed
         #time.sleep(5)
-        timeNow = time.clock()
+        timeNow = time.time()
         self.statsMap["execution_time"] = timeNow - self.start
         # record the seriation UUID
         self.statsMap["seriation_run_id"] = self.seriation_run_identifier
 
-        if self.args['verbose'] not in self.FalseList:
-            self.log.info("Time elapsed for completion of program: %s seconds", self.statsMap["execution_time"])
+        self.log.info("Time elapsed for completion of program: %s seconds", self.statsMap["execution_time"])
 
         if self.args['graphs'] not in self.FalseList:
             plt.show() # display
