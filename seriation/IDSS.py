@@ -2439,24 +2439,19 @@ class IDSS():
 
             #################################################### END SECTION ####################################################
 
-            if self.args['verbose'] not in self.FalseList:
-                nodeList = sumGraphByWeight.nodes()
-                for a in self.assemblages:
-                    if a not in nodeList:
-                        notPartOfSeriationsList.append(a)
-                        self.log.info("not used in solution: %s", a)
 
-                unused_assemblages = len(notPartOfSeriationsList)
+            nodeList = sumGraphByWeight.nodes()
+            for a in self.assemblages:
+                if a not in nodeList:
+                    notPartOfSeriationsList.append(a)
+                    self.log.info("not used in solution: %s", a)
 
-                self.log.info("Frequency seriation complete - max size: %s  final number of solutions: %s  unused assemblages: %s",
-                              maxNodes, len(frequencyArray), unused_assemblages)
-                # print "Seriation complete."
-                # print "Maximum size of seriation: %d" % maxNodes
-                # print "Number of frequency seriation solutions at last step: %d" % len(frequencyArray)
-                # print "Assemblages not part of final solution:"
-                #
-                # if len(notPartOfSeriationsList) == 0:
-                #     print "*** All assemblages used in seriations.***"
+            unused_assemblages = len(notPartOfSeriationsList)
+
+            self.log.info("Frequency seriation complete - max size: %s  final number of solutions: %s  unused assemblages: %s",
+                          maxNodes, len(frequencyArray), unused_assemblages)
+
+            ##### end of --frequency processing
 
         if self.args['continuity'] not in self.FalseList:
             continuity_start = time.clock()
