@@ -15,7 +15,7 @@ matplotlib.use('Agg')
 
 import csv
 import argparse
-import logging as logger
+import logging as logging
 import itertools
 import random as rnd
 import curses  # for windows use:http://www.lfd.uci.edu/~gohlke/pythonlibs/#curses
@@ -52,6 +52,13 @@ from seriation.frequencySeriationMaker import frequencySeriationMaker
 import seriation.seriationEvaluation as seriationEvaluation
 from seriation.occurrenceSeriationMaker import occurrenceSeriationMaker
 from seriation import idss_version
+
+LEVEL_TRACE = 5
+
+def idss_trace(self, message, *args, **kws):
+    self.log(LEVEL_TRACE, message, *args, **kws)
+
+
 
 
 class IDSS():
@@ -165,16 +172,19 @@ class IDSS():
         self.initialized = True
         self.statsMap["cmdline"] = " ".join(full_cmdline)
 
-        #print "self.args: %s" % self.args
-
+        logging.addLevelName(LEVEL_TRACE, 'TRACE')
+        logging.Logger.trace = idss_trace
         if int(self.args['debug']) == 1:
-            logger.basicConfig(level=logger.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
+            logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
+        elif int(self.args['debug'] > 1):
+            logging.basicConfig(level=LEVEL_TRACE, format='%(asctime)s %(levelname)s: %(message)s')
         else:
-            logger.basicConfig(level=logger.INFO, format='%(asctime)s %(levelname)s: %(message)s')
+            logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s')
+        self.log = logging.getLogger()
 
         # create a unique seriation run identifier
         self.seriation_run_identifier = uuid.uuid1().urn
-        logger.info("seriation run identifier: %s", self.seriation_run_identifier)
+        self.log.info("seriation run identifier: %s", self.seriation_run_identifier)
         self._create_pickle_tempdir()
         self.statsMap["continuity"] = self.args["continuity"]
         self.statsMap["frequency"] = self.args["frequency"]
@@ -198,15 +208,15 @@ class IDSS():
         useable_tuples = []
         # for e in tuples:
         #     useable_tuples.append(e)
-        logger.debug('potential combinations: '+str(len(self._cached_triples)))
+        self.log.trace('potential combinations: '+str(len(self._cached_triples)))
         return self._cached_triples
 
     def openFile(self, filename):
         try:
-            logger.debug("trying to open: %s ", filename)
+            self.log.trace("trying to open: %s ", filename)
             file = open(filename, 'rU')
         except csv.Error as e:
-            logger.error("Cannot open %s. Error: %s", filename, e)
+            logging.error("Cannot open %s. Error: %s", filename, e)
             sys.exit('file %s does not open: %s') % ( filename, e)
 
         reader = csv.reader(file, delimiter=self.args['delimiter'], quotechar='|')
@@ -262,17 +272,16 @@ class IDSS():
             combined=""
             for val in self.assemblages[e]:
                 combined += str(val)
-            #print "combined:", combined
+
             self.occurrenceSeriationList[e]=combined
             val = tempList.get(combined, 0)
             if val==0:
                 newval = []
                 newval.append(e)
                 tempList[combined]=newval
-                #print "combined: ", combined, " value: ", tempList[combined]
             else:
                 tempList[combined].append(e)
-                #print "now combined: ", combined, "now value: ", tempList[combined]
+
         self.assemblages={}
         self.assemblageFrequencies = {}
         self.labels=[]
@@ -292,7 +301,7 @@ class IDSS():
             self.assemblageSize[newval]=int(sum(newarray))
 
     def preCalculateSumOfDifferencesBetweenPairs(self):
-        logger.debug("Precalculate differences between pairs")
+        self.log.trace("Precalculate differences between pairs")
         pairs = self.all_pairs(self.assemblages)
         for pair in pairs:
             #diff = self.calculateSumOfDifferences(pair[0], pair[1])
@@ -303,10 +312,10 @@ class IDSS():
             self.sumOfDifferencesBetweenPairs[key1] = diff
             self.sumOfDifferencesBetweenPairs[key2] = diff
             if diff == 0:
-                logger.info("Potential problem:  %s and %s are identical in their frequencies. ", pair[0],pair[1])
+                self.log.info("Potential problem:  %s and %s are identical in their frequencies. ", pair[0],pair[1])
 
     def preCalculateComparisons(self):
-        logger.debug("Precalculating the comparisons between all pairs of assemblages...")
+        self.log.trace("Precalculating the comparisons between all pairs of assemblages...")
         pairs = self.all_pairs(self.assemblages)
         for pair in pairs:
             self.pairGraph.add_node(pair[0], name=pair[0])
@@ -318,8 +327,8 @@ class IDSS():
             for i in columns:
                 val1 = ass1[i]
                 val2 = ass2[i]
-                logger.debug("\t\tComparing Assemblage: %s  and    Assemblage: %s  ########", pair[0], pair[1])
-                logger.debug("\t\t\t\tType %d- Type %d - Type %d - Type %d - Type %d - Type %d - Type %d  ########", i,
+                self.log.trace("\t\tComparing Assemblage: %s  and    Assemblage: %s  ########", pair[0], pair[1])
+                self.log.trace("\t\t\t\tType %d- Type %d - Type %d - Type %d - Type %d - Type %d - Type %d  ########", i,
                              i, i, i, i, i, i)
 
                 if self.args['bootstrapCI'] not in self.FalseList:
@@ -341,13 +350,13 @@ class IDSS():
                         comparison += "U"
                     if val1 == val2:
                         comparison += "M"
-                logger.debug("Type %d: - comparison is: %s ", i, comparison[i])
+                self.log.trace("Type %d: - comparison is: %s ", i, comparison[i])
 
-            logger.debug("Comparison for %s and %s is: %s ", pair[0], pair[1], comparison)
+            self.log.trace("Comparison for %s and %s is: %s ", pair[0], pair[1], comparison)
             self.pairGraph.add_edge(pair[0], pair[1], weight=comparison)
 
     def openPairwiseFile(self, filename):
-        logger.debug("Opening pairwise file %", filename)
+        self.log.trace("Opening pairwise file %", filename)
         try:
             pw = open(filename, 'r')
         except csv.Error as e:
@@ -361,7 +370,7 @@ class IDSS():
         return True
 
     def openXYFile(self, filename):
-        logger.debug("Opening XY file %s", filename)
+        self.log.trace("Opening XY file %s", filename)
         ## open the xy file
         try:
             xyf = open(filename, 'r')
@@ -411,7 +420,7 @@ class IDSS():
 
         ## Go through all of the combinations
         for combo in pairs:
-            logger.debug("comparing combination of %s and %s ", combo[0], combo[1])
+            self.log.trace("comparing combination of %s and %s ", combo[0], combo[1])
             pairname1 = combo[0] + "*" + combo[1]
             pairname2 = combo[1] + "*" + combo[0]
             maxDifference = 0
@@ -419,14 +428,14 @@ class IDSS():
             assemblage2 = self.assemblages[combo[1]]
             i = -1
             columns = len(self.assemblages[combo[0]])
-            logger.debug("Number of columns: %d", columns)
+            self.log.trace("Number of columns: %d", columns)
             ## calculate the maximum differences between the pairs of assemblages (across all types)
             for i in (0, columns - 1):
-                logger.debug("i: %d ", i)
+                self.log.trace("i: %d ", i)
                 ass1 = float(assemblage1[i])
                 ass2 = float(assemblage2[i])
                 diff = abs(ass1 - ass2)
-                logger.debug("assemblage1: %f assemblage2: %f diff: %f", ass1, ass2, diff)
+                self.log.trace("assemblage1: %f assemblage2: %f diff: %f", ass1, ass2, diff)
                 if diff > maxDifference:
                     maxDifference = diff
             assemblageComparison[pairname1] = maxDifference
@@ -438,11 +447,11 @@ class IDSS():
             for assemblage2 in self.assemblages:
                 if not assemblage1 == assemblage2:
                     testpair = assemblage1 + "*" + assemblage2
-                    logger.debug("Pairs: %s and %s", assemblage1, assemblage2)
-                    logger.debug("Comp value of pairs: %s:  %f and threshold is: %f", testpair,
+                    self.log.trace("Pairs: %s and %s", assemblage1, assemblage2)
+                    self.log.trace("Comp value of pairs: %s:  %f and threshold is: %f", testpair,
                                  assemblageComparison[testpair], threshold)
                     if assemblageComparison[testpair] <= threshold:
-                        logger.debug("Appending %s to the list of valid comparisons for %s ", assemblage1, assemblage2)
+                        self.log.trace("Appending %s to the list of valid comparisons for %s ", assemblage1, assemblage2)
                         cAssemblages.append(assemblage2)
             self.validComparisonsHash[assemblage1] = cAssemblages
         return True
@@ -462,7 +471,7 @@ class IDSS():
             self.scr.refresh()
 
         ## for each assemblage
-        logger.debug("Calculating bootstrap confidence intervals")
+        self.log.trace("Calculating bootstrap confidence intervals")
         # for each assemblage
 
         for currentLabel in sorted(self.assemblages.iterkeys()):
@@ -494,7 +503,7 @@ class IDSS():
                     ## index should be total # of types at end
                     count += 1
 
-                logger.debug("cumulate: %s", cumulate)
+                self.log.trace("cumulate: %s", cumulate)
 
                 ## set new_assemblage
                 new_assemblage = []
@@ -511,7 +520,7 @@ class IDSS():
                         typeIndex -= 1
                     new_assemblage[found] += 1
 
-                logger.debug("new_assemblage: %s", new_assemblage)
+                self.log.trace("new_assemblage: %s", new_assemblage)
 
                 ## count new assemblage frequencies
                 counter = 0
@@ -525,7 +534,7 @@ class IDSS():
                     counter += 1
                     ## this should result in a new assemblage of the same size
 
-                logger.debug("arrayOfStats at end of boot sample: %s", arrayOfStats)
+                self.log.trace("arrayOfStats at end of boot sample: %s", arrayOfStats)
 
             lowerCI = []
             upperCI = []
@@ -557,7 +566,7 @@ class IDSS():
             self.scr.refresh()
 
         ## for each assemblage
-        logger.debug("Calculating bootstrap confidence intervals")
+        self.log.trace("Calculating bootstrap confidence intervals")
         # for each assemblage
 
         # We're going to still do this one assemblage at a time, but in reality the
@@ -619,13 +628,13 @@ class IDSS():
                     curses.endwin()
                     curses.resetty()
                     sys.exit("Quitting as requested.\n\r")
-            logger.debug("Triple test: %s * %s * %s", permu[0], permu[1], permu[2])
+            self.log.trace("Triple test: %s * %s * %s", permu[0], permu[1], permu[2])
 
             comparison12 = ""
             comparison23 = ""
             error = 0
             columns = len(self.assemblages[permu[0]])
-            logger.debug("Columns: %d", columns)
+            self.log.trace("Columns: %d", columns)
 
             ## the idea here is that you are have 3 assemblages in order 1<->2<->3
             ## what we want to do is see if the %s go up or down from 1 to 2 and 2 to 3
@@ -636,7 +645,7 @@ class IDSS():
                 ass2 = self.assemblages[permu[1]][i]
                 ass3 = self.assemblages[permu[2]][i]
 
-                logger.debug("ass1: %f ass2: %f ass3: %f", ass1, ass2, ass3)
+                self.log.trace("ass1: %f ass2: %f ass3: %f", ass1, ass2, ass3)
                 if self.args['bootstrapCI'] not in self.FalseList:
                     low1 = self.typeFrequencyLowerCI[permu[0]][i]
                     low2 = self.typeFrequencyLowerCI[permu[1]][i]
@@ -669,7 +678,7 @@ class IDSS():
                     elif ass2 == ass1:
                         comparison12 += "M"
                     else:
-                        logger.debug("\n\rNo match to our possibility of combinations. ass1: %f ass2: %f" % ass1, ass2)
+                        self.log.trace("\n\rNo match to our possibility of combinations. ass1: %f ass2: %f" % ass1, ass2)
                         print "\n\rNo match to our possibility of combinations.  ass1: %f  ass2: %f \n\r" % ass1, ass2
                         print "I must quit. Debugging required.\n\r"
                         sys.exit()
@@ -681,12 +690,12 @@ class IDSS():
                     elif ass2 == ass3:
                         comparison23 = "M"
                     else:
-                        logger.debug("\n\rNo match to our possibility of combinations. ass2: %f ass3: %f" % ass2, ass3)
+                        self.log.trace("\n\rNo match to our possibility of combinations. ass2: %f ass3: %f" % ass2, ass3)
                         print "\n\rNo match to our possibility of combinations.  ass2: %f  ass3: %f \n\r" % ass2, ass3
                         print "I must quit. Debugging required.\n\r"
                         sys.exit()
 
-                    logger.debug("Comparison12: %s Comparison23: %s", comparison12, comparison23)
+                    self.log.trace("Comparison12: %s Comparison23: %s", comparison12, comparison23)
 
             comparison = comparison12 + comparison23
             test = re.compile('DU').search(comparison)
@@ -703,15 +712,15 @@ class IDSS():
                 net.add_node(permu[2], name=permu[2], site="end", end=1, connectedTo=permu[1])
                 net.add_edge(permu[0], permu[1], weight=comparison12, GraphID=graphID, end=1)
                 net.add_edge(permu[2], permu[1], weight=comparison23, GraphID=graphID, end=1)
-                logger.debug("VALID TRIPLE SOLUTION: %s * %s * %s ", permu[0], permu[1], permu[2])
-                logger.debug("VALID TRIPLE SOLUTION: %s  <--->   %s", comparison12, comparison23)
-                logger.debug("VALID TRIPLE SOLUTION: %s ", net.adjacency_list())
+                self.log.trace("VALID TRIPLE SOLUTION: %s * %s * %s ", permu[0], permu[1], permu[2])
+                self.log.trace("VALID TRIPLE SOLUTION: %s  <--->   %s", comparison12, comparison23)
+                self.log.trace("VALID TRIPLE SOLUTION: %s ", net.adjacency_list())
                 path = nx.shortest_path(net, source=permu[0], target=permu[2])
-                logger.debug("VALID TRIPLE SOLUTION: Ends are: %s and %s", permu[0], permu[2])
-                logger.debug("VALID TRIPLE SOLUTION: Shortest Path: %s ", path)
+                self.log.trace("VALID TRIPLE SOLUTION: Ends are: %s and %s", permu[0], permu[2])
+                self.log.trace("VALID TRIPLE SOLUTION: Shortest Path: %s ", path)
                 triples.append(net)
                 numberOfTriplets += 1
-                logger.debug("Current number of triplets: %d", numberOfTriplets)
+                self.log.trace("Current number of triplets: %d", numberOfTriplets)
 
         return triples
 
@@ -859,7 +868,7 @@ class IDSS():
         return sumGraph
 
 
-    def finalGoodbye(self):
+    def finalize_metadata_and_cleanup(self):
 
         # record version of software used to outputdirectory
         versionFile = self.outputDirectory + self.inputFile[0:-4] + "-metadata.txt"
@@ -1665,31 +1674,31 @@ class IDSS():
         filteredarray = []
         if self.args['screen'] not in self.FalseList:
             self.scr.addstr(1, 40, "STEP: Filter to get uniques... ")
-        logger.debug("--- Filtering solutions so we only end up with the unique ones.")
-        logger.debug("--- Start with %d solutions.", len(end_solutions))
+        self.log.trace("--- Filtering solutions so we only end up with the unique ones.")
+        self.log.trace("--- Start with %d solutions.", len(end_solutions))
         filteredarray.append(end_solutions[-1])
         newOne = 0
         for tnetwork in reversed(all_solutions):
             exists = 0
             for fnetwork in filteredarray:
                 fnetworkArray = fnetwork.nodes()
-                logger.debug("----fnetworkArray: %s", fnetworkArray)
+                self.log.trace("----fnetworkArray: %s", fnetworkArray)
                 tnetworkArray = tnetwork.nodes()
-                logger.debug("----tnetworkArray: %s", tnetworkArray)
+                self.log.trace("----tnetworkArray: %s", tnetworkArray)
                 minus = list(set(tnetworkArray) - set(fnetworkArray))
-                logger.debug("difference between: %s ", minus)
+                self.log.trace("difference between: %s ", minus)
                 change = len(minus)
-                logger.debug("Change: %d", change)
+                self.log.trace("Change: %d", change)
                 if change > 0 and len(list(set(minus) - set(fnetworkArray))):
                     newOne += 1
                 else:
                     exists += 1
             if exists == 0:
-                logger.debug("pushing tnetwork to list of filtered arrays")
+                self.log.trace("pushing tnetwork to list of filtered arrays")
                 filteredarray.append(tnetwork)
             exists = 0
 
-        logger.debug("End with %d solutions.", len(filteredarray))
+        self.log.trace("End with %d solutions.", len(filteredarray))
         filterCount = len(filteredarray)
         if self.args['screen'] not in self.FalseList:
             self.scr.addstr(11, 1, "End with filterCount solutions.")
@@ -1957,6 +1966,8 @@ class IDSS():
 
     def seriate(self):
 
+        self.log.info("IDSS seriation Version %s" % idss_version.__version__)
+
         if self.initialized == False:
             print "You must call this method after calling initialize() with a list of arguments for the seriation"
             sys.exit(1)
@@ -1964,14 +1975,14 @@ class IDSS():
 
         self.checkMinimumRequirements()
         #####################################DEBUG OUTPUT#############################################################
-        if self.args['debug'] is not None:
-            ## Logging
-            logger.basicConfig(stream=sys.stderr, level=logger.DEBUG)
-            self.args['screen'] = None
-        else:
-            logger.basicConfig(stream=sys.stderr, level=logger.ERROR)
+        # if self.args['debug'] is not None:
+        #     ## Logging
+        #     logger.basicConfig(stream=sys.stderr, level=logger.trace)
+        #     self.args['screen'] = None
+        # else:
+        #     logger.basicConfig(stream=sys.stderr, level=logger.ERROR)
 
-        logger.debug("Arguments: %s", self.args)
+        self.log.trace("Arguments: %s", self.args)
 
         ##################################################################################################
         if (self.args['screen'] is not None) and (self.args['debug'] is None ):
@@ -2005,15 +2016,15 @@ class IDSS():
         ######################################FILE INPUT#############################################################
         filename = self.args['inputfile']
         if filename is "":
-            logger.error("You must enter a filename to continue.")
+            logging.error("You must enter a filename to continue.")
             print "You must enter a filename to continue."
             sys.exit("Quitting due to errors.")
 
         try:
-            logger.debug("Going to try to open and load: %s", filename)
+            self.log.trace("Going to try to open and load: %s", filename)
             self.openFile(filename)
         except IOError as e:
-            logger.error("Cannot open %s. Error: %s", filename, e.strerror)
+            logging.error("Cannot open %s. Error: %s", filename, e.strerror)
 
             print("Cannot open %s. Error. %s ", filename, e.strerror)
             if self.args['screen'] not in self.FalseList:
@@ -2055,12 +2066,12 @@ class IDSS():
             sys.exit()
 
         ############################################################################################################
-        logger.debug("Going to open pairwise file it is exists.")
+        self.log.trace("Going to open pairwise file it is exists.")
         if self.args['pairwisefile'] not in self.FalseList:
             self.openPairwiseFile(self.args['pairwisefile'])
 
         ############################################################################################################
-        logger.debug("Going to open XY file if it exists.")
+        self.log.trace("Going to open XY file if it exists.")
         if self.args['xyfile'] not in self.FalseList:
             self.openXYFile(self.args['xyfile'])
         else:
@@ -2073,17 +2084,17 @@ class IDSS():
                 self.distanceBetweenAssemblages[name] = 0
 
         ############################################################################################################
-        logger.debug("Assume threshold is 1.0 unless its specified in arguments.")
+        self.log.trace("Assume threshold is 1.0 unless its specified in arguments.")
         threshold = 1.0
         if self.args['threshold'] is not None:
             threshold = float(self.args['threshold'])
 
-        logger.debug("Going to create list of valid pairs for comparisons.")
+        self.log.trace("Going to create list of valid pairs for comparisons.")
         self.thresholdDetermination(threshold)
 
         ###########################################################################################################
-        logger.debug("Now calculate the bootstrap comparisons based ")
-        logger.debug("on specified confidence interval, if in the arguments.")
+        self.log.trace("Now calculate the bootstrap comparisons based ")
+        self.log.trace("on specified confidence interval, if in the arguments.")
 
         if self.args['bootstrapCI'] == True:
             bootstrap_start = time.clock()
@@ -2100,7 +2111,7 @@ class IDSS():
             # manual_elapsed = time_end_manual_bootstrap - time_start_manual_bootstrap
             self.statsMap["bootstrap_ci_processing_time"] = bootstrap_elapsed
 
-            print "Bootstrap CI calculation using %s samples - elapsed time: %s sec" % (bootsize, bootstrap_elapsed)
+            self.log.debug("Bootstrap CI calculation using %s samples - elapsed time: %s sec", bootsize, bootstrap_elapsed)
 
 
 
@@ -2110,13 +2121,13 @@ class IDSS():
         OUTFILE, OUTPAIRSFILE, OUTMSTFILE, OUTMSTDISTANCEFILE = self.setupOutput()
 
         ###########################################################################################################
-        logger.debug("Now pre-calculating all the combinations between pairs of assemblages. ")
-        logger.debug("This returns a graph with all pairs and the comparisons as weights.")
+        self.log.trace("Now pre-calculating all the combinations between pairs of assemblages. ")
+        self.log.trace("This returns a graph with all pairs and the comparisons as weights.")
         pairGraph = self.preCalculateComparisons()
 
         #####################################
 
-        logger.debug("Now calculate sum of differences between all pairs")
+        self.log.trace("Now calculate sum of differences between all pairs")
         self.preCalculateSumOfDifferencesBetweenPairs()
 
         #####################################
@@ -2127,8 +2138,9 @@ class IDSS():
         notPartOfSeriationsList = []
 
         if self.args['frequency'] not in self.FalseList or self.args['occurrence'] not in self.FalseList:
+            frequency_start = time.clock()
             ###########################################################################################################
-            logger.debug("Calculate all the valid triples.")
+            self.log.trace("Calculate all the valid triples.")
             triples = self.findAllValidTriples()
             ###########################################################################################################
             stepcount = 0
@@ -2161,10 +2173,8 @@ class IDSS():
             flcifile = self.pickledir + "/typeFrequencyLowerCI.p"
             pickle.dump(self.typeFrequencyLowerCI,open(flcifile,'wb'))
 
-
-            timeNow = time.clock()
-            prewhile_loop = timeNow - self.start
-            #print "Elapsed time prior to while loop: %d seconds" % prewhile_loop
+            prewhile_loop = time.clock() - frequency_start
+            self.log.debug("Elapsed time prior to while loop: %s seconds", prewhile_loop)
 
             while currentMaxSeriationSize <= self.maxSeriationSize:
                 currentMaxSeriationSize += 1
@@ -2177,9 +2187,9 @@ class IDSS():
                     #print("Currently have %d solutions at step %d"%( len(newNetworks), currentMaxSeriationSize))
                     if len(newNetworks) > 0:
                         # there were no networks the previous times so nothing to do.
-                        logger.debug("These solutions are ---  ")
+                        self.log.trace("These solutions are ---  ")
                         for sol in newNetworks:
-                            logger.debug("solution %d: %s", i, nx.shortest_path(sol, sol.graph["End1"], sol.graph["End2"]))
+                            self.log.trace("solution %d: %s", i, nx.shortest_path(sol, sol.graph["End1"], sol.graph["End2"]))
                             i += 1
                         networks = []
                         networks += newNetworks  # copy the array of previous new ones for this round
@@ -2187,9 +2197,9 @@ class IDSS():
                         newNetworks = []         # clear the array of new solutions
 
                 stepcount += 1
-                logger.debug("_______________________________________________________________________________________")
-                logger.debug("Step number:  %d", currentMaxSeriationSize)
-                logger.debug("_______________________________________________________________________________________")
+                self.log.trace("_______________________________________________________________________________________")
+                self.log.trace("Step number:  %d", currentMaxSeriationSize)
+                self.log.trace("_______________________________________________________________________________________")
 
                 if self.args['screen'] not in self.FalseList:
                     self.scr.addstr(4, 0, "Step number:                                    ")
@@ -2200,15 +2210,14 @@ class IDSS():
                     self.scr.addstr(5, 0, msg)
                     self.scr.refresh()
 
-                logger.debug("Number of solutions from previous step: %d", len(networks))
+                self.log.trace("Number of solutions from previous step: %d", len(networks))
                 match = 0      ## set the current match to zero for this step (sees if there are any new solutions for step)
                 ## look through the set of existing valid networks.
                 validNewNetworks = []
 
 
-                # timeNow = time.clock()
-                # preparallel_time = timeNow - self.start
-                # print "Elapsed time through while loop for curmaxsize: %s = %d seconds" % (currentMaxSeriationSize,preparallel_time)
+                preparallel_time = time.clock() - frequency_start
+                self.log.debug("Elapsed time prior to parallelized section for curmaxsize: %s = %s seconds", currentMaxSeriationSize,preparallel_time)
 
                 try:
                     cpus = multiprocessing.cpu_count()
@@ -2247,7 +2256,7 @@ class IDSS():
                         newNetworks += s
                         all_solutions += s
                         self.solutionCount += len(s)
-                        logger.debug("Added %d new solutions. Solution count is now:  %d", len(validNewNetworks),
+                        self.log.trace("Added %d new solutions. Solution count is now:  %d", len(validNewNetworks),
                                  self.solutionCount)
                         if len(s) > maxNodes:
                             maxNodes = len(s)
@@ -2271,7 +2280,7 @@ class IDSS():
                 else:
                     end_solutions = networks
 
-            logger.debug("Process complete at seriation size %d with %d solutions before filtering.",
+            self.log.debug("Process complete at seriation size %s with %s solutions before filtering.",
                          self.maxSeriationSize, len(end_solutions))
 
             all_solutions += end_solutions
@@ -2287,7 +2296,7 @@ class IDSS():
             #    frequencyArray = self.filterInclusiveSolutions(end_solutions)
             #filteredarray = all_solutions
 
-            logger.debug("Process complete at seriation size %d with %d solutions after filtering.",
+            self.log.debug("Filtering complete at seriation size %s with %s solutions.",
                          self.maxSeriationSize, len(frequencyArray))
 
             self.statsMap['max_seriation_size'] = self.maxSeriationSize
@@ -2297,14 +2306,15 @@ class IDSS():
             #     ## determine time elapsed
             #     #time.sleep(5)
             timeNow = time.clock()
-            self.statsMap["processing_time"] = timeNow - self.start
-            print "Time elapsed for frequency seriation processing: %d seconds" % self.statsMap["processing_time"]
+            self.statsMap["processing_time"] = timeNow - frequency_start
+            self.log.debug("Time elapsed for frequency seriation processing: %s seconds", self.statsMap["processing_time"])
 
             #################################################### OUTPUT SECTION ####################################################
             output_start = time.clock()
             self.output(frequencyArray, OUTFILE, OUTPAIRSFILE, OUTMSTFILE, OUTMSTDISTANCEFILE, maxNodes)
             output_elapsed = time.clock() - output_start
             self.statsMap["frequency_output_processing_time"] = output_elapsed
+            self.log.debug("frequency output completed in %s", output_elapsed)
 
             if self.args['atlas'] not in self.FalseList:
                 atlas_start = time.clock()
@@ -2317,6 +2327,7 @@ class IDSS():
             self.sumGraphOutput(sumGraphByWeight, self.outputDirectory + self.inputFile[0:-4] + "-sumgraph-by-weight")
             sumgraphweight_elapsed = time.clock() - sumgraphweight_start
             self.statsMap["sumgraphweight_processing_time"] = sumgraphweight_elapsed
+            self.log.debug("sum graph by weight processing complete: %s", sumgraphweight_elapsed)
 
             ## optional output. Summing graph by count (and then minmax) is very confusing at this point and not very useful. Making optional.
             # if self.args['minmaxbycount'] not in self.FalseList:
@@ -2328,6 +2339,7 @@ class IDSS():
                 excelFileName,textFileName=self.outputExcel(frequencyArray, self.outputDirectory+self.inputFile[0:-4], "frequency")
                 excel_elapsed = time.clock() - excel_start
                 self.statsMap["excel_processing_time"] = excel_elapsed
+                self.log.debug("option --excel processing complete: %s", excel_elapsed)
 
 
             if self.args['frequencyseriation'] not in self.FalseList:
@@ -2340,6 +2352,7 @@ class IDSS():
                 seriation.makeGraph(self.args)
                 excel_frequencyseriation_elapsed = time.clock() - excel_frequencyseriation_start
                 self.statsMap["excel_freqseriation_processing_time"] = excel_frequencyseriation_elapsed
+                self.log.debug("excel frequencyseriation macro output complete: %s", excel_frequencyseriation_elapsed)
 
             if self.args['occurrenceseriation'] not in self.FalseList:
                 occurrence_start = time.clock()
@@ -2351,6 +2364,7 @@ class IDSS():
                 seriation.makeGraph(self.args)
                 occurrence_elapsed = time.clock()
                 self.statsMap["occurrence_processing_time"] = occurrence_elapsed
+                self.log.debug("occurrence seriation processing complete: %s", occurrence_elapsed)
 
             #################################################### MinMax Graph ############################################
             #print self.args
@@ -2361,13 +2375,14 @@ class IDSS():
 
             minmax_weight_elapsed = time.clock() - minmax_weight_start
             self.statsMap["minmax_weight_processing_time"] = minmax_weight_elapsed
+            self.log.debug("minmax by weight processing complete: %s", minmax_weight_elapsed)
 
             if self.args['xyfile'] not in self.FalseList:
                 spatial_start = time.clock()
                 if self.args['spatialsignificance'] not in self.FalseList:
 
                     pscore, distance, geodistance, sd_geodistance = self.calculateGeographicSolutionPValue(minMaxGraphByWeight)
-                    print "Geographic p-value for the frequency seriation minmax solution: ", pscore
+                    self.log.info("Geographic p-value for the frequency seriation minmax solution: %s ", pscore)
                     filename=self.outputDirectory + self.inputFile[0:-4]+"-geography.txt"
                     with open(filename, "a") as myfile:
                         text=self.inputFile[0:-4]+"\t"+str(pscore)+"\t"+str(distance)+"\t"+str(geodistance)+"\t" \
@@ -2375,6 +2390,7 @@ class IDSS():
                         myfile.write(text)
                 spatial_elapsed = time.clock() - spatial_start
                 self.statsMap['spatial_processing_time'] = spatial_elapsed
+                self.log.debug("spatial significance processing complete: %s", spatial_elapsed)
 
 
             ## optional output. Minmax by count is very confusing at this point and not very useful.
@@ -2419,21 +2435,28 @@ class IDSS():
                 plt.savefig(pngfile,dpi=75)
                 mst_elapsed = time.clock() - mst_start
                 self.statsMap["mst_processing_time"] = mst_elapsed
+                self.log.debug("MST processing complete: %s", mst_elapsed)
 
             #################################################### END SECTION ####################################################
 
             if self.args['verbose'] not in self.FalseList:
-                print "Seriation complete."
-                print "Maximum size of seriation: %d" % maxNodes
-                print "Number of frequency seriation solutions at last step: %d" % len(frequencyArray)
-                print "Assemblages not part of final solution:"
                 nodeList = sumGraphByWeight.nodes()
                 for a in self.assemblages:
                     if a not in nodeList:
                         notPartOfSeriationsList.append(a)
-                        print a
-                if len(notPartOfSeriationsList) == 0:
-                    print "*** All assemblages used in seriations.***"
+                        self.log.info("not used in solution: %s", a)
+
+                unused_assemblages = len(notPartOfSeriationsList)
+
+                self.log.info("Frequency seriation complete - max size: %s  final number of solutions: %s  unused assemblages: %s",
+                              maxNodes, len(frequencyArray), unused_assemblages)
+                # print "Seriation complete."
+                # print "Maximum size of seriation: %d" % maxNodes
+                # print "Number of frequency seriation solutions at last step: %d" % len(frequencyArray)
+                # print "Assemblages not part of final solution:"
+                #
+                # if len(notPartOfSeriationsList) == 0:
+                #     print "*** All assemblages used in seriations.***"
 
         if self.args['continuity'] not in self.FalseList:
             continuity_start = time.clock()
@@ -2484,7 +2507,7 @@ class IDSS():
 
                 if self.args['spatialsignificance'] not in self.FalseList:
                     pscore ,distance, geodistance, sd_geodistance = self.calculateGeographicSolutionPValue(minMaxGraphByWeight)
-                    print "Geographic p-value for the continuity seriation minmax solution: ", pscore
+                    self.log.debug("Geographic p-value for the continuity seriation minmax solution: ", pscore)
                     filename=self.outputDirectory + "geography.txt"
                     with open(filename, "a") as myfile:
                         text=self.inputFile[0:-4]+"\t"+str(pscore)+"\t"+str(distance)+"\t"+str(geodistance)+"\t" \
@@ -2493,6 +2516,7 @@ class IDSS():
 
             continuity_elapsed = time.clock() - continuity_start
             self.statsMap["continuity_processing_time"] = continuity_elapsed
+            self.log.info("Continuity seriation processing complete: %s", continuity_elapsed)
 
         ## determine time elapsed
         #time.sleep(5)
@@ -2502,7 +2526,7 @@ class IDSS():
         self.statsMap["seriation_run_id"] = self.seriation_run_identifier
 
         if self.args['verbose'] not in self.FalseList:
-            print "Time elapsed for completion of program: %d seconds" % self.statsMap["execution_time"]
+            self.log.info("Time elapsed for completion of program: %s seconds", self.statsMap["execution_time"])
 
         if self.args['graphs'] not in self.FalseList:
             plt.show() # display
@@ -2510,9 +2534,7 @@ class IDSS():
         if self.args['preservepickle'] == 0:
             shutil.rmtree(self.pickledir)
 
-        ## say goodbye and clean up the screen stuff #########################
-        self.finalGoodbye()
-
+        self.finalize_metadata_and_cleanup()
 
         return frequencyArray, continuityArray, notPartOfSeriationsList, self.statsMap
 

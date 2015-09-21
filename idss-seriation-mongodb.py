@@ -88,7 +88,7 @@ def parse_arguments():
 
 
 if __name__ == "__main__":
-    print "IDSS seriation Version %s" % idss_version.__version__
+
 
     seriation = IDSS()
     args = parse_arguments()
