@@ -14,7 +14,7 @@ import datetime
 
 
 
-class SeriationParameters(EmbeddedDocument):
+class SeriationRunParameters(EmbeddedDocument):
     bootstrap_ci_flag = BooleanField()
     bootstrap_significance = FloatField()
     spatial_significance = BooleanField()
@@ -27,36 +27,51 @@ class SeriationParameters(EmbeddedDocument):
     full_cmdline = StringField()
 
 
-class SeriationProfiling(EmbeddedDocument):
-    frequency_processing_time = FloatField()
-    continuity_processing_time = FloatField()
-    spatial_processing_time = FloatField()
-    frequency_output_processing_time = FloatField()
-    minmaxweight_processing_time = FloatField()
-    sumgraphweight_processing_time = FloatField()
-    frequency_filter_processing_time = FloatField()
-    excel_freqseriation_processing_time = FloatField()
+class SeriationProfilingData(EmbeddedDocument):
     bootstrap_ci_processing_time = FloatField()
-    excel_processing_time = FloatField()
-    atlas_processing_time = FloatField()
-    occurrence_processing_time = FloatField()
-    mst_processing_time = FloatField()
+    total_frequency_processing_time = FloatField()
+    freq_main_processing_time = FloatField()
+    freq_spatial_processing_time = FloatField()
+    freq_output_processing_time = FloatField()
+    freq_minmaxweight_processing_time = FloatField()
+    freq_sumgraphweight_processing_time = FloatField()
+    freq_filter_processing_time = FloatField()
+    freq_excelmacro_processing_time = FloatField()
+    freq_excel_processing_time = FloatField()
+    freq_atlas_processing_time = FloatField()
+    freq_mst_processing_time = FloatField()
+    total_continuity_processing_time = FloatField()
+    total_occurrence_processing_time = FloatField()
 
+
+class FrequencySeriationResult(EmbeddedDocument):
+    max_solution_size = IntField()
+    total_number_solutions = IntField()
+    spatial_significance_pvalue = FloatField()
+
+
+class OccurrenceSeriationResult(EmbeddedDocument):
+    pass
+
+class ContinuitySeriationResult(EmbeddedDocument):
+    spatial_significance_pvalue = FloatField()
 
 
 class SeriationRun(Document):
-
     total_runtime = FloatField()
-    total_number_solutions = IntField()
-    max_solution_size = IntField()
-    parameters = EmbeddedDocumentField(SeriationParameters)
-    profiling = EmbeddedDocumentField(SeriationProfiling)
+    parameters = EmbeddedDocumentField(SeriationRunParameters)
+    profiling = EmbeddedDocumentField(SeriationProfilingData)
+    frequency_results = EmbeddedDocumentField(FrequencySeriationResult)
+    continuity_results = EmbeddedDocumentField(ContinuitySeriationResult)
+    occurrence_results = EmbeddedDocumentField(OccurrenceSeriationResult)
     version_used = StringField(required=True)
     seriation_run_id = StringField(required=True)
     num_assemblages = IntField()
     num_classes = IntField()
     date_seriation_run = DateTimeField(default=datetime.datetime.now)
     meta = {'allow_inheritance': True}
+
+
 
 
 
@@ -93,7 +108,7 @@ class SeriationDatabase(object):
         else:
             xyfile = self.args.xyfile
 
-        params = SeriationParameters()
+        params = SeriationRunParameters()
         params.inputfile = self.args.inputfile
         params.bootstrap_ci_flag = bool(self.args.bootstrapCI)
         params.bootstrap_significance = self.args.bootstrapSignificance
@@ -106,47 +121,65 @@ class SeriationDatabase(object):
         params.full_cmdline = stats_map["cmdline"]
 
 
-        profile = SeriationProfiling()
-        if 'processing_time' in stats_map:
-            profile.frequency_processing_time = stats_map['processing_time']
-        if 'continuity_processing_time' in stats_map:
-            profile.continuity_processing_time = stats_map["continuity_processing_time"]
+        profile = SeriationProfilingData()
+
+        profile.bootstrap_ci_processing_time = stats_map["bootstrap_ci_processing_time"]
+        profile.total_frequency_processing_time = stats_map['frequency_processing_time']
+        profile.freq_main_processing_time = stats_map['freq_main_processing_time']
+        profile.freq_filter_processing_time = stats_map['frequency_filter_solutions_time']
+        profile.freq_sumgraphweight_processing_time = stats_map["sumgraphweight_processing_time"]
+        profile.freq_output_processing_time = stats_map["frequency_output_processing_time"]
+        profile.freq_minmaxweight_processing_time = stats_map["minmax_weight_processing_time"]
+
         if 'spatial_processing_time' in stats_map:
-            profile.spatial_processing_time = stats_map["spatial_processing_time"]
-        if 'minmax_weight_processing_time' in stats_map:
-            profile.minmaxweight_processing_time = stats_map["minmax_weight_processing_time"]
+            profile.freq_spatial_processing_time = stats_map["spatial_processing_time"]
+
+        if 'continuity_processing_time' in stats_map:
+            profile.total_continuity_processing_time = stats_map["continuity_processing_time"]
+
         if 'occurrence_processing_time' in stats_map:
-            profile.occurrence_processing_time = stats_map["occurrence_processing_time"]
-        if 'frequency_output_processing_time' in stats_map:
-            profile.frequency_output_processing_time = stats_map["frequency_output_processing_time"]
-        if 'sumgraphweight_processing_time' in stats_map:
-            profile.sumgraphweight_processing_time = stats_map["sumgraphweight_processing_time"]
+            profile.total_occurrence_processing_time = stats_map["occurrence_processing_time"]
+
         if 'mst_processing_time' in stats_map:
-            profile.mst_processing_time = stats_map["mst_processing_time"]
-        if 'frequency_filter_solutions_time' in stats_map:
-            profile.frequency_filter_processing_time = stats_map["frequency_filter_solutions_time"]
+            profile.freq_mst_processing_time = stats_map["mst_processing_time"]
         if 'atlas_processing_time' in stats_map:
-            profile.atlas_processing_time = stats_map["atlas_processing_time"]
+            profile.freq_atlas_processing_time = stats_map["atlas_processing_time"]
         if 'excel_processing_time' in stats_map:
-            profile.excel_processing_time = stats_map["excel_processing_time"]
+            profile.freq_excel_processing_time = stats_map["excel_processing_time"]
         if 'excel_freqseriation_processing_time' in stats_map:
-            profile.excel_freqseriation_processing_time = stats_map["excel_freqseriation_processing_time"]
-        if "bootstrap_ci_processing_time" in stats_map:
-            profile.bootstrap_ci_processing_time = stats_map["bootstrap_ci_processing_time"]
-
-
+            profile.freq_excelmacro_processing_time = stats_map["excel_freqseriation_processing_time"]
 
 
         srun = SeriationRun()
         srun.parameters = params
         srun.profiling = profile
-        srun.max_solution_size = stats_map['max_seriation_size']
-        srun.total_number_solutions = stats_map['total_number_solutions']
+
         srun.total_runtime = stats_map['execution_time']
         srun.version_used = idss_version.__version__
         srun.seriation_run_id = stats_map['seriation_run_id']
         srun.num_assemblages = stats_map["num_assemblages"]
         srun.num_classes = stats_map["num_classes"]
 
+
+
+        # add the results from various seriation types
+        if self.args.frequency == 1:
+            freqres = FrequencySeriationResult()
+            freqres.max_solution_size = stats_map['max_seriation_size']
+            freqres.total_number_solutions = stats_map['total_number_solutions']
+            freqres.spatial_significance_pvalue = stats_map['frequency_geographic_pvalue']
+
+            srun.frequency_results = freqres
+
+        if self.args.continuity == 1:
+            contres = ContinuitySeriationResult()
+            contres.spatial_significance_pvalue = stats_map['continuity_geographic_pvalue']
+
+            srun.continuity_results = contres
+
+
+
+
+        # persist the entire set of results
         srun.save()
 

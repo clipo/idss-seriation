@@ -53,9 +53,9 @@ def parse_arguments():
                         help="Produces a shapefile as part of the output. You must have specified the --xyfile (coordinates for each point) as well.")
     parser.add_argument('--graphs', default=0,
                         help="If true, the program will display the graphs that are created. If not, the graphs are just saved as .png files.")
-    parser.add_argument('--frequency', default=1,
+    parser.add_argument('--frequency', type=int, default=1,
                         help="Conduct a standard frequency seriation analysis. Default is None.")
-    parser.add_argument('--continuity', default=None, help="Conduct a continuity seriation analysis. Default is None.")
+    parser.add_argument('--continuity', default=0, type=int, help="Conduct a continuity seriation analysis. Default is None.")
     parser.add_argument('--graphroot', default=None,
                         help="The root of the graph figures (i.e., name of assemblage you want to treat as one end in the graphs.")
     parser.add_argument('--continuityroot', default=None,
@@ -68,7 +68,7 @@ def parse_arguments():
                         help="If you do not use type names as the first line of the input file, use this option to read the data.")
     parser.add_argument('--frequencyseriation', default=None, help="Generates graphical output for the results in a frequency seriation form.")
     parser.add_argument('--verbose',default=True, help='Provides output for your information')
-    parser.add_argument('--occurrence', default=None, help="Treats data as just occurrence information and produces valid occurrence solutions.")
+    parser.add_argument('--occurrence', default=0, type=int, help="Treats data as just occurrence information and produces valid occurrence solutions.")
     parser.add_argument('--occurrenceseriation', default=None, help="Generates graphical output for occurrence seriation.")
     parser.add_argument('--spatialsignificance', default=None, help="Calculate the significance of the spatial aspect of the final solution. Default is None.")
     parser.add_argument('--spatialbootstrapN',default=100, help='Set the number of resamples used for calculating the spatial significance. Default is 100.')

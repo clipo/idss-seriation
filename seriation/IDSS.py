@@ -904,7 +904,7 @@ class IDSS():
 
         # record
 
-        outputFile = self.outputDirectory + self.inputFile[0:-4] + ".vna"
+        outputFile = self.outputDirectory + self.inputFile[0:-4] + "-frequency.vna"
         OUTMSTFILE = OUTMSTDISTANCEFILE = ""
         try:
             OUTFILE = open(outputFile, 'w')
@@ -912,15 +912,15 @@ class IDSS():
             msg = "Can't open file %s to write: %s" % outputFile, e
             sys.exit(msg)
 
-        outpairsFile = self.outputDirectory + self.inputFile[0:-4] + "-pairs.vna"
+        outpairsFile = self.outputDirectory + self.inputFile[0:-4] + "-frequency-pairs.vna"
         try:
             OUTPAIRSFILE = open(outpairsFile, 'w')
         except csv.Error as e:
             msg = "Can't open file %s to write: %s" % outpairsFile, e
             sys.exit(msg)
 
-        outmstFile = self.inputFile[0:-4] + "-mst.vna"
-        outmst2File = self.inputFile[0:-4] + "mst-dist.vna"
+        outmstFile = self.inputFile[0:-4] + "frequency-mst.vna"
+        outmst2File = self.inputFile[0:-4] + "frequency-mst-dist.vna"
         if self.args['mst'] not in self.FalseList:
             try:
                 OUTMSTFILE = open(outmstFile, 'w')
@@ -966,7 +966,7 @@ class IDSS():
         for n,d in graph.nodes_iter(data=True):
             w.point(float(d['xCoordinate']),float(d['yCoordinate']))
             w.record(d['name'],'Point')
-        w.save(shapefilename[0:-4]+"-points.shp")
+        w.save(shapefilename[0:-4]+"frequency-points.shp")
 
 
 
@@ -1807,7 +1807,7 @@ class IDSS():
 
         return seriationList
 
-    def calculateGeographicSolutionPValue(self,graph):
+    def calculateGeographicSolutionPValue(self,graph,type):
         """
 
         :param graph:
@@ -1906,7 +1906,7 @@ class IDSS():
         #         pvalueScore += 1
         #     x.append(testDistance)
 
-        filename=self.outputDirectory+self.inputFile[0:-4]+"-geographic-distance.png"
+        filename=self.outputDirectory+self.inputFile[0:-4] + "-" + type + "-geographic-distance.png"
         f=plt.figure(filename, figsize=(8, 8))
         plt.rcParams['font.family']='sans-serif'
         #f=plt.figure("Geographic Distance", figsize=(8, 8))
@@ -2309,9 +2309,9 @@ class IDSS():
             #     ## determine time elapsed
             #     #time.sleep(5)
             timeNow = time.time()
-            self.statsMap["processing_time"] = timeNow - frequency_start
-            self.log.debug("...main frequency seriation analysis complete at: %s seconds", self.statsMap["processing_time"])
-
+            freq_processing_elapsed = time.time() - frequency_start
+            self.statsMap["freq_main_processing_time"] = freq_processing_elapsed
+            self.log.debug("...main frequency seriation analysis complete at: %s seconds", freq_processing_elapsed)
             #################################################### OUTPUT SECTION ####################################################
             output_start = time.time()
             self.output(frequencyArray, OUTFILE, OUTPAIRSFILE, OUTMSTFILE, OUTMSTDISTANCEFILE, maxNodes)
@@ -2327,7 +2327,7 @@ class IDSS():
 
             sumgraphweight_start = time.time()
             sumGraphByWeight = self.sumGraphsByWeight(frequencyArray)
-            self.sumGraphOutput(sumGraphByWeight, self.outputDirectory + self.inputFile[0:-4] + "-sumgraph-by-weight")
+            self.sumGraphOutput(sumGraphByWeight, self.outputDirectory + self.inputFile[0:-4] + "-frequency-sumgraph-by-weight")
             sumgraphweight_elapsed = time.time() - sumgraphweight_start
             self.statsMap["sumgraphweight_processing_time"] = sumgraphweight_elapsed
             self.log.debug("...sum graph by weight processing complete: %s", sumgraphweight_elapsed)
@@ -2374,7 +2374,7 @@ class IDSS():
             minmax_weight_start = time.time()
             minMaxGraphByWeight = self.createMinMaxGraphByWeight(input_graph=sumGraphByWeight, weight='weight')
             self.graphOutput(minMaxGraphByWeight,
-                        self.outputDirectory + self.inputFile[0:-4] + "-minmax-by-weight.png")
+                        self.outputDirectory + self.inputFile[0:-4] + "-frequency-minmax-by-weight.png")
 
             minmax_weight_elapsed = time.time() - minmax_weight_start
             self.statsMap["minmax_weight_processing_time"] = minmax_weight_elapsed
@@ -2384,9 +2384,10 @@ class IDSS():
                 spatial_start = time.time()
                 if self.args['spatialsignificance'] not in self.FalseList:
 
-                    pscore, distance, geodistance, sd_geodistance = self.calculateGeographicSolutionPValue(minMaxGraphByWeight)
+                    pscore, distance, geodistance, sd_geodistance = self.calculateGeographicSolutionPValue(minMaxGraphByWeight,"frequency")
+                    self.statsMap['frequency_geographic_pvalue'] = pscore
                     self.log.debug("...Geographic p-value for the frequency seriation minmax solution: %s ", pscore)
-                    filename=self.outputDirectory + self.inputFile[0:-4]+"-geography.txt"
+                    filename=self.outputDirectory + self.inputFile[0:-4]+"-frequency-geography.txt"
                     with open(filename, "a") as myfile:
                         text=self.inputFile[0:-4]+"\t"+str(pscore)+"\t"+str(distance)+"\t"+str(geodistance)+"\t" \
                              + str(sd_geodistance)+"\t"+str(self.totalAssemblageSize)+"\n"
@@ -2434,7 +2435,7 @@ class IDSS():
                 nx.draw_networkx_edges(mst,pos,alpha=0.4,node_size=0,width=1,edge_color='k')
                 nx.draw_networkx_labels(mst,pos,fontsize=10)
                 plt.axis('off')
-                pngfile= self.outputDirectory+"/"+self.inputFile[0:-4]+"-mst.png"
+                pngfile= self.outputDirectory+"/"+self.inputFile[0:-4]+"-frequency-mst.png"
                 plt.savefig(pngfile,dpi=75)
                 mst_elapsed = time.time() - mst_start
                 self.statsMap["mst_processing_time"] = mst_elapsed
@@ -2451,6 +2452,7 @@ class IDSS():
 
             unused_assemblages = len(notPartOfSeriationsList)
             frequency_final_elapsed = time.time() - frequency_start
+            self.statsMap["frequency_processing_time"] = frequency_final_elapsed
             self.log.info("Frequency seriation complete at %s: - max size: %s  final number of solutions: %s  unused assemblages: %s",
                           frequency_final_elapsed, maxNodes, len(frequencyArray), unused_assemblages)
 
@@ -2465,7 +2467,7 @@ class IDSS():
             sGraphByCount = self.sumGraphsByCount(continuityArray)
             sGraphByWeight = self.sumGraphsByWeight(continuityArray)
             self.graphOutput(sGraphByCount, self.outputDirectory + self.inputFile[0:-4] + "-continuity-sumgraph.png")
-            self.MST(sGraphByCount, self.outputDirectory + self.inputFile[0:-4] + "-mst-of-min.png")
+            self.MST(sGraphByCount, self.outputDirectory + self.inputFile[0:-4] + "-continuity-mst-of-min.png")
             minMaxGraphByWeight = self.createMinMaxGraphByWeight(input_graph=sGraphByWeight, weight='weight')
             self.graphOutput(minMaxGraphByWeight, self.outputDirectory +  self.inputFile[0:-4] + "-continuity-minmax-by-weight.png")
             minMaxGraphByCount = self.createMinMaxGraphByCount(input_graph=sGraphByCount, weight='weight')
@@ -2492,11 +2494,13 @@ class IDSS():
 
             validSeriations = self.findValidSeriations(minMaxGraphByWeight)
 
-            self.createAtlasOfSolutions(validSeriations, "continuity-valid-seriations")
-            filteredSet=self.filterInclusiveSolutions(validSeriations)
-            #print "Filtered set:", filteredSet
-            self.createAtlasOfSolutions(filteredSet, "continuity-unique-valid-seriations")
+            if self.args['atlas'] not in self.FalseList:
+                self.createAtlasOfSolutions(validSeriations, "continuity-valid-seriations")
+
+
             if self.args['excel'] not in self.FalseList:
+                filteredSet=self.filterInclusiveSolutions(validSeriations)
+                self.createAtlasOfSolutions(filteredSet, "continuity-unique-valid-seriations")
                 excelFileName,textFileName=self.outputExcel(filteredSet, self.outputDirectory+self.inputFile[0:-4], "valid_continuity")
                 seriation = frequencySeriationMaker()
                 argument={'inputfile':textFileName, 'multiple':True}
@@ -2505,9 +2509,10 @@ class IDSS():
             if self.args['xyfile'] not in self.FalseList:
 
                 if self.args['spatialsignificance'] not in self.FalseList:
-                    pscore ,distance, geodistance, sd_geodistance = self.calculateGeographicSolutionPValue(minMaxGraphByWeight)
+                    pscore ,distance, geodistance, sd_geodistance = self.calculateGeographicSolutionPValue(minMaxGraphByWeight,"continuity")
+                    self.statsMap['continuity_geographic_pvalue'] = pscore
                     self.log.debug("...geographic p-value for the continuity seriation minmax solution: %s", pscore)
-                    filename=self.outputDirectory + "geography.txt"
+                    filename=self.outputDirectory + self.inputFile[0:-4] + "-continuity-geography.txt"
                     with open(filename, "a") as myfile:
                         text=self.inputFile[0:-4]+"\t"+str(pscore)+"\t"+str(distance)+"\t"+str(geodistance)+"\t" \
                              + str(sd_geodistance)+"\t"+str(self.totalAssemblageSize)+"\n"
