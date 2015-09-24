@@ -167,13 +167,15 @@ class SeriationDatabase(object):
             freqres = FrequencySeriationResult()
             freqres.max_solution_size = stats_map['max_seriation_size']
             freqres.total_number_solutions = stats_map['total_number_solutions']
-            freqres.spatial_significance_pvalue = stats_map['frequency_geographic_pvalue']
+            if 'frequency_geographic_pvalue' in stats_map:
+                freqres.spatial_significance_pvalue = stats_map['frequency_geographic_pvalue']
 
             srun.frequency_results = freqres
 
         if self.args.continuity == 1:
             contres = ContinuitySeriationResult()
-            contres.spatial_significance_pvalue = stats_map['continuity_geographic_pvalue']
+            if 'continuity_geographic_pvalue' in stats_map:
+                contres.spatial_significance_pvalue = stats_map['continuity_geographic_pvalue']
 
             srun.continuity_results = contres
 

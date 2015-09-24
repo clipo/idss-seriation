@@ -1663,6 +1663,68 @@ class IDSS():
 
         return output_graph
 
+    def _get_longest_subsolution(self,all_solutions):
+        cur_longest = []
+        for sol in all_solutions:
+            if len(sol) > len(cur_longest):
+                cur_longest = sol
+        return cur_longest
+
+    def _get_cached_nodes(self,cache, solution):
+        if solution not in cache:
+            cache[solution] = set(solution.nodes())
+        return cache[solution]
+
+    def filterSolutions_optimized(self, end_solutions, all_solutions):
+        ################################################# FILTERING  ####################################
+        # now do some weeding. Basically start with the last network ( largest),
+        #  and work backwards to smaller and smaller solutions. Ignore any
+        # network that is already represented larger since these are trivial (e.g., A->B->C->D already covers
+        # A->C->D.) That should then leave all the unique maximum solutions (or so it seems)
+        ################################################# FILTERING  ####################################
+
+        filteredarray = []
+        num_comparisons = 0
+        node_cache = dict()
+
+        self.log.trace("--- Filtering solutions so we only end up with the unique ones.")
+        self.log.trace("--- Start with %d solutions.", len(end_solutions))
+        filteredarray.append(self._get_longest_subsolution(end_solutions))
+        newOne = 0
+        for tnetwork in reversed(all_solutions):
+            self.log.trace("trying tnetwork: %s of length %s", tnetwork, len(tnetwork.nodes()))
+            tnetwork_nodeset = self._get_cached_nodes(node_cache, tnetwork)
+            self.log.trace("Testing tnetworkArray: %s against accepted solutions", tnetwork_nodeset)
+            exists = 0
+
+            for fnetwork in filteredarray:
+                fnetwork_nodeset = self._get_cached_nodes(node_cache, fnetwork)
+                self.log.trace("...trial: fnetworkArray: %s", fnetwork_nodeset)
+
+                diff = tnetwork_nodeset - fnetwork_nodeset
+
+                self.log.trace("...difference between: %s ", diff)
+                self.log.trace("...Change: %d", len(diff))
+
+                if len(diff) > 0 and len(diff - fnetwork_nodeset):
+                    newOne += 1
+                else:
+                    exists += 1
+
+                num_comparisons += 1
+            if exists == 0:
+                self.log.trace("pushing tnetwork to list of filtered arrays")
+                filteredarray.append(tnetwork)
+            exists = 0
+
+        self.log.trace("End with %d solutions.", len(filteredarray))
+        self.log.trace("filterSolutions_1 performed %s comparisons", num_comparisons)
+
+        return filteredarray
+
+
+
+
     def filterSolutions(self, end_solutions, all_solutions):
         ################################################# FILTERING  ####################################
         # now do some weeding. Basically start with the last network ( largest),
@@ -2287,9 +2349,13 @@ class IDSS():
 
             all_solutions += end_solutions
             self.log.debug("...parallel processing complete at seriation size %s with %s solutions before filtering.", self.maxSeriationSize, len(all_solutions))
+
+            pickle.dump(all_solutions,open("prefilter-allsolutions.pickle", 'wb'))
+
             ###########################################################################################################
             freq_filter_solutions = time.time()
-            frequencyArray = self.filterSolutions(end_solutions, all_solutions)
+            frequencyArray = self.filterSolutions_optimized(end_solutions, all_solutions)
+            #frequencyArray = self.filterSolutions(end_solutions, all_solutions)
             freq_filter_elapsed = time.time() - freq_filter_solutions
             self.statsMap["frequency_filter_solutions_time"] = freq_filter_elapsed
 

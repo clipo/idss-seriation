@@ -10,3 +10,4 @@ svgwrite
 uuid
 xlsxwriter
 mongoengine
+pygraphviz
