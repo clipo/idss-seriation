@@ -4,11 +4,11 @@ multiprocessing
 networkx
 numpy
 pysvg
-reportlab
 scipy
 svglib
 svgwrite
 uuid
 xlsxwriter
 mongoengine
+pydot2
 pygraphviz

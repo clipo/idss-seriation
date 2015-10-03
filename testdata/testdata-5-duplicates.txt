@@ -1,0 +1,6 @@
+Assemblage_Name	Type_1	Type_2	Type_3	Type_4
+Assemblage-1	0	50	5	45
+Assemblage-2	0	48	5	47
+Assemblage-3	0	45	5	50
+Assemblage-41	20	10	30	40
+Assemblage-42	20	10	30	40

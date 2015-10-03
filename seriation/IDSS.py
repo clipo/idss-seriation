@@ -2213,6 +2213,8 @@ class IDSS():
             newNetworks = []
             self.solutionCount = len(triples)     ## the current # of solutions that will be checked
             self.solutionsChecked = len(triples)  ## set the total solutions checked value
+            self.log.debug("Starting with triples as the solution set to examine, size: %s", len(triples))
+
             currentTotal = len(triples)
             solutions = []
             all_solutions = []
@@ -2344,6 +2346,8 @@ class IDSS():
                     end_solutions = newNetworks
                 else:
                     end_solutions = networks
+
+                self.log.trace("...size of end_solutions at end of parallel step: %s", len(end_solutions))
 
 
 
