@@ -1,3 +1,4 @@
+setuptools
 matplotlib
 multiprocessing
 networkx
