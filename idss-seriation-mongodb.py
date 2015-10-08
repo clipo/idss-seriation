@@ -94,6 +94,6 @@ if __name__ == "__main__":
     args = parse_arguments()
     db = SeriationDatabase(args)
     seriation.initialize(args,sys.argv)
-    (frequencyResults, continuityResults, exceptionList, statsMap) = seriation.seriate()
-    db.store_run_metadata(statsMap)
+    (frequencyResults, continuityResults, exceptionList, statsMap,fileMap) = seriation.seriate()
+    db.store_run_metadata(statsMap,fileMap)
 

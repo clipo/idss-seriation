@@ -11,6 +11,60 @@ Description here
 from mongoengine import *
 from seriation import idss_version
 import datetime
+import logging as logger
+
+
+
+class SeriationFileLocations(EmbeddedDocument):
+    inputfile = StringField()
+    xyfile = StringField()
+    pairfile = StringField()
+    mstfile = StringField()
+    shapefile = StringField()
+    metadatafile = StringField()
+    frequencyvnafile = StringField()
+    frequencypairsvnafile = StringField()
+    frequencymstvnafile = StringField()
+    frequencymstdistvnafile = StringField()
+    frequencypointsshapefile = StringField()
+    frequencyatlasfile = StringField()
+    frequencyexceltxtfile = StringField()
+    frequencyexcelwookbookfile = StringField()
+    frequencysumgraphgmlfile = StringField()
+    frequencysumgraphshapefile = StringField()
+    frequencysumgraphvnafile = StringField()
+    frequencysumgraphbyweightpngfile = StringField()
+    frequencysumgraphbyweightgmlfile = StringField()
+    frequencysumgraphbycountpngfile = StringField()
+    frequencysumgraphbycountgmlfile = StringField()
+    frequencyminmaxbyweightpngfile = StringField()
+    frequencyminmaxbyweightgmlfile = StringField()
+    frequencygeosignificancefile = StringField()
+    frequencymstpngfile = StringField()
+    contsumgraphfile  = StringField()
+    contmstminfile = StringField()
+    contminmaxweightgml = StringField()
+    contminmaxcountgml = StringField()
+    continuityexceltxtfile = StringField()
+    continuityexcelworkbookfile = StringField()
+    continuityatlasfile = StringField()
+    continuityvalidseriationsatlasfile = StringField()
+    continuityuniquevalidseriationsatlasfile = StringField()
+    continuityvalidseriationsexceltxtfile = StringField()
+    continuityvalidseriationsexcelworkbookfile = StringField()
+    continuitygeosignificancefile = StringField()
+    continuitysumgraphbyweightpngfile = StringField()
+    continuitysumgraphbyweightgmlfile = StringField()
+    continuitysumgraphbycountpngfile = StringField()
+    continuitysumgraphbycountgmlfile = StringField()
+    continuityminmaxbyweightpngfile = StringField()
+    continuityminmaxbyweightgmlfile = StringField()
+
+
+
+
+
+
 
 
 
@@ -57,6 +111,17 @@ class ContinuitySeriationResult(EmbeddedDocument):
     spatial_significance_pvalue = FloatField()
 
 
+
+class MinmaxSolutionMetrics(EmbeddedDocument):
+    """
+    Scores or metrics from minmax seriation solutions
+    """
+    score_chronological_accuracy = FloatField()
+    num_branch_points = IntField()
+    mean_degree = FloatField()
+
+
+
 class SeriationRun(Document):
     total_runtime = FloatField()
     parameters = EmbeddedDocumentField(SeriationRunParameters)
@@ -64,6 +129,8 @@ class SeriationRun(Document):
     frequency_results = EmbeddedDocumentField(FrequencySeriationResult)
     continuity_results = EmbeddedDocumentField(ContinuitySeriationResult)
     occurrence_results = EmbeddedDocumentField(OccurrenceSeriationResult)
+    file_locations = EmbeddedDocumentField(SeriationFileLocations)
+    minmax_metrics = EmbeddedDocumentField(MinmaxSolutionMetrics)
     version_used = StringField(required=True)
     seriation_run_id = StringField(required=True)
     num_assemblages = IntField()
@@ -92,7 +159,7 @@ class SeriationDatabase(object):
                 password = args.dbpassword)
 
 
-    def store_run_metadata(self, stats_map):
+    def store_run_metadata(self, stats_map, fileMap):
         """
         Saves the metadata for a single seriation run. Parameter
         subdocument is constructed from the command line args held
@@ -107,6 +174,13 @@ class SeriationDatabase(object):
             xyfile = "none"
         else:
             xyfile = self.args.xyfile
+
+
+        floc = SeriationFileLocations()
+        #logger.debug("fileMap: %s", fileMap)
+        for fkey in fileMap.keys():
+            floc.__setattr__(fkey, str(fileMap[fkey]))
+
 
         params = SeriationRunParameters()
         params.inputfile = self.args.inputfile
@@ -153,6 +227,7 @@ class SeriationDatabase(object):
         srun = SeriationRun()
         srun.parameters = params
         srun.profiling = profile
+        srun.file_locations = floc
 
         srun.total_runtime = stats_map['execution_time']
         srun.version_used = idss_version.__version__

@@ -34,6 +34,7 @@ import scipy as sp
 import scipy.stats
 import networkx as nx
 import shutil
+from path import path
 
 
 
@@ -104,6 +105,8 @@ class IDSS():
         self.solutionsChecked = 0 ## total # of seriations evaluated to find the final subset
         # for returning execution statistics and diagnostics to the caller
         self.statsMap = dict()
+        # for caching the filenames we're creating for output, to record later
+        self.fileMap = dict()
         # memoize the tuples
         self._cached_triples = None
         self.delimiter = ""
@@ -218,6 +221,8 @@ class IDSS():
         except csv.Error as e:
             logging.error("Cannot open %s. Error: %s", filename, e)
             sys.exit('file %s does not open: %s') % ( filename, e)
+
+        self.fileMap['inputfile'] = path(filename).abspath()
 
         reader = csv.reader(file, delimiter=self.args['delimiter'], quotechar='|')
         values = []
@@ -357,6 +362,7 @@ class IDSS():
 
     def openPairwiseFile(self, filename):
         self.log.trace("Opening pairwise file %", filename)
+        self.fileMap['pairfile'] = path(filename).abspath()
         try:
             pw = open(filename, 'r')
         except csv.Error as e:
@@ -370,6 +376,9 @@ class IDSS():
         return True
 
     def openXYFile(self, filename):
+        # cache the absolute path to the xyfile for later use
+        self.fileMap['xyfile'] = path(filename).abspath()
+
         self.log.trace("Opening XY file %s", filename)
         ## open the xy file
         try:
@@ -774,8 +783,11 @@ class IDSS():
                 'fontsize': 10}
         plt.axis('off')
         plt.savefig(filename, dpi=75)
+
+        self.fileMap['mstfile'] = path(filename).abspath()
         self.saveGraph(sGraph, filename + ".gml")
         if self.args['shapefile'] is not None and self.args['xyfile'] is not None:
+            self.fileMap['shapefile'] = path(filename + ".shp").abspath()
             self.createShapefile(M,  filename + ".shp")
 
 
@@ -872,6 +884,7 @@ class IDSS():
 
         # record version of software used to outputdirectory
         versionFile = self.outputDirectory + self.inputFile[0:-4] + "-metadata.txt"
+
         try:
             VERFILE = open(versionFile, 'w')
         except (OSError, IOError) as e:
@@ -888,6 +901,10 @@ class IDSS():
             VERFILE.write("%s: %s" % (k,v))
             VERFILE.write("\n")
 
+        for fkey in self.fileMap.keys():
+            VERFILE.write("%s: %s" %(fkey, str(self.fileMap[fkey])))
+            VERFILE.write("\n")
+
         VERFILE.close()
 
         if self.args['screen'] is not None:
@@ -896,6 +913,7 @@ class IDSS():
             curses.nl()
             curses.echo()
             os.system("reset")
+        self.fileMap['metadatafile'] = path(versionFile).abspath()
 
     #################################################### set up all the output files ####################################################
     def setupOutput(self):
@@ -905,6 +923,7 @@ class IDSS():
         # record
 
         outputFile = self.outputDirectory + self.inputFile[0:-4] + "-frequency.vna"
+        self.fileMap["frequencyvnafile"] = path(outputFile).abspath()
         OUTMSTFILE = OUTMSTDISTANCEFILE = ""
         try:
             OUTFILE = open(outputFile, 'w')
@@ -913,6 +932,7 @@ class IDSS():
             sys.exit(msg)
 
         outpairsFile = self.outputDirectory + self.inputFile[0:-4] + "-frequency-pairs.vna"
+        self.fileMap['frequencypairsvnafile'] = path(outpairsFile).abspath()
         try:
             OUTPAIRSFILE = open(outpairsFile, 'w')
         except csv.Error as e:
@@ -922,6 +942,8 @@ class IDSS():
         outmstFile = self.inputFile[0:-4] + "frequency-mst.vna"
         outmst2File = self.inputFile[0:-4] + "frequency-mst-dist.vna"
         if self.args['mst'] not in self.FalseList:
+            self.fileMap['frequencymstvnafile'] = path(outmstFile).abspath()
+            self.fileMap['frequencymstdistvnafile'] = path(outmst2File).abspath()
             try:
                 OUTMSTFILE = open(outmstFile, 'w')
                 OUTMSTDISTANCEFILE = open(outmst2File, 'w')
@@ -966,13 +988,18 @@ class IDSS():
         for n,d in graph.nodes_iter(data=True):
             w.point(float(d['xCoordinate']),float(d['yCoordinate']))
             w.record(d['name'],'Point')
-        w.save(shapefilename[0:-4]+"frequency-points.shp")
+        fname = shapefilename[0:-4]+"frequency-points.shp"
+        self.fileMap['frequencypointsshapefile'] = path(fname).abspath()
+        w.save(fname)
 
 
 
     def createAtlasOfSolutions(self, filteredarray, type):
         plt.rcParams['font.family']='sans-serif'
-        plt.figure(self.inputFile[0:-4] + "-" + str(type) + "-atlas.png", figsize=(8, 8))
+        atlasfilename = self.outputDirectory + self.inputFile[0:-4] + "-" + str(type) + "-atlas.png"
+        atlasFileKey = type + 'atlasfile'
+        self.fileMap[atlasFileKey] = path(atlasfilename).abspath()
+        plt.figure(atlasfilename, figsize=(8, 8))
         num = 0
         for g in filteredarray:
             t = 0
@@ -1007,16 +1034,19 @@ class IDSS():
                     with_labels=True,
                     labels=names
             )
-        atlasFile = self.outputDirectory + self.inputFile[0:-4] + "-" + str(type) + "-atlas.png"
-        plt.savefig(atlasFile, dpi=400)
-        #plt.show() # display
+        plt.savefig(atlasfilename, dpi=400)
+
 
     def outputExcel(self, filteredarray, filename, type):
         csv.register_dialect('excel_tab', delimiter='\t',lineterminator="\n")
         textFileName = filename +"-"+type+"-seriations.txt"
+        fileMapTxtKey = type + "exceltxtfile"
+        self.fileMap[fileMapTxtKey] = path(textFileName).abspath()
         f=open(textFileName, 'wb')
         writer=csv.writer(f,'excel_tab')
         excelFileName= filename + "-" + type + ".xlsx"
+        fileMapExcelKey = type + "excelwookbookfile"
+        self.fileMap[fileMapExcelKey] = path(excelFileName).abspath()
         workbook = xlsxwriter.Workbook(excelFileName)
         worksheet = workbook.add_worksheet()
         row = 0
@@ -1252,23 +1282,32 @@ class IDSS():
         return filtered_graph_list
 
     ## Output to file and to the screen
-    def graphOutput(self, sumGraph, sumgraphfilename):
+    def graphOutput(self, graph, graphfname, graphtype, type):
 
         ## Now make the graphic for set of graphs
         plt.rcParams['text.usetex'] = False
         plt.rcParams['font.family']='sans-serif'
-        newfilename = sumgraphfilename
-        gmlfilename = sumgraphfilename + ".gml"
-        self.saveGraph(sumGraph, gmlfilename)
+        newfilename = graphfname + "-" + type
+        gmlfilename = graphfname + "-" + type + ".gml"
+        pngfilename = graphfname + "-" + type + ".png"
+        gmltag = type + graphtype + "gmlfile"
+        pngtag = type + graphtype + "pngfile"
+        self.fileMap[gmltag] = path(gmlfilename).abspath()
+        self.fileMap[pngtag] = path(pngfilename).abspath()
+
+        self.saveGraph(graph, gmlfilename)
         if self.args['shapefile'] is not None and self.args['xyfile'] is not None:
-            self.createShapefile(sumGraph,  newfilename[0:-4] + ".shp")
+            sumgraphshpfile = newfilename[0:-4] + ".shp"
+            shapetag = type + graphtype + "shapefile"
+            self.fileMap[shapetag] = path(sumgraphshpfile).abspath()
+            self.createShapefile(graph,  sumgraphshpfile)
         plt.figure(newfilename, figsize=(8, 8))
         os.environ["PATH"] += ":/usr/local/bin:"
-        pos = nx.graphviz_layout(sumGraph)
+        pos = nx.graphviz_layout(graph)
         edgewidth = []
 
         ### Note the weights here are biased where the *small* differences are the largest (since its max value - diff)
-        weights = nx.get_edge_attributes(sumGraph, 'weight')
+        weights = nx.get_edge_attributes(graph, 'weight')
         for w in weights:
             edgewidth.append(weights[w])
         maxValue = max(edgewidth)
@@ -1277,24 +1316,25 @@ class IDSS():
             widths.append(((maxValue - w) + 1) * 5)
 
         assemblageSizes = []
-        sizes = nx.get_node_attributes(sumGraph, 'size')
+        sizes = nx.get_node_attributes(graph, 'size')
         #print sizes
         for s in sizes:
             #print sizes[s]
             assemblageSizes.append(sizes[s]/self.totalAssemblageSize*self.nodeSizeFactor)
-        nx.draw_networkx_edges(sumGraph, pos, alpha=0.3, width=widths)
-        sizes = nx.get_node_attributes(sumGraph, 'size')
-        nx.draw_networkx_nodes(sumGraph, pos, node_size=assemblageSizes, font_family='sans-serif',node_color='w', alpha=0.4)
-        nx.draw_networkx_edges(sumGraph, pos, alpha=0.4, node_size=0, width=1, edge_color='k')
-        nx.draw_networkx_labels(sumGraph, pos, font_family='sans-serif', fontname='Helvetica', fontsize=10)
+        nx.draw_networkx_edges(graph, pos, alpha=0.3, width=widths)
+        sizes = nx.get_node_attributes(graph, 'size')
+        nx.draw_networkx_nodes(graph, pos, node_size=assemblageSizes, font_family='sans-serif',node_color='w', alpha=0.4)
+        nx.draw_networkx_edges(graph, pos, alpha=0.4, node_size=0, width=1, edge_color='k')
+        nx.draw_networkx_labels(graph, pos, font_family='sans-serif', fontname='Helvetica', fontsize=10)
         font = {'fontname': 'Helvetica',
                 'font_family':'sans-serif',
                 'color': 'k',
                 'fontweight': 'bold',
                 'fontsize': 10}
         plt.axis('off')
-        plt.savefig(newfilename, dpi=75)
-        self.saveGraph(sumGraph, newfilename + ".gml")
+        plt.savefig(pngfilename, dpi=75)
+
+        self.saveGraph(graph, pngfilename)
 
 
     ## Output to file and to the screen
@@ -1306,6 +1346,7 @@ class IDSS():
                 sumGraph.add_node(a, name=a, xCoordinate=self.xAssemblage[a], yCoordinate=self.yAssemblage[a],
                                   size=self.assemblageSize[a]/self.totalAssemblageSize*self.nodeSizeFactor)
         sumgraphOutputFile = sumgraphfilename + ".vna"
+        self.fileMap['frequencysumgraphvnafile'] = path(sumgraphOutputFile).abspath()
         SUMGRAPH = open(sumgraphOutputFile, 'w')
         SUMGRAPH.write("*Node data\n")
         SUMGRAPH.write("ID AssemblageSize X Y Easting Northing\n")
@@ -1335,7 +1376,11 @@ class IDSS():
 
         ## Now make the graphic for the sumgraph
         newfilename =  sumgraphfilename + "-weight.png"
-        self.saveGraph(sumGraph, sumgraphfilename + ".gml")
+        sumgraphgml = sumgraphfilename + ".gml"
+
+        self.fileMap['frequencysumgraphpngfile'] = path(newfilename).abspath()
+        self.fileMap['frequencysumgraphgmlfile'] = path(sumgraphgml).abspath()
+        self.saveGraph(sumGraph, sumgraphgml)
         plt.figure(newfilename, figsize=(8, 8))
         plt.rcParams['text.usetex'] = False
         plt.rcParams['font.family']='sans-serif'
@@ -1371,7 +1416,9 @@ class IDSS():
         plt.savefig(newfilename, dpi=75)
 
         if self.args['shapefile'] is not None and self.args['xyfile'] is not None:
-            self.createShapefile(sumGraph, sumgraphfilename + "-weight.shp")
+            fname = sumgraphfilename + "-weight.shp"
+            self.fileMap['frequencysumgraphweightshapefile'] = path(fname).abspath()
+            self.createShapefile(sumGraph, fname )
 
 
     #################################################### OUTPUT SECTION ####################################################
@@ -2354,7 +2401,7 @@ class IDSS():
             all_solutions += end_solutions
             self.log.debug("...parallel processing complete at seriation size %s with %s solutions before filtering.", self.maxSeriationSize, len(all_solutions))
 
-            pickle.dump(all_solutions,open("prefilter-allsolutions.pickle", 'wb'))
+            #pickle.dump(all_solutions,open("prefilter-allsolutions.pickle", 'wb'))
 
             ###########################################################################################################
             freq_filter_solutions = time.time()
@@ -2442,9 +2489,10 @@ class IDSS():
             #################################################### MinMax Graph ############################################
             #print self.args
             minmax_weight_start = time.time()
+            minmaxweightfile = self.outputDirectory + self.inputFile[0:-4] + "-minmax-by-weight"
+            self.fileMap['frequencyminmaxweightpngfile'] = path(minmaxweightfile).abspath()
             minMaxGraphByWeight = self.createMinMaxGraphByWeight(input_graph=sumGraphByWeight, weight='weight')
-            self.graphOutput(minMaxGraphByWeight,
-                        self.outputDirectory + self.inputFile[0:-4] + "-frequency-minmax-by-weight.png")
+            self.graphOutput(minMaxGraphByWeight, minmaxweightfile, 'minmaxbyweight', 'frequency')
 
             minmax_weight_elapsed = time.time() - minmax_weight_start
             self.statsMap["minmax_weight_processing_time"] = minmax_weight_elapsed
@@ -2458,6 +2506,7 @@ class IDSS():
                     self.statsMap['frequency_geographic_pvalue'] = pscore
                     self.log.debug("...Geographic p-value for the frequency seriation minmax solution: %s ", pscore)
                     filename=self.outputDirectory + self.inputFile[0:-4]+"-frequency-geography.txt"
+                    self.fileMap['frequencygeosignificancefile'] = path(filename).abspath()
                     with open(filename, "a") as myfile:
                         text=self.inputFile[0:-4]+"\t"+str(pscore)+"\t"+str(distance)+"\t"+str(geodistance)+"\t" \
                              + str(sd_geodistance)+"\t"+str(self.totalAssemblageSize)+"\n"
@@ -2506,6 +2555,7 @@ class IDSS():
                 nx.draw_networkx_labels(mst,pos,fontsize=10)
                 plt.axis('off')
                 pngfile= self.outputDirectory+"/"+self.inputFile[0:-4]+"-frequency-mst.png"
+                self.fileMap['frequencymstpngfile'] = path(pngfile).abspath()
                 plt.savefig(pngfile,dpi=75)
                 mst_elapsed = time.time() - mst_start
                 self.statsMap["mst_processing_time"] = mst_elapsed
@@ -2536,12 +2586,20 @@ class IDSS():
             #self.outputGraphArray(array)
             sGraphByCount = self.sumGraphsByCount(continuityArray)
             sGraphByWeight = self.sumGraphsByWeight(continuityArray)
-            self.graphOutput(sGraphByCount, self.outputDirectory + self.inputFile[0:-4] + "-continuity-sumgraph.png")
-            self.MST(sGraphByCount, self.outputDirectory + self.inputFile[0:-4] + "-continuity-mst-of-min.png")
+
+            contsumgraphfile = self.outputDirectory + self.inputFile[0:-4] + "-sumgraphbycount"
+            contmstminfile = self.outputDirectory + self.inputFile[0:-4] + "-continuity-mst-of-min.png"
+            contminmaxweightpng = self.outputDirectory +  self.inputFile[0:-4] + "-minmax-by-weight"
+            contminmaxweightgml = contminmaxweightpng
+            contminmaxcountpng = self.outputDirectory + self.inputFile[0:-4] + "-minmax-by-count"
+            contminmaxcountgml = contminmaxcountpng
+
+            self.graphOutput(sGraphByCount, contsumgraphfile, 'sumgraphbycount', 'continuity')
+            self.MST(sGraphByCount, contmstminfile)
             minMaxGraphByWeight = self.createMinMaxGraphByWeight(input_graph=sGraphByWeight, weight='weight')
-            self.graphOutput(minMaxGraphByWeight, self.outputDirectory +  self.inputFile[0:-4] + "-continuity-minmax-by-weight.png")
+            self.graphOutput(minMaxGraphByWeight,contminmaxweightgml, 'sumgraphbyweight', 'continuity')
             minMaxGraphByCount = self.createMinMaxGraphByCount(input_graph=sGraphByCount, weight='weight')
-            self.graphOutput(minMaxGraphByCount, self.outputDirectory + self.inputFile[0:-4] + "-continuity-minmax-by-count.png")
+            self.graphOutput(minMaxGraphByCount,contminmaxcountgml, 'minmaxbycount', 'continuity')
             if self.args['atlas'] not in self.FalseList:
                 self.createAtlasOfSolutions(continuityArray, "continuity")
 
@@ -2565,13 +2623,13 @@ class IDSS():
             validSeriations = self.findValidSeriations(minMaxGraphByWeight)
 
             if self.args['atlas'] not in self.FalseList:
-                self.createAtlasOfSolutions(validSeriations, "continuity-valid-seriations")
+                self.createAtlasOfSolutions(validSeriations, "continuityvalidseriations")
 
 
             if self.args['excel'] not in self.FalseList:
                 filteredSet=self.filterInclusiveSolutions(validSeriations)
-                self.createAtlasOfSolutions(filteredSet, "continuity-unique-valid-seriations")
-                excelFileName,textFileName=self.outputExcel(filteredSet, self.outputDirectory+self.inputFile[0:-4], "valid_continuity")
+                self.createAtlasOfSolutions(filteredSet, "continuityuniquevalidseriations")
+                excelFileName,textFileName=self.outputExcel(filteredSet, self.outputDirectory+self.inputFile[0:-4], "continuityvalidseriations")
                 seriation = frequencySeriationMaker()
                 argument={'inputfile':textFileName, 'multiple':True}
                 seriation.makeGraph(argument)
@@ -2583,6 +2641,7 @@ class IDSS():
                     self.statsMap['continuity_geographic_pvalue'] = pscore
                     self.log.debug("...geographic p-value for the continuity seriation minmax solution: %s", pscore)
                     filename=self.outputDirectory + self.inputFile[0:-4] + "-continuity-geography.txt"
+                    self.fileMap['continuitygeosignificancefile'] = path(filename).abspath()
                     with open(filename, "a") as myfile:
                         text=self.inputFile[0:-4]+"\t"+str(pscore)+"\t"+str(distance)+"\t"+str(geodistance)+"\t" \
                              + str(sd_geodistance)+"\t"+str(self.totalAssemblageSize)+"\n"
@@ -2609,7 +2668,7 @@ class IDSS():
 
         self.finalize_metadata_and_cleanup()
 
-        return frequencyArray, continuityArray, notPartOfSeriationsList, self.statsMap
+        return frequencyArray, continuityArray, notPartOfSeriationsList, self.statsMap, self.fileMap
 
 
 

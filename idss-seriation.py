@@ -87,6 +87,6 @@ if __name__ == "__main__":
     seriation = IDSS()
     args = parse_arguments()
     seriation.initialize(args,sys.argv)
-    (frequencyResults, continuityResults, exceptionList, statsMap) = seriation.seriate()
+    (frequencyResults, continuityResults, exceptionList, statsMap, fileMap) = seriation.seriate()
 
 
