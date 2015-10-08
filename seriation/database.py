@@ -16,6 +16,7 @@ import logging as logger
 
 
 class SeriationFileLocations(EmbeddedDocument):
+    # files used by IDSS.py itself
     inputfile = StringField()
     xyfile = StringField()
     pairfile = StringField()
@@ -59,6 +60,15 @@ class SeriationFileLocations(EmbeddedDocument):
     continuitysumgraphbycountgmlfile = StringField()
     continuityminmaxbyweightpngfile = StringField()
     continuityminmaxbyweightgmlfile = StringField()
+
+    # files created by analysis scripts
+    # annotation in seriationct
+    annotatedfreqminmaxbyweightgmlfile = StringField()
+    annotatedfreqminmaxbyweightdotfile = StringField()
+    annotatedfreqminmaxbyweightpngfile = StringField()
+    annotatedcontminmaxbyweightgmlfile = StringField()
+    annotatedcontminmaxbyweightdotfile = StringField()
+    annotatedcontminmaxbyweightpngfile = StringField()
 
 
 
