@@ -14,6 +14,9 @@ import datetime
 import logging as logger
 
 
+def get_file_location_keys():
+    return sorted([k for k,v in SeriationFileLocations._fields.iteritems()])
+
 
 class SeriationFileLocations(EmbeddedDocument):
     # files used by IDSS.py itself

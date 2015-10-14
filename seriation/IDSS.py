@@ -2597,7 +2597,7 @@ class IDSS():
             self.graphOutput(sGraphByCount, contsumgraphfile, 'sumgraphbycount', 'continuity')
             self.MST(sGraphByCount, contmstminfile)
             minMaxGraphByWeight = self.createMinMaxGraphByWeight(input_graph=sGraphByWeight, weight='weight')
-            self.graphOutput(minMaxGraphByWeight,contminmaxweightgml, 'sumgraphbyweight', 'continuity')
+            self.graphOutput(minMaxGraphByWeight,contminmaxweightgml, 'minmaxbyweight', 'continuity')
             minMaxGraphByCount = self.createMinMaxGraphByCount(input_graph=sGraphByCount, weight='weight')
             self.graphOutput(minMaxGraphByCount,contminmaxcountgml, 'minmaxbycount', 'continuity')
             if self.args['atlas'] not in self.FalseList:
