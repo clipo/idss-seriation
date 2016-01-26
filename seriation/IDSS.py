@@ -1346,7 +1346,7 @@ class IDSS():
                 sumGraph.add_node(a, name=a, xCoordinate=self.xAssemblage[a], yCoordinate=self.yAssemblage[a],
                                   size=self.assemblageSize[a]/self.totalAssemblageSize*self.nodeSizeFactor)
         sumgraphOutputFile = sumgraphfilename + ".vna"
-        self.fileMap['frequencysumgraphvnafile'] = path(sumgraphOutputFile).abspath()
+        self.fileMap['frequencysumgraphbyweightvnafile'] = path(sumgraphOutputFile).abspath()
         SUMGRAPH = open(sumgraphOutputFile, 'w')
         SUMGRAPH.write("*Node data\n")
         SUMGRAPH.write("ID AssemblageSize X Y Easting Northing\n")
@@ -1378,8 +1378,8 @@ class IDSS():
         newfilename =  sumgraphfilename + "-weight.png"
         sumgraphgml = sumgraphfilename + ".gml"
 
-        self.fileMap['frequencysumgraphpngfile'] = path(newfilename).abspath()
-        self.fileMap['frequencysumgraphgmlfile'] = path(sumgraphgml).abspath()
+        self.fileMap['frequencysumgraphbyweightpngfile'] = path(newfilename).abspath()
+        self.fileMap['frequencysumgraphbyweightgmlfile'] = path(sumgraphgml).abspath()
         self.saveGraph(sumGraph, sumgraphgml)
         plt.figure(newfilename, figsize=(8, 8))
         plt.rcParams['text.usetex'] = False
