@@ -1,3 +1,4 @@
+ez_setup
 setuptools
 matplotlib
 multiprocessing
