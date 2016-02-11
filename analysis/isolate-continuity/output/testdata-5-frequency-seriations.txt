@@ -1,0 +1,30 @@
+Seriation_Number	Assemblage	Type_1	Type_2	Type_3	Type_4
+1	Assemblage-4	0	30	20	50
+1	Assemblage-3	0	45	5	50
+1	Assemblage-2	0	48	5	47
+1	Assemblage-1	0	50	5	45
+
+2	Assemblage-5	20	10	30	40
+2	Assemblage-2	0	48	5	47
+2	Assemblage-1	0	50	5	45
+
+3	Assemblage-5	20	10	30	40
+3	Assemblage-3	0	45	5	50
+3	Assemblage-1	0	50	5	45
+
+4	Assemblage-5	20	10	30	40
+4	Assemblage-3	0	45	5	50
+4	Assemblage-2	0	48	5	47
+
+5	Assemblage-5	20	10	30	40
+5	Assemblage-4	0	30	20	50
+5	Assemblage-1	0	50	5	45
+
+6	Assemblage-5	20	10	30	40
+6	Assemblage-4	0	30	20	50
+6	Assemblage-2	0	48	5	47
+
+7	Assemblage-5	20	10	30	40
+7	Assemblage-4	0	30	20	50
+7	Assemblage-3	0	45	5	50
+

@@ -19,15 +19,14 @@ if __name__ == "__main__":
     parser.add_argument("--outputdirectory", help="path to directory where IDSS output directories will be created",
                         required=True)
     parser.add_argument("--xyfile", help="path to XY coordinate file for spatial significance", required=True)
-    parser.add_argument("--dryrun",
-                        help="Flag to show what the script will do without executing anything.  Set to zero (0) to actually execute the batch",
-                        type=int, default=1)
     parser.add_argument("--execpath", help="Path to the IDSS executable script (optional)")
     parser.add_argument("--parallelbackground", help="Start the seriations in the background, all at once (don't do this with big batches, use Grid Engine!)", type=int, default=0)
     parser.add_argument("--dobootstrapsignificance", type=int, default=1, help="Perform bootstrap significance tests with a 95% CI")
     parser.add_argument("--database", help="Name of database to store seriation run statistics in")
     parser.add_argument("--continuity",type=int, help="Perform continuity seriation",default=0)
     parser.add_argument("--frequency",type=int, help="Perform frequency seriation",default=1)
+    parser.add_argument("--createcommandfile", type=int, default=0, help="produce a file of the commands to be executed instead of directly executing the seriations (useful for grid engine)")
+    parser.add_argument("--commandfile", help="Name of command file to be written for this batch of seriations")
 
     args = parser.parse_args()
 
@@ -38,10 +37,13 @@ if __name__ == "__main__":
 
     print "WARNING:  At the moment, this script should only be used to process a directory of input files associated with a single XY file\n"
 
-    if args.parallelbackground == 1:
-        base_cmd = "( nohup "
-    else:
-        base_cmd = ''
+    f = None
+    if args.createcommandfile == 1:
+        f = open(args.commandfile, 'wb')
+        f.write("#!/bin/sh")
+        f.write('\n')
+
+    base_cmd = ''
 
     if args.database is not None:
         base_cmd += "idss-seriation-mongodb.py --debug 0 --graphs 0 --spatialbootstrapN 100 --spatialsignificance=1 "
@@ -71,18 +73,18 @@ if __name__ == "__main__":
     for file in os.listdir(args.inputdirectory):
         if fnmatch.fnmatch(file, '*.txt'):
 
-            if args.dryrun == 0:
-                log.info("Processing input file: %s", file)
-            else:
-                log.info("Dry run for input file: %s", file)
+            log.info("Processing input file: %s", file)
 
             root = parse_filename_into_root(file)
 
             inputfile = args.inputdirectory + "/" + file
 
             outdir = os.getcwd() + '/' + args.outputdirectory + "/" + root
-            if args.dryrun == 0:
+
+            try:
                 os.mkdir(outdir)
+            except:
+                pass
 
         if args.execpath is not None:
             cmd = args.execpath + "/"
@@ -97,7 +99,13 @@ if __name__ == "__main__":
                 cmd += " & ) &"
 
             log.debug("cmd: %s", cmd)
-            if args.dryrun == 0:
+
+            if args.createcommandfile == 0:
                 os.system(cmd)
+            else:
+                f.write(cmd)
+                f.write('\n')
+
+    f.close()
 
 

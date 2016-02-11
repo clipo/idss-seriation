@@ -130,7 +130,8 @@ setup(name="idss-seriation",
       scripts = [
         'idss-seriation.py',
         'idss-seriation-mongodb.py',
-	    'utilities/run-idss-batch.py'
+	    'utilities/run-idss-batch.py',
+        'utilities/idss-batch-builder.py'
       ],
       author='Carl P. Lipo and Mark E. Madsen',
       author_email='clipo@csulb.edu',
