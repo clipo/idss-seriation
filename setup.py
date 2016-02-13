@@ -131,6 +131,7 @@ setup(name="idss-seriation",
         'idss-seriation.py',
         'idss-seriation-mongodb.py',
 	    'utilities/run-idss-batch.py',
+        'utilities/idss-pickle-input.py',
         'utilities/idss-batch-builder.py'
       ],
       author='Carl P. Lipo and Mark E. Madsen',

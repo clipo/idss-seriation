@@ -13,7 +13,7 @@ with minimizing hamming distance in our 2015 paper with MJO et al.
 import networkx as nx
 import numpy as np
 
-from ..common_utilities import iso_filter_graphs, interassemblage_distance_euclidean
+from ..common_utilities import iso_filter_graphs, interassemblage_distance_euclidean, create_complete_distance_weighted_graph
 
 
 def _continuitySeriationImpl(assemblages,assemblageFrequencies,assemblageSize,xAssemblage,yAssemblage):
@@ -178,4 +178,6 @@ def _euclidean_minimum_spanning_tree_seriation_impl(assemblages,assemblageFreque
     :param yAssemblage:
     :return:
     """
-    pass
+    cg = create_complete_distance_weighted_graph(assemblages,assemblageFrequencies,interassemblage_distance_euclidean)
+    mst_g = nx.minimum_spanning_tree(cg)
+    return mst_g
