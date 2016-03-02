@@ -209,13 +209,15 @@ class SeriationDatabase(object):
 
         profile = SeriationProfilingData()
 
-        profile.bootstrap_ci_processing_time = stats_map["bootstrap_ci_processing_time"]
-        profile.total_frequency_processing_time = stats_map['frequency_processing_time']
-        profile.freq_main_processing_time = stats_map['freq_main_processing_time']
-        profile.freq_filter_processing_time = stats_map['frequency_filter_solutions_time']
-        profile.freq_sumgraphweight_processing_time = stats_map["sumgraphweight_processing_time"]
-        profile.freq_output_processing_time = stats_map["frequency_output_processing_time"]
-        profile.freq_minmaxweight_processing_time = stats_map["minmax_weight_processing_time"]
+        if 'bootstrap_ci_processing_time' in stats_map:
+            profile.bootstrap_ci_processing_time = stats_map["bootstrap_ci_processing_time"]
+        if 'frequency_processing_time' in stats_map:
+            profile.total_frequency_processing_time = stats_map['frequency_processing_time']
+            profile.freq_main_processing_time = stats_map['freq_main_processing_time']
+            profile.freq_filter_processing_time = stats_map['frequency_filter_solutions_time']
+            profile.freq_sumgraphweight_processing_time = stats_map["sumgraphweight_processing_time"]
+            profile.freq_output_processing_time = stats_map["frequency_output_processing_time"]
+            profile.freq_minmaxweight_processing_time = stats_map["minmax_weight_processing_time"]
 
         if 'spatial_processing_time' in stats_map:
             profile.freq_spatial_processing_time = stats_map["spatial_processing_time"]
