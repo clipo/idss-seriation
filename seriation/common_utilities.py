@@ -40,6 +40,8 @@ def interassemblage_geographic_distance(a1, a2, xAssemblages, yAssemblages):
     :param yAssemblages:
     :return:
     """
+    raise NotImplemented
+
 
 def interassemblage_distance_euclidean(assemblage1freq, assemblage2freq):
     """

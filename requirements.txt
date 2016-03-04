@@ -11,6 +11,6 @@ svgwrite
 uuid
 xlsxwriter
 mongoengine
-reportlab
 pydot2
 pygraphviz
+reportlab
