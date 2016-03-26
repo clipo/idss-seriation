@@ -75,6 +75,8 @@ def parse_arguments():
     parser.add_argument('--minmaxbycount',default=None, help='Create a minmax solution from the aggregate set by weighting on the basis of # of times edges appear in solutions. Default is None.')
     parser.add_argument('--delimiter', help="character delimiting the fields in inputfile", default='\t')
     parser.add_argument('--preservepickle', help="Do not delete pickle directory, to allow for debugging", type=int, default=0)
+    parser.add_argument("--source_identifier", help="Identifier for the source of the input data, often used in large batches of simulation/seriation pairs to tie steps of an experiment together", type=str, default="none")
+
 
     return parser.parse_args()
 

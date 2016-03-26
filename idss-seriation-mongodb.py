@@ -82,6 +82,7 @@ def parse_arguments():
     parser.add_argument("--database", help="Name of Mongodb database to use for saving metadata", required=True)
     parser.add_argument("--dbuser", help="Username on MongoDB database server, optional")
     parser.add_argument("--dbpassword", help="Password on MongoDB database server, optional")
+    parser.add_argument("--source_identifier", help="Identifier for the source of the input data, often used in large batches of simulation/seriation pairs to tie steps of an experiment together", default="none", type=str)
 
     return parser.parse_args()
 

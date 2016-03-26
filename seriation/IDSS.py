@@ -112,6 +112,7 @@ class IDSS():
         self.delimiter = ""
         self.pickledir = ""
         self.seriation_run_identifier = None
+        self.source_identifier = None
 
 
     def _setup_defaults(self):
@@ -150,7 +151,8 @@ class IDSS():
                     'spatialbootstrapN':None,
                     'minmaxbycount':None,
                     'delimiter': None,
-                    'preservepickle' : 0
+                    'preservepickle' : 0,
+                    'source_identifier': 'none'
                     }
         return self.defaults
 
@@ -172,6 +174,7 @@ class IDSS():
             args_map = parsed_args
         self.args = self._setup_defaults()
         self.args.update(args_map)
+
         self.initialized = True
         self.statsMap["cmdline"] = " ".join(full_cmdline)
 
@@ -896,6 +899,8 @@ class IDSS():
 
         VERFILE.write("RunID: %s" % self.seriation_run_identifier)
         VERFILE.write("\n")
+
+        VERFILE.write("source_identifier: %s" % self.args['source_identifier'])
 
         for k,v in self.statsMap.items():
             VERFILE.write("%s: %s" % (k,v))

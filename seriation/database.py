@@ -148,6 +148,7 @@ class SeriationRun(Document):
     num_assemblages = IntField()
     num_classes = IntField()
     date_seriation_run = DateTimeField(default=datetime.datetime.now)
+    source_identifier = StringField()
     meta = {'allow_inheritance': True}
 
 
@@ -248,7 +249,7 @@ class SeriationDatabase(object):
         srun.seriation_run_id = stats_map['seriation_run_id']
         srun.num_assemblages = stats_map["num_assemblages"]
         srun.num_classes = stats_map["num_classes"]
-
+        srun.source_identifier = self.args.source_identifier
 
 
         # add the results from various seriation types
