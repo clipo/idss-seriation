@@ -152,7 +152,7 @@ class SeriationRun(Document):
     meta = {'allow_inheritance': True}
 
 
-
+#TODO:  Index the table to make annotation easy
 
 
 class SeriationDatabase(object):
