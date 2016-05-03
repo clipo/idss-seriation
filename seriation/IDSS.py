@@ -1339,7 +1339,7 @@ class IDSS():
         plt.axis('off')
         plt.savefig(pngfilename, dpi=75)
 
-        self.saveGraph(graph, pngfilename)
+        self.saveGraph(graph, gmlfilename)
 
 
     ## Output to file and to the screen

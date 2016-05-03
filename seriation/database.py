@@ -124,6 +124,7 @@ class ContinuitySeriationResult(EmbeddedDocument):
 
 
 
+
 class MinmaxSolutionMetrics(EmbeddedDocument):
     """
     Scores or metrics from minmax seriation solutions
