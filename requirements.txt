@@ -2,7 +2,7 @@ ez_setup
 setuptools
 matplotlib
 multiprocessing
-networkx
+networkx==1.9.1
 numpy
 pysvg
 scipy
