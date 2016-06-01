@@ -75,6 +75,9 @@ place to start.
  You will also need to install the GraphViz libraries. GraphViz is available for Mac OS X, Windows, Linux and
   can be installed by going to http://www.graphviz.org/Download.php.
 
+For Ubuntu, you will need to install graphviz before running pip install -r requirements.txt:
+
+   sudo apt-get install graphviz libgraphviz-dev
 
 3.  After dependencies are installed, run the installation script:
 
