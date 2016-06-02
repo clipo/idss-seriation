@@ -1,4 +1,4 @@
-__author__ = 'carllipo'
+#!/usr/bin/env python
 
 
 import logging as logger
