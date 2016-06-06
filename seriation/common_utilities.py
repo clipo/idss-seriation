@@ -85,3 +85,49 @@ def create_complete_distance_weighted_graph(assemblages, assemblageFreq, distanc
     return g
 
 
+def calculateFstForGraph(graph,assemblageFreq):
+    """Given a graph of assemblages, calculate the Fst for the set of assemblages.
+    :param graph: NetworkX graph of assemblages
+    :param assemblageFreq: dict of assemblage frequency lists, with assemblages as key
+    :return: Fst value
+    """
+
+    Hs = 0.0
+
+    average_Type_Frequencies=np.array([])
+    ## iterate through the nodes in the graph
+    num_of_columns=0
+
+    for node in graph.nodes():
+
+        ## get the list of types for the assemblages
+        typelist=assemblageFreq[node]
+        ## count the columns. We do this so we can match the columns between assembalges to do the calculations
+        num_of_columns = len(typelist)
+        # Hs:  Calculate the average of these subpopulation heterozygosities
+        Hs_array=np.asarray(typelist)
+        Hs += np.mean(Hs_array)
+
+    Hs_total=Hs/len(graph.nodes())
+    Ht=0.0
+
+    for i in range(0, num_of_columns):
+        type_array = np.array([])
+        sum=0
+        count=0
+        for node in graph.nodes():
+            typelist = assemblageFreq[node]
+            np.append(type_array,typelist[i])
+            sum += typelist[i]
+            count +=1
+        np.append(average_Type_Frequencies,sum/count)
+
+    Ht=np.prod(average_Type_Frequencies)
+
+    Fst=(Ht-Hs_total)/Ht
+    return Fst
+
+
+
+
+
