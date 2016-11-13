@@ -132,10 +132,12 @@ setup(name="idss-seriation",
         'idss-seriation-mongodb.py',
 	    'utilities/run-idss-batch.py',
         'utilities/idss-pickle-input.py',
-        'utilities/idss-batch-builder.py'
+        'utilities/idss-batch-builder.py',
+	'utilities/frequencySeriationMaker.py',
+	'utilities/occurrenceSeriationMaker.py'
       ],
       author='Carl P. Lipo and Mark E. Madsen',
-      author_email='clipo@csulb.edu',
+      author_email='clipo@binghamton.edu',
       url='https://github.com/clipo/idss-seriation',
       classifiers=[
           'Development Status :: 2 - Beta',

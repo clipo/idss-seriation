@@ -2455,8 +2455,8 @@ class IDSS():
             self.log.debug("...sum graph by weight processing complete: %s", sumgraphweight_elapsed)
 
             ## optional output. Summing graph by count (and then minmax) is very confusing at this point and not very useful. Making optional.
-            # if self.args['minmaxbycount'] not in self.FalseList:
-            #     sumGraphByCount = self.sumGraphsByCount(frequencyArray)
+            #if self.args['minmaxbycount'] not in self.FalseList:
+            #    sumGraphByCount = self.sumGraphsByCount(frequencyArray)
             #     self.sumGraphOutput(sumGraphByCount, self.outputDirectory + self.inputFile[0:-4] + "-sumgraph-by-count")
 
             if self.args['excel'] not in self.FalseList:
@@ -2592,16 +2592,16 @@ class IDSS():
             sGraphByCount = self.sumGraphsByCount(continuityArray)
             sGraphByWeight = self.sumGraphsByWeight(continuityArray)
 
-            contsumgraphfile = self.outputDirectory + self.inputFile[0:-4] + "-sumgraph-by-count"
-            contsumgraphweightfile = self.outputDirectory + self.inputFile[0:-4] + "-sumgraph-by-weight"
             contmstminfile = self.outputDirectory + self.inputFile[0:-4] + "-continuity-mst-of-min.png"
+            contsumgraphbycountfile = self.outputDirectory + self.inputFile[0:-4] + "-sumgraph-by-count"
+            contsumgraphbyweightfile = self.outputDirectory + self.inputFile[0:-4] + "-sumgraph-by-weight"
             contminmaxweightpng = self.outputDirectory +  self.inputFile[0:-4] + "-minmax-by-weight"
             contminmaxweightgml = contminmaxweightpng
             contminmaxcountpng = self.outputDirectory + self.inputFile[0:-4] + "-minmax-by-count"
             contminmaxcountgml = contminmaxcountpng
 
-            self.graphOutput(sGraphByCount, contsumgraphfile, 'sumgraphbycount', 'continuity')
-            self.graphOutput(sGraphByWeight, contsumgraphweightfile, 'sumgraphbyweight', 'continuity')
+            self.graphOutput(sGraphByCount, contsumgraphbycountfile, 'sumgraph-by-count', 'continuity')
+            self.graphOutput(sGraphByWeight, contsumgraphbyweightfile, 'sumgraph-by-weight', 'continuity')
             self.MST(sGraphByCount, contmstminfile)
             minMaxGraphByWeight = self.createMinMaxGraphByWeight(input_graph=sGraphByWeight, weight='weight')
             self.graphOutput(minMaxGraphByWeight,contminmaxweightgml, 'minmaxbyweight', 'continuity')

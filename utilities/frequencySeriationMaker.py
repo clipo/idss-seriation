@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+# Copyright (c) 2013-2015.  Carl P. Lipo <clipo@binghamton.edu>
+#
+# This work is licensed under the terms of the Apache Software License, Version 2.0.  See the file LICENSE for details.
+__author__ = 'carllipo'
 
 
 import logging as logger

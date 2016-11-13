@@ -1,8 +1,16 @@
 #!/usr/bin/env python
+# Copyright (c) 2013-2015.  Carl P. Lipo <clipo@binghamton.edu>
+#
+# This work is licensed under the terms of the Apache Software License, Version 2.0.  See the file LICENSE for details.
+__author__ = 'carllipo'
 
-
+import pysvg
+from pysvg import *
 import logging as logger
+import itertools
 import math
+import numpy as np
+import xlsxwriter
 import sys
 import csv
 import argparse
@@ -10,10 +18,12 @@ import numpy as np
 import scipy as sp
 import scipy.stats
 import svgwrite
+from svgwrite import cm, mm
 import random
+from svglib.svglib import svg2rlg
+from reportlab.graphics import renderPDF
 
-
-class frequencySeriationMaker():
+class occurrenceSeriationMaker():
     color = ["b", "r", "m", "y", "k", "w", (0.976, 0.333, 0.518), (0.643, 0.416, 0.894),
              (0.863, 0.66, 0.447), (0.824, 0.412, 0.118)]
 
@@ -41,11 +51,16 @@ class frequencySeriationMaker():
         self.dwg=None
         self.rowPosition=200
         self.rowHeight=15
-        self.columnSize=200
-        self.barScale=200
+        self.columnSize=25
+        self.barScale=1000
         self.seriationNumber=0
         self.args={}
-        self.FalseList=[None,0,False,"None","0","False"]
+        self.outputRowAssemblage={}
+        self.occurrenceValues={}
+        self.simplifiedList = dict()
+        self.occurrenceSeriationList={}
+        self.newList={}
+        self.columnStart=0
 
     def processSeriationData(self):
         try:
@@ -65,7 +80,7 @@ class frequencySeriationMaker():
             else:      ## ignore the first row here. we just need the assemblage info
                 row = map(str, row)
                 if len(row)>0:
-                    if self.args['multiple'] in self.FalseList:
+                    if self.args['multiple'] in (None, 'False', '0'):
                         sernum=1
                         label=row[0]
                     else:
@@ -77,7 +92,7 @@ class frequencySeriationMaker():
                         self.maxAssemblageLabelLength=labelLength
             rowcount += 1
         file.close()
-
+        self.rowPosition += self.maxAssemblageLabelLength
         ## initialize positions
         for n in range(0,self.numberOfClasses+1):
             self.typePositions.append(n)
@@ -92,14 +107,14 @@ class frequencySeriationMaker():
         count =0
         index=2
         reader = csv.reader(file, delimiter='\t', quotechar='|')
-        self.rowPosition = self.rowIndex*5
+        self.rowPosition = 200
         startBlock=0
         startcorner=self.rowPosition
         for row in reader:
             ## first row is the header row with the type names.
             if count==0:
                 row = map(str,row)
-                if self.args['multiple'] in self.FalseList:
+                if self.args['multiple'] in (None, 'False', "0"):
                     row.pop(0)
                 else:
                     row.pop(0)
@@ -107,36 +122,39 @@ class frequencySeriationMaker():
                 for r in row:
                     self.typeNames.append(r)
                 count +=1
-                self.outputHeaderRow(self.typeNames)
-                self.rowPosition += self.rowIndex
-                startcorner=self.rowPosition
+                self.headerRow=(self.typeNames)
+                self.headerRowPosition=self.rowPosition
             else:
                 if len(row) > 1:
                     index += 1
                     row = map(str, row)
-                    #print self.args
-                    if self.args['multiple'] in self.FalseList:
+                    if self.args['multiple'] in (None, 'False', '0'):
                         self.seriationNumber=1
                         label=row[0]
                         self.labels.append(label)
-                        #print "row before: ", row
                         row.pop(0)
-                        #print "row after: ", row
-                        row = map(float, row)
                     else:
                         self.seriationNumber=float(row[0])
                         label = row[1]
                         self.labels.append(label)
-                        #print "Row first: ", row
                         row.pop(0)
                         row.pop(0)
-                        #print "row after: ", row
-                        #print "row!", row[3:]
-                        row = map(float, row)
-                    self.numberOfClasses = len(row)
+                    #print row
+                    row = map(float, row)
+                    newrow=[]
+                    rowtext=""
+                    for r in row:
+                        if r>0:
+                            r = 1.0
+                            rowtext += "1"
+                        else:
+                            r = 0.0
+                            rowtext += "0"
+                        newrow.append(r)
+                    self.numberOfClasses = len(newrow)
                     self.countOfAssemblages += 1
-                    self.outputAssemblageRow(label,row)
-                    self.rowPosition += self.rowIndex
+                    self.outputRowAssemblage[label]=newrow
+                    self.occurrenceValues[label]=rowtext
                 else:
                     endcorner=self.rowPosition+self.rowHeight
                     self.rowPosition += self.rowIndex*2
@@ -144,7 +162,23 @@ class frequencySeriationMaker():
                         self.createBlock(startcorner,endcorner)
                     startcorner=self.rowPosition
 
-        self.maxSeriationSize = self.countOfAssemblages
+        if self.args['multiple'] in (None, 'False', "0"):
+            ## eliminate duplicates (if single)
+            #print "length before: ",len(self.outputRowAssemblage)
+            self.aggregateIdenticalAssemblages()
+            for e in self.outputRowAssemblage:
+                if len(e) > self.maxAssemblageLabelLength:
+                    self.maxAssemblageLabelLength=len(e)
+            #print "length after: ",len(self.outputRowAssemblage)
+
+        self.outputHeaderRow(self.typeNames)
+        self.rowPosition += self.rowIndex
+        startcorner=self.rowPosition
+        for r in self.outputRowAssemblage:
+            self.outputAssemblageRow(r,self.outputRowAssemblage[r])
+            self.rowPosition += self.rowIndex
+
+        self.maxSeriationSize = len(self.labels)
 
         #if args['pdf'] not in (None, False, 0):
         #    drawing = svg2rlg(self.outputFile)
@@ -152,11 +186,45 @@ class frequencySeriationMaker():
 
         return True
 
+    def calculateSumOfDifferences(self, assemblage1, assemblage2):
+        diff = 0
+        for type in range(0, self.numberOfClasses):
+            diff += pow((float(self.outputRowAssemblage[assemblage1][type]) - float(
+                self.outputRowAssemblage[assemblage2][type])),2)
+        return pow(diff,0.5)
+
     def createBlock(self,startcorner,endcorner):
         shapes = self.dwg.add(self.dwg.g(id='background', fill='grey', opacity=0.3))
         shapes.add(self.dwg.rect(insert=(20,  startcorner), size=(self.numberOfClasses*self.columnSize+self.maxAssemblageLabelLength*8+280,
                                                                   endcorner-startcorner),
                         fill='grey',opacity=0.3, stroke='none', stroke_width=1))
+
+    def aggregateIdenticalAssemblages(self):
+        tempList={}
+        for e in self.occurrenceValues:
+            combined = ''.join(self.occurrenceValues[e])
+            self.occurrenceSeriationList[e]=combined
+            val = tempList.get(combined, 0)
+            if val==0:
+                newval = []
+                newval.append(e)
+                tempList[combined]=newval
+                #print "combined: ", combined, " value: ", tempList[combined]
+            else:
+                tempList[combined].append(e)
+                #print "now combined: ", combined, "now value: ", tempList[combined]
+
+        self.occurrenceSeriationList={}
+        self.outputRowAssemblage={}
+        self.labels=[]
+        for t in tempList:
+            newval = str("/".join(tempList[t]))
+            self.occurrenceSeriationList[newval]=t
+            #print "NewKey:", newval, "Value:", t
+            self.outputRowAssemblage[newval]=t
+            self.labels.append(newval)
+
+        return True
 
     def outputHeaderRow(self, typeNames):
 
@@ -169,28 +237,34 @@ class frequencySeriationMaker():
             if length>maxTypeNameLength:
                 maxTypeNameLength=length
 
-        colindex = self.maxAssemblageLabelLength*20
+        colindex = self.maxAssemblageLabelLength*10+self.columnSize+self.columnStart
         count=0
         xpos={}
         for t in self.typeNames:
             count+=1
             #self.dwg.add(self.dwg.textArea(text=t,insert=(colindex, self.rowPosition)))
-            self.dwg.add(self.dwg.text(t, insert=(colindex+80, self.rowPosition)))
+            rotationtext = "rotate(-90,"+str(colindex)+","+str(self.rowPosition)+")"
+            self.dwg.add(self.dwg.text(t, insert=(colindex, self.rowPosition),transform=str(rotationtext)  ))
             colindex += self.columnSize
             self.typePositions[count]=colindex
 
-        self.dwg.add(self.dwg.text("Assemblage Size", insert=(colindex+50,self.rowPosition)))
-        self.assemblageSize=colindex+50
+        #self.dwg.add(self.dwg.text("Assemblage Size", insert=(colindex+50,self.rowPosition)))
+        #self.assemblageSize=colindex+50
 
     def outputAssemblageRow(self, assemblageName, row):
         freq=[]
         values=[]
-        rowtotal = sum(row)
+        #rowtotal = sum(row)
         for r in row:
-            freq.append(float(float(r) / float(rowtotal)))
+            ## turn into occurrence
+            if int(r)>0:
+                r=1.0
+            else:
+                r=0.0
+            freq.append(float(r))
             values.append(float(r))
         self.rowPosition += self.rowIndex
-        assemblageNameXPosition=self.maxAssemblageLabelLength*15-len(assemblageName)*8
+        assemblageNameXPosition=self.maxAssemblageLabelLength*10-len(assemblageName)*7.5+self.columnStart
         self.dwg.add(self.dwg.text(assemblageName, insert=(assemblageNameXPosition, self.rowPosition+self.rowHeight)))
         count = 0
         xposition = self.typePositions[1]
@@ -198,15 +272,18 @@ class frequencySeriationMaker():
         for typeFreq in freq:
             count += 1
             x = self.typePositions[count]
-            width = int(typeFreq*self.barScale)
+            if typeFreq>0:
+                width=10
+            else:
+                width=0
             xposition += self.rowIndex
             #print "width: ", width
             shapes = self.dwg.add(self.dwg.g(id='freqbar', fill='white'))
-            leftx = x-90-(width*0.5)
+            leftx = x-90-(width*0.5)+60
             shapes.add(self.dwg.rect(insert=(leftx,  self.rowPosition), size=(width,self.rowHeight),
-                        fill='white', stroke='black', stroke_width=1))
-            self.errorBars(typeFreq,width,x,leftx,lowerCI[count-1],upperCI[count-1],meanCI[count-1])
-        self.dwg.add(self.dwg.text(int(sum(values)), insert=(self.assemblageSize+25,self.rowPosition+5)))
+                        fill='black', stroke='black', stroke_width=1))
+            #self.errorBars(typeFreq,width,x,leftx,lowerCI[count-1],upperCI[count-1],meanCI[count-1])
+        #self.dwg.add(self.dwg.text(int(sum(values)), insert=(self.assemblageSize+25,self.rowPosition+5)))
         self.dwg.save()
 
 
@@ -329,7 +406,6 @@ class frequencySeriationMaker():
 
     def setupOutput(self):
         self.openFile=self.args['inputfile']
-        #print "File: ", self.openFile
         self.outputFile= self.args['inputfile'][0:-4]+".svg"
         self.dwg = svgwrite.Drawing(self.outputFile, profile='tiny')
 
@@ -364,26 +440,24 @@ if __name__ == "__main__":
         parser.error(str(msg))
         sys.exit()
 
-
-    seriation = frequencySeriationMaker()
-    args['multiple']=False
+    seriation = occurrenceSeriationMaker()
     seriation.makeGraph(args)
 
 ''''
 From the command line:
 
-python ./frequencySeriationMaker.py --inputfile=../testdata/pfg.txt"
+python ./occurrenceSeriationMaker.py --inputfile=../testdata/pfg.txt"
 
 if you want to use this based on the original data that doesn't have a first column with the seriation number (as is true for the IDSS output), you
 need to specify that its a single input.
 
-python ./frequencySeriationMaker.py --multiple=0 --inputfile=../testdata/testdata-two-branches.txt
+python ./occurrenceSeriationMaker.py --multiple=0 --inputfile=../testdata/testdata-two-branches.txt
 
 As a module:
 
-from frequencySeriationMaker import frequencySeriationMaker
+from occurrenceySeriationMaker import occurrenceSeriationMaker
 
-seriation = frequencySeriationMaker()
+seriation = occurrenceSeriationMaker()
 
 args={'inputfile':'../testdata/pfg-cpl-seriations.txt','debug':1 }
 
