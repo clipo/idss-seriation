@@ -993,7 +993,7 @@ class IDSS():
         for n,d in graph.nodes_iter(data=True):
             w.point(float(d['xCoordinate']),float(d['yCoordinate']))
             w.record(d['name'],'Point')
-        fname = shapefilename[0:-4]+"frequency-points.shp"
+        fname = shapefilename[0:-4] + "-points.shp"
         self.fileMap['frequencypointsshapefile'] = path(fname).abspath()
         w.save(fname)
 
@@ -1302,7 +1302,7 @@ class IDSS():
 
         self.saveGraph(graph, gmlfilename)
         if self.args['shapefile'] is not None and self.args['xyfile'] is not None:
-            sumgraphshpfile = newfilename[0:-4] + ".shp"
+            sumgraphshpfile = newfilename + ".shp"
             shapetag = type + graphtype + "shapefile"
             self.fileMap[shapetag] = path(sumgraphshpfile).abspath()
             self.createShapefile(graph,  sumgraphshpfile)
@@ -2592,7 +2592,8 @@ class IDSS():
             sGraphByCount = self.sumGraphsByCount(continuityArray)
             sGraphByWeight = self.sumGraphsByWeight(continuityArray)
 
-            contsumgraphfile = self.outputDirectory + self.inputFile[0:-4] + "-sumgraphbycount"
+            contsumgraphfile = self.outputDirectory + self.inputFile[0:-4] + "-sumgraph-by-count"
+            contsumgraphweightfile = self.outputDirectory + self.inputFile[0:-4] + "-sumgraph-by-weight"
             contmstminfile = self.outputDirectory + self.inputFile[0:-4] + "-continuity-mst-of-min.png"
             contminmaxweightpng = self.outputDirectory +  self.inputFile[0:-4] + "-minmax-by-weight"
             contminmaxweightgml = contminmaxweightpng
@@ -2600,6 +2601,7 @@ class IDSS():
             contminmaxcountgml = contminmaxcountpng
 
             self.graphOutput(sGraphByCount, contsumgraphfile, 'sumgraphbycount', 'continuity')
+            self.graphOutput(sGraphByWeight, contsumgraphweightfile, 'sumgraphbyweight', 'continuity')
             self.MST(sGraphByCount, contmstminfile)
             minMaxGraphByWeight = self.createMinMaxGraphByWeight(input_graph=sGraphByWeight, weight='weight')
             self.graphOutput(minMaxGraphByWeight,contminmaxweightgml, 'minmaxbyweight', 'continuity')
@@ -2628,13 +2630,13 @@ class IDSS():
             validSeriations = self.findValidSeriations(minMaxGraphByWeight)
 
             if self.args['atlas'] not in self.FalseList:
-                self.createAtlasOfSolutions(validSeriations, "continuityvalidseriations")
+                self.createAtlasOfSolutions(validSeriations, "continuity-validseriations")
 
 
             if self.args['excel'] not in self.FalseList:
                 filteredSet=self.filterInclusiveSolutions(validSeriations)
-                self.createAtlasOfSolutions(filteredSet, "continuityuniquevalidseriations")
-                excelFileName,textFileName=self.outputExcel(filteredSet, self.outputDirectory+self.inputFile[0:-4], "continuityvalidseriations")
+                self.createAtlasOfSolutions(filteredSet, "continuity-uniquevalidseriations")
+                excelFileName,textFileName=self.outputExcel(filteredSet, self.outputDirectory+self.inputFile[0:-4], "continuity-validseriations")
                 seriation = frequencySeriationMaker()
                 argument={'inputfile':textFileName, 'multiple':True}
                 seriation.makeGraph(argument)

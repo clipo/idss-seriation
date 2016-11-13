@@ -1,6 +1,5 @@
 # IDSS Seriation #
 
-(Travis build badge goes here)
 
 ## Overview ##
 
