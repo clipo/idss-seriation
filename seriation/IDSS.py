@@ -809,6 +809,7 @@ class IDSS():
                               size=self.assemblageSize[name]/self.totalAssemblageSize*self.nodeSizeFactor)
 
         ## first find global max weight and global min weight
+        ## TODO - we should do this without the 1000 constant, we're just finding min and max here
         globalMaxWeight=0
         globalMinWeight=1000
         for g in filteredarray:
@@ -854,6 +855,8 @@ class IDSS():
                                   size=self.assemblageSize[name]/self.totalAssemblageSize*self.nodeSizeFactor)
 
             maxWeight = 0
+
+            ## TODO:  Is there a bug here - variable e is used in nested loops...?
             for e in g.edges_iter():
                 d = g.get_edge_data(*e)
                 fromAssemblage = e[0]
