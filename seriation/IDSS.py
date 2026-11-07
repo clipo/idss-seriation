@@ -2661,7 +2661,13 @@ class IDSS():
             #################################################### END SECTION ####################################################
 
 
-            nodeList = sumGraphByWeight.nodes()
+            # FIX: the summed graph contains every assemblage, so the old test (membership in
+            # sumGraphByWeight.nodes()) never found an unused assemblage. An assemblage is unused
+            # when it appears in no solution.
+            nodeList = set()
+            for g in frequencyArray:
+                if hasattr(g, "nodes"):
+                    nodeList.update(g.nodes())
             for a in self.assemblages:
                 if a not in nodeList:
                     notPartOfSeriationsList.append(a)

@@ -39,9 +39,13 @@ present in tag v2.0 in the same or a closely related form, except where noted.
 7. **No-solution case** (`_get_longest_subsolution`). An empty list was passed on as a solution
    when no solution existed, which caused a crash in `output`.
 
+8. **Unused assemblages** (`seriate`). Assemblages in no solution were looked up in the summed
+   graph, which contains every assemblage, so the count of unused assemblages was always zero.
+   They are now found from the solutions themselves.
+
 ## Change of method (switchable)
 
-8. **Bootstrap interval** (`confidence_interval`). The original interval was the mean of the
+9. **Bootstrap interval** (`confidence_interval`). The original interval was the mean of the
    bootstrap replicates plus or minus t times their standard error. Its width depends on the number
    of replicates, not on sample size: about 0.20 sampling standard deviations with 100 replicates
    (v2.0) and 0.02 with 10,000 (v2.5.1). The default is now the percentile interval of the
