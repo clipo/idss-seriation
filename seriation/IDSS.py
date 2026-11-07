@@ -153,7 +153,7 @@ class IDSS():
                     'minmaxbycount':None,
                     'delimiter': None,
                     'cimethod': 'percentile',
-                    'dipcriterion': 'neighbor',
+                    'dipcriterion': 'triple',
                     'search': 'idss',
                     'maxorderings': None,
                     'exactengine': 'auto',
@@ -1732,7 +1732,7 @@ class IDSS():
         if self.args.get('threshold') not in (None, "", "None") and float(self.args['threshold']) < 1.0:
             sys.exit("--search=exact cannot be combined with --threshold below 1.0: the threshold restricts "
                      "which assemblages may be neighbours, which the exact search does not support.")
-        if self.args.get('dipcriterion', 'neighbor') != 'triple':
+        if self.args.get('dipcriterion', 'triple') != 'triple':
             self.log.info("--search=exact uses the every-triple criterion (--dipcriterion=triple).")
             self.args['dipcriterion'] = 'triple'
         labels = sorted(self.assemblages.keys())

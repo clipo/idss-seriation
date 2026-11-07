@@ -59,16 +59,17 @@ of small tables with and without bootstrap intervals.
 
 With bootstrap intervals, IDSS can detect violations in two ways, selected with `--dipcriterion`:
 
-- `neighbor` (default, the original IDSS test): increases and decreases are judged between neighbouring
+- `triple` (default): any assemblage whose upper bound is below the lower bounds of both an earlier and a
+  later assemblage in the solution is a violation. This matches the definition of unimodality, and any valid
+  solution remains valid when assemblages are removed from it.
+- `neighbor` (the test used in releases up to v2.5.1): increases and decreases are judged between neighbouring
   assemblages, and a significant decrease followed (possibly after non-significant steps) by a significant
   increase is a violation. A chain of overlapping intervals can therefore contain an assemblage that is
-  significantly lower than both an earlier and a later assemblage, and such a solution is accepted.
-- `triple`: any assemblage whose upper bound is below the lower bounds of both an earlier and a later
-  assemblage in the solution is a violation. This is the stricter reading of unimodality. Any valid
-  solution remains valid when assemblages are removed from it.
+  significantly lower than both an earlier and a later assemblage, and such a solution is accepted. On the PFG
+  test data, the largest solution accepted under this rule contains such dips.
 
-Without bootstrap intervals (`--bootstrapCI=0`) the two criteria are equivalent. Running the same data under
-both shows how much the results depend on the choice.
+Without bootstrap intervals (`--bootstrapCI=0`) the two criteria are equivalent. Use `neighbor` to reproduce
+earlier analyses or to show how much the results depend on the choice.
 
 One property of the iterative search is unchanged: when a set of assemblages has several valid orderings, only
 the first one found is reported.
@@ -278,7 +279,7 @@ assemblages that are to be seriated.   Other useful options include:
 - `--cimethod=percentile|legacy` Bootstrap interval. `percentile` (default) uses the percentile interval of the
   bootstrap replicates; `legacy` reproduces the interval used in releases v2.0 to v2.5.1.
 - `--dipcriterion=neighbor|triple` How a violation of unimodality is detected with bootstrap intervals (see
-  "Two criteria for a violation of unimodality" above). Default is `neighbor`.
+  "Two criteria for a violation of unimodality" above). Default is `triple`.
 - `--search=idss|exact` Iterative search (default) or exact branch-and-bound search (see "Exact search option").
 - `--maxorderings=<n>` With `--search=exact`, the number of orderings kept as solutions for output. Default 10000.
 - `--exactengine=auto|c|python` With `--search=exact`, which implementation to use. Default `auto`.

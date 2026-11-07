@@ -26,11 +26,12 @@ def parse_arguments():
     parser.add_argument('--cimethod', default='percentile', choices=['percentile', 'legacy'],
                         help="Bootstrap interval: 'percentile' (default) uses the percentile interval of the "
                              "bootstrap replicates; 'legacy' reproduces the original mean +/- t*SE interval.")
-    parser.add_argument('--dipcriterion', default='neighbor', choices=['neighbor', 'triple'],
-                        help="How a violation of unimodality is detected. 'neighbor' (default, the original IDSS "
-                             "test) compares neighbouring assemblages and rejects a decrease followed by an increase. "
-                             "'triple' rejects any assemblage that is lower than both an earlier and a later "
-                             "assemblage in the solution. Without bootstrap intervals the two are equivalent.")
+    parser.add_argument('--dipcriterion', default='triple', choices=['triple', 'neighbor'],
+                        help="How a violation of unimodality is detected. 'triple' (default) rejects any assemblage "
+                             "that is lower than both an earlier and a later assemblage in the solution. 'neighbor' "
+                             "(the test used in releases up to v2.5.1) compares neighbouring assemblages only and "
+                             "rejects a decrease followed by an increase. Without bootstrap intervals the two are "
+                             "equivalent.")
     parser.add_argument('--search', default='idss', choices=['idss', 'exact'],
                         help="'idss' (default) builds solutions iteratively from valid triples. 'exact' runs a "
                              "branch-and-bound search that returns every largest valid subset and every valid "

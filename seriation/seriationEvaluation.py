@@ -137,7 +137,7 @@ def checkForValidAdditions(nnetwork):
             oneToColumns = range(len(assemblages[testAssemblage]))
 
             error = 0  ## set the error check to 0
-            if args.get('dipcriterion', 'neighbor') == 'triple':
+            if args.get('dipcriterion', 'triple') == 'triple':
                 p = nx.shortest_path(nnetwork, nnetwork.graph[assEnd], nnetwork.graph[otherEnd])
                 for i in oneToColumns:
                     if tripleDipWithNewEnd(testAssemblage, p, i):
