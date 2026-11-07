@@ -1,0 +1,181 @@
+cpl-pfg m100 s1: Minimum sample size 100: excluded 2 assemblage(s): 13-N-5, 13-P-10
+cpl-pfg m100 s1: Search finished in 0.0s, 1,120 nodes.
+cpl-pfg m100 s1: Largest valid subset size: 10 of 18
+cpl-pfg m100 s1: Distinct largest subsets: 6
+cpl-pfg m100 s1: Valid orderings of those subsets (mirror images counted once): 92
+cpl-pfg m100 s1: Assemblages in every largest subset (6): 10-P-1, 13-N-4, 13-N-16, 13-O-11, 13-O-10, 12-O-5
+cpl-pfg m100 s2: Minimum sample size 100: excluded 2 assemblage(s): 13-N-5, 13-P-10
+cpl-pfg m100 s2: Search finished in 0.0s, 1,193 nodes.
+cpl-pfg m100 s2: Largest valid subset size: 10 of 18
+cpl-pfg m100 s2: Distinct largest subsets: 6
+cpl-pfg m100 s2: Valid orderings of those subsets (mirror images counted once): 92
+cpl-pfg m100 s2: Assemblages in every largest subset (6): 10-P-1, 13-N-4, 13-N-16, 13-O-11, 13-O-10, 12-O-5
+cpl-pfg m100 s3: Minimum sample size 100: excluded 2 assemblage(s): 13-N-5, 13-P-10
+cpl-pfg m100 s3: Search finished in 0.0s, 932 nodes.
+cpl-pfg m100 s3: Largest valid subset size: 10 of 18
+cpl-pfg m100 s3: Distinct largest subsets: 4
+cpl-pfg m100 s3: Valid orderings of those subsets (mirror images counted once): 48
+cpl-pfg m100 s3: Assemblages in every largest subset (8): 10-P-1, 11-O-10, 11-N-4, 13-N-4, 13-N-16, 13-O-11, 13-O-10, 12-O-5
+cpl-pfg m100 s4: Minimum sample size 100: excluded 2 assemblage(s): 13-N-5, 13-P-10
+cpl-pfg m100 s4: Search finished in 0.0s, 1,474 nodes.
+cpl-pfg m100 s4: Largest valid subset size: 9 of 18
+cpl-pfg m100 s4: Distinct largest subsets: 15
+cpl-pfg m100 s4: Valid orderings of those subsets (mirror images counted once): 168
+cpl-pfg m100 s4: Assemblages in every largest subset (3): 13-N-16, 13-O-11, 13-O-10
+cpl-pfg m100 s5: Minimum sample size 100: excluded 2 assemblage(s): 13-N-5, 13-P-10
+cpl-pfg m100 s5: Search finished in 0.0s, 1,159 nodes.
+cpl-pfg m100 s5: Largest valid subset size: 10 of 18
+cpl-pfg m100 s5: Distinct largest subsets: 6
+cpl-pfg m100 s5: Valid orderings of those subsets (mirror images counted once): 92
+cpl-pfg m100 s5: Assemblages in every largest subset (6): 10-P-1, 13-N-4, 13-N-16, 13-O-11, 13-O-10, 12-O-5
+pfg-cpl-mainfort m100 s1: Minimum sample size 100: excluded 13 assemblage(s): 40TP026, Bishop, Notgrass, Upper_Nodena, Richardsons_Landing, Norfolk, Cheatham, Connor, Dundee, 40LA007, Hatchie, Jeter, Pouncey
+pfg-cpl-mainfort m100 s1: Search finished in 0.0s, 34,191 nodes.
+pfg-cpl-mainfort m100 s1: Largest valid subset size: 16 of 42
+pfg-cpl-mainfort m100 s1: Distinct largest subsets: 4
+pfg-cpl-mainfort m100 s1: Valid orderings of those subsets (mirror images counted once): 400
+pfg-cpl-mainfort m100 s1: Assemblages in every largest subset (14): Grant, Wall, Big_Eddy, Graves_Lake, Carson_Lake, Fortune, Cummins, Hollywood, Starkley, Cramor_Place, Kent_Place, Rose_Mound, Nickel, Barton_Ranch
+pfg-cpl-mainfort m100 s2: Minimum sample size 100: excluded 13 assemblage(s): 40TP026, Bishop, Notgrass, Upper_Nodena, Richardsons_Landing, Norfolk, Cheatham, Connor, Dundee, 40LA007, Hatchie, Jeter, Pouncey
+pfg-cpl-mainfort m100 s2: Search finished in 0.0s, 35,379 nodes.
+pfg-cpl-mainfort m100 s2: Largest valid subset size: 16 of 42
+pfg-cpl-mainfort m100 s2: Distinct largest subsets: 3
+pfg-cpl-mainfort m100 s2: Valid orderings of those subsets (mirror images counted once): 304
+pfg-cpl-mainfort m100 s2: Assemblages in every largest subset (12): Wall, Graves_Lake, Fortune, Cummins, Hollywood, Starkley, Cramor_Place, Kent_Place, Williamson, Rose_Mound, Nickel, Barton_Ranch
+pfg-cpl-mainfort m100 s3: Minimum sample size 100: excluded 13 assemblage(s): 40TP026, Bishop, Notgrass, Upper_Nodena, Richardsons_Landing, Norfolk, Cheatham, Connor, Dundee, 40LA007, Hatchie, Jeter, Pouncey
+pfg-cpl-mainfort m100 s3: Search finished in 0.0s, 37,467 nodes.
+pfg-cpl-mainfort m100 s3: Largest valid subset size: 16 of 42
+pfg-cpl-mainfort m100 s3: Distinct largest subsets: 7
+pfg-cpl-mainfort m100 s3: Valid orderings of those subsets (mirror images counted once): 552
+pfg-cpl-mainfort m100 s3: Assemblages in every largest subset (10): Wall, Fortune, Cummins, Hollywood, Starkley, Cramor_Place, Kent_Place, Rose_Mound, Nickel, Barton_Ranch
+pfg-cpl-mainfort m100 s4: Minimum sample size 100: excluded 13 assemblage(s): 40TP026, Bishop, Notgrass, Upper_Nodena, Richardsons_Landing, Norfolk, Cheatham, Connor, Dundee, 40LA007, Hatchie, Jeter, Pouncey
+pfg-cpl-mainfort m100 s4: Search finished in 0.0s, 35,732 nodes.
+pfg-cpl-mainfort m100 s4: Largest valid subset size: 16 of 42
+pfg-cpl-mainfort m100 s4: Distinct largest subsets: 1
+pfg-cpl-mainfort m100 s4: Valid orderings of those subsets (mirror images counted once): 64
+pfg-cpl-mainfort m100 s4: Assemblages in every largest subset (16): Parchman, West_Mounds, Wall, Graves_Lake, Commerce, Fortune, Salomon, Cummins, Hollywood, Starkley, Cramor_Place, Kent_Place, Williamson, Rose_Mound, Nickel, Barton_Ranch
+pfg-cpl-mainfort m100 s5: Minimum sample size 100: excluded 13 assemblage(s): 40TP026, Bishop, Notgrass, Upper_Nodena, Richardsons_Landing, Norfolk, Cheatham, Connor, Dundee, 40LA007, Hatchie, Jeter, Pouncey
+pfg-cpl-mainfort m100 s5: Search finished in 0.1s, 66,339 nodes.
+pfg-cpl-mainfort m100 s5: Largest valid subset size: 15 of 42
+pfg-cpl-mainfort m100 s5: Distinct largest subsets: 24
+pfg-cpl-mainfort m100 s5: Valid orderings of those subsets (mirror images counted once): 2,652
+pfg-cpl-mainfort m100 s5: Assemblages in every largest subset (9): Wall, Fortune, Cummins, Hollywood, Cramor_Place, Kent_Place, Rose_Mound, Nickel, Barton_Ranch
+mainfort-data-collapsed m100 s1: Minimum sample size 100: excluded 13 assemblage(s): 40LA007, Hatchie, Bishop, Richardsons_Landing, 40TP026, Jeter, Norfolk, Upper_Nodena, Notgrass, Cheatham, Pouncey, Dundee, Connor
+mainfort-data-collapsed m100 s1: Search finished in 0.5s, 348,615 nodes.
+mainfort-data-collapsed m100 s1: Largest valid subset size: 17 of 41
+mainfort-data-collapsed m100 s1: Distinct largest subsets: 6
+mainfort-data-collapsed m100 s1: Valid orderings of those subsets (mirror images counted once): 728
+mainfort-data-collapsed m100 s1: Assemblages in every largest subset (14): Hollywood, Rose_Mound, Cramor, Williamson, Beck, Carson_Lake, Big_Eddy, Starkley, Cummins, Fortune, Parchman, Graves_Lake, Kent, Grant
+mainfort-data-collapsed m100 s2: Minimum sample size 100: excluded 13 assemblage(s): 40LA007, Hatchie, Bishop, Richardsons_Landing, 40TP026, Jeter, Norfolk, Upper_Nodena, Notgrass, Cheatham, Pouncey, Dundee, Connor
+mainfort-data-collapsed m100 s2: Search finished in 0.4s, 285,409 nodes.
+mainfort-data-collapsed m100 s2: Largest valid subset size: 17 of 41
+mainfort-data-collapsed m100 s2: Distinct largest subsets: 6
+mainfort-data-collapsed m100 s2: Valid orderings of those subsets (mirror images counted once): 552
+mainfort-data-collapsed m100 s2: Assemblages in every largest subset (14): Hollywood, Rose_Mound, Cramor, Williamson, Beck, Carson_Lake, Big_Eddy, Starkley, Cummins, Fortune, Parchman, Graves_Lake, Kent, Grant
+mainfort-data-collapsed m100 s3: Minimum sample size 100: excluded 13 assemblage(s): 40LA007, Hatchie, Bishop, Richardsons_Landing, 40TP026, Jeter, Norfolk, Upper_Nodena, Notgrass, Cheatham, Pouncey, Dundee, Connor
+mainfort-data-collapsed m100 s3: Search finished in 0.4s, 283,610 nodes.
+mainfort-data-collapsed m100 s3: Largest valid subset size: 17 of 41
+mainfort-data-collapsed m100 s3: Distinct largest subsets: 6
+mainfort-data-collapsed m100 s3: Valid orderings of those subsets (mirror images counted once): 552
+mainfort-data-collapsed m100 s3: Assemblages in every largest subset (14): Hollywood, Rose_Mound, Cramor, Williamson, Beck, Carson_Lake, Big_Eddy, Starkley, Cummins, Fortune, Parchman, Graves_Lake, Kent, Grant
+mainfort-data-collapsed m100 s4: Minimum sample size 100: excluded 13 assemblage(s): 40LA007, Hatchie, Bishop, Richardsons_Landing, 40TP026, Jeter, Norfolk, Upper_Nodena, Notgrass, Cheatham, Pouncey, Dundee, Connor
+mainfort-data-collapsed m100 s4: Search finished in 0.4s, 334,915 nodes.
+mainfort-data-collapsed m100 s4: Largest valid subset size: 18 of 41
+mainfort-data-collapsed m100 s4: Distinct largest subsets: 2
+mainfort-data-collapsed m100 s4: Valid orderings of those subsets (mirror images counted once): 320
+mainfort-data-collapsed m100 s4: Assemblages in every largest subset (17): Hollywood, Rose_Mound, Cramor, Williamson, Barton, Beck, Nickel, Carson_Lake, Big_Eddy, Starkley, Cummins, Fortune, Parchman, Graves_Lake, Kent, Grant, Belle_Meade
+mainfort-data-collapsed m100 s5: Minimum sample size 100: excluded 13 assemblage(s): 40LA007, Hatchie, Bishop, Richardsons_Landing, 40TP026, Jeter, Norfolk, Upper_Nodena, Notgrass, Cheatham, Pouncey, Dundee, Connor
+mainfort-data-collapsed m100 s5: Search finished in 0.4s, 342,801 nodes.
+mainfort-data-collapsed m100 s5: Largest valid subset size: 18 of 41
+mainfort-data-collapsed m100 s5: Distinct largest subsets: 3
+mainfort-data-collapsed m100 s5: Valid orderings of those subsets (mirror images counted once): 2,656
+mainfort-data-collapsed m100 s5: Assemblages in every largest subset (16): Hollywood, Rose_Mound, Cramor, Williamson, Barton, Beck, Nickel, Carson_Lake, Big_Eddy, Starkley, Cummins, Fortune, Parchman, Graves_Lake, Kent, Grant
+cpl-pfg m200 s1: Minimum sample size 200: excluded 6 assemblage(s): 10-P-1, 13-N-5, 13-N-16, 13-O-11, 13-P-8, 13-P-10
+cpl-pfg m200 s1: Search finished in 0.0s, 197 nodes.
+cpl-pfg m200 s1: Largest valid subset size: 7 of 14
+cpl-pfg m200 s1: Distinct largest subsets: 11
+cpl-pfg m200 s1: Valid orderings of those subsets (mirror images counted once): 26
+cpl-pfg m200 s1: Assemblages in every largest subset (2): 13-N-4, 13-O-10
+cpl-pfg m200 s2: Minimum sample size 200: excluded 6 assemblage(s): 10-P-1, 13-N-5, 13-N-16, 13-O-11, 13-P-8, 13-P-10
+cpl-pfg m200 s2: Search finished in 0.0s, 205 nodes.
+cpl-pfg m200 s2: Largest valid subset size: 7 of 14
+cpl-pfg m200 s2: Distinct largest subsets: 11
+cpl-pfg m200 s2: Valid orderings of those subsets (mirror images counted once): 26
+cpl-pfg m200 s2: Assemblages in every largest subset (2): 13-N-4, 13-O-10
+cpl-pfg m200 s3: Minimum sample size 200: excluded 6 assemblage(s): 10-P-1, 13-N-5, 13-N-16, 13-O-11, 13-P-8, 13-P-10
+cpl-pfg m200 s3: Search finished in 0.0s, 206 nodes.
+cpl-pfg m200 s3: Largest valid subset size: 7 of 14
+cpl-pfg m200 s3: Distinct largest subsets: 11
+cpl-pfg m200 s3: Valid orderings of those subsets (mirror images counted once): 26
+cpl-pfg m200 s3: Assemblages in every largest subset (2): 13-N-4, 13-O-10
+cpl-pfg m200 s4: Minimum sample size 200: excluded 6 assemblage(s): 10-P-1, 13-N-5, 13-N-16, 13-O-11, 13-P-8, 13-P-10
+cpl-pfg m200 s4: Search finished in 0.0s, 204 nodes.
+cpl-pfg m200 s4: Largest valid subset size: 7 of 14
+cpl-pfg m200 s4: Distinct largest subsets: 12
+cpl-pfg m200 s4: Valid orderings of those subsets (mirror images counted once): 28
+cpl-pfg m200 s4: Assemblages in every largest subset (2): 13-N-4, 13-O-10
+cpl-pfg m200 s5: Minimum sample size 200: excluded 6 assemblage(s): 10-P-1, 13-N-5, 13-N-16, 13-O-11, 13-P-8, 13-P-10
+cpl-pfg m200 s5: Search finished in 0.0s, 187 nodes.
+cpl-pfg m200 s5: Largest valid subset size: 7 of 14
+cpl-pfg m200 s5: Distinct largest subsets: 9
+cpl-pfg m200 s5: Valid orderings of those subsets (mirror images counted once): 22
+cpl-pfg m200 s5: Assemblages in every largest subset (3): 11-N-4, 13-N-4, 13-O-10
+pfg-cpl-mainfort m200 s1: Minimum sample size 200: excluded 21 assemblage(s): 40TP026, Bishop, Notgrass, Upper_Nodena, Richardsons_Landing, Norfolk, Cheatham, Connor, Dundee, 40LA007, Hatchie, Jeter, Pouncey, Parchman, Wilder, Turnbow, Rast, Fullen, Grant, West_Mounds, Wall
+pfg-cpl-mainfort m200 s1: Search finished in 0.0s, 7,254 nodes.
+pfg-cpl-mainfort m200 s1: Largest valid subset size: 14 of 34
+pfg-cpl-mainfort m200 s1: Distinct largest subsets: 1
+pfg-cpl-mainfort m200 s1: Valid orderings of those subsets (mirror images counted once): 42
+pfg-cpl-mainfort m200 s1: Assemblages in every largest subset (14): Big_Eddy, Graves_Lake, Carson_Lake, Fortune, Salomon, Cummins, Hollywood, Starkley, Cramor_Place, Kent_Place, Williamson, Rose_Mound, Nickel, Barton_Ranch
+pfg-cpl-mainfort m200 s2: Minimum sample size 200: excluded 21 assemblage(s): 40TP026, Bishop, Notgrass, Upper_Nodena, Richardsons_Landing, Norfolk, Cheatham, Connor, Dundee, 40LA007, Hatchie, Jeter, Pouncey, Parchman, Wilder, Turnbow, Rast, Fullen, Grant, West_Mounds, Wall
+pfg-cpl-mainfort m200 s2: Search finished in 0.0s, 6,561 nodes.
+pfg-cpl-mainfort m200 s2: Largest valid subset size: 14 of 34
+pfg-cpl-mainfort m200 s2: Distinct largest subsets: 2
+pfg-cpl-mainfort m200 s2: Valid orderings of those subsets (mirror images counted once): 64
+pfg-cpl-mainfort m200 s2: Assemblages in every largest subset (13): Big_Eddy, Graves_Lake, Carson_Lake, Fortune, Salomon, Cummins, Hollywood, Starkley, Cramor_Place, Kent_Place, Rose_Mound, Nickel, Barton_Ranch
+pfg-cpl-mainfort m200 s3: Minimum sample size 200: excluded 21 assemblage(s): 40TP026, Bishop, Notgrass, Upper_Nodena, Richardsons_Landing, Norfolk, Cheatham, Connor, Dundee, 40LA007, Hatchie, Jeter, Pouncey, Parchman, Wilder, Turnbow, Rast, Fullen, Grant, West_Mounds, Wall
+pfg-cpl-mainfort m200 s3: Search finished in 0.0s, 6,621 nodes.
+pfg-cpl-mainfort m200 s3: Largest valid subset size: 14 of 34
+pfg-cpl-mainfort m200 s3: Distinct largest subsets: 2
+pfg-cpl-mainfort m200 s3: Valid orderings of those subsets (mirror images counted once): 64
+pfg-cpl-mainfort m200 s3: Assemblages in every largest subset (13): Big_Eddy, Graves_Lake, Carson_Lake, Fortune, Salomon, Cummins, Hollywood, Starkley, Cramor_Place, Kent_Place, Rose_Mound, Nickel, Barton_Ranch
+pfg-cpl-mainfort m200 s4: Minimum sample size 200: excluded 21 assemblage(s): 40TP026, Bishop, Notgrass, Upper_Nodena, Richardsons_Landing, Norfolk, Cheatham, Connor, Dundee, 40LA007, Hatchie, Jeter, Pouncey, Parchman, Wilder, Turnbow, Rast, Fullen, Grant, West_Mounds, Wall
+pfg-cpl-mainfort m200 s4: Search finished in 0.0s, 5,889 nodes.
+pfg-cpl-mainfort m200 s4: Largest valid subset size: 14 of 34
+pfg-cpl-mainfort m200 s4: Distinct largest subsets: 1
+pfg-cpl-mainfort m200 s4: Valid orderings of those subsets (mirror images counted once): 32
+pfg-cpl-mainfort m200 s4: Assemblages in every largest subset (14): Big_Eddy, Graves_Lake, Carson_Lake, Fortune, Salomon, Cummins, Hollywood, Starkley, Cramor_Place, Kent_Place, Williamson, Rose_Mound, Nickel, Barton_Ranch
+pfg-cpl-mainfort m200 s5: Minimum sample size 200: excluded 21 assemblage(s): 40TP026, Bishop, Notgrass, Upper_Nodena, Richardsons_Landing, Norfolk, Cheatham, Connor, Dundee, 40LA007, Hatchie, Jeter, Pouncey, Parchman, Wilder, Turnbow, Rast, Fullen, Grant, West_Mounds, Wall
+pfg-cpl-mainfort m200 s5: Search finished in 0.0s, 5,757 nodes.
+pfg-cpl-mainfort m200 s5: Largest valid subset size: 14 of 34
+pfg-cpl-mainfort m200 s5: Distinct largest subsets: 2
+pfg-cpl-mainfort m200 s5: Valid orderings of those subsets (mirror images counted once): 64
+pfg-cpl-mainfort m200 s5: Assemblages in every largest subset (13): Big_Eddy, Graves_Lake, Carson_Lake, Fortune, Salomon, Cummins, Hollywood, Starkley, Cramor_Place, Kent_Place, Rose_Mound, Nickel, Barton_Ranch
+mainfort-data-collapsed m200 s1: Minimum sample size 200: excluded 23 assemblage(s): 40LA007, Hatchie, Bishop, Richardsons_Landing, Wilder, 40TP026, Fullen, Jeter, Rast, Norfolk, Upper_Nodena, Notgrass, Wall, Commerce, Turnbow, Cheatham, Carson_Lake, Pouncey, Dundee, Connor, West_Mounds, Parchman, Grant
+mainfort-data-collapsed m200 s1: Search finished in 0.0s, 42,494 nodes.
+mainfort-data-collapsed m200 s1: Largest valid subset size: 15 of 31
+mainfort-data-collapsed m200 s1: Distinct largest subsets: 2
+mainfort-data-collapsed m200 s1: Valid orderings of those subsets (mirror images counted once): 88
+mainfort-data-collapsed m200 s1: Assemblages in every largest subset (14): Hollywood, Rose_Mound, Cramor, Williamson, Parkin, Beck, Big_Eddy, Starkley, Cummins, Fortune, Salomon, Graves_Lake, Kent, Belle_Meade
+mainfort-data-collapsed m200 s2: Minimum sample size 200: excluded 23 assemblage(s): 40LA007, Hatchie, Bishop, Richardsons_Landing, Wilder, 40TP026, Fullen, Jeter, Rast, Norfolk, Upper_Nodena, Notgrass, Wall, Commerce, Turnbow, Cheatham, Carson_Lake, Pouncey, Dundee, Connor, West_Mounds, Parchman, Grant
+mainfort-data-collapsed m200 s2: Search finished in 0.0s, 30,721 nodes.
+mainfort-data-collapsed m200 s2: Largest valid subset size: 15 of 31
+mainfort-data-collapsed m200 s2: Distinct largest subsets: 2
+mainfort-data-collapsed m200 s2: Valid orderings of those subsets (mirror images counted once): 396
+mainfort-data-collapsed m200 s2: Assemblages in every largest subset (14): Hollywood, Rose_Mound, Cramor, Williamson, Parkin, Beck, Big_Eddy, Starkley, Cummins, Fortune, Salomon, Graves_Lake, Kent, Belle_Meade
+mainfort-data-collapsed m200 s3: Minimum sample size 200: excluded 23 assemblage(s): 40LA007, Hatchie, Bishop, Richardsons_Landing, Wilder, 40TP026, Fullen, Jeter, Rast, Norfolk, Upper_Nodena, Notgrass, Wall, Commerce, Turnbow, Cheatham, Carson_Lake, Pouncey, Dundee, Connor, West_Mounds, Parchman, Grant
+mainfort-data-collapsed m200 s3: Search finished in 0.0s, 38,242 nodes.
+mainfort-data-collapsed m200 s3: Largest valid subset size: 15 of 31
+mainfort-data-collapsed m200 s3: Distinct largest subsets: 2
+mainfort-data-collapsed m200 s3: Valid orderings of those subsets (mirror images counted once): 88
+mainfort-data-collapsed m200 s3: Assemblages in every largest subset (14): Hollywood, Rose_Mound, Cramor, Williamson, Parkin, Beck, Big_Eddy, Starkley, Cummins, Fortune, Salomon, Graves_Lake, Kent, Belle_Meade
+mainfort-data-collapsed m200 s4: Minimum sample size 200: excluded 23 assemblage(s): 40LA007, Hatchie, Bishop, Richardsons_Landing, Wilder, 40TP026, Fullen, Jeter, Rast, Norfolk, Upper_Nodena, Notgrass, Wall, Commerce, Turnbow, Cheatham, Carson_Lake, Pouncey, Dundee, Connor, West_Mounds, Parchman, Grant
+mainfort-data-collapsed m200 s4: Search finished in 0.1s, 41,600 nodes.
+mainfort-data-collapsed m200 s4: Largest valid subset size: 15 of 31
+mainfort-data-collapsed m200 s4: Distinct largest subsets: 2
+mainfort-data-collapsed m200 s4: Valid orderings of those subsets (mirror images counted once): 396
+mainfort-data-collapsed m200 s4: Assemblages in every largest subset (14): Hollywood, Rose_Mound, Cramor, Williamson, Parkin, Beck, Big_Eddy, Starkley, Cummins, Fortune, Salomon, Graves_Lake, Kent, Belle_Meade
+mainfort-data-collapsed m200 s5: Minimum sample size 200: excluded 23 assemblage(s): 40LA007, Hatchie, Bishop, Richardsons_Landing, Wilder, 40TP026, Fullen, Jeter, Rast, Norfolk, Upper_Nodena, Notgrass, Wall, Commerce, Turnbow, Cheatham, Carson_Lake, Pouncey, Dundee, Connor, West_Mounds, Parchman, Grant
+mainfort-data-collapsed m200 s5: Search finished in 0.0s, 27,873 nodes.
+mainfort-data-collapsed m200 s5: Largest valid subset size: 15 of 31
+mainfort-data-collapsed m200 s5: Distinct largest subsets: 2
+mainfort-data-collapsed m200 s5: Valid orderings of those subsets (mirror images counted once): 44
+mainfort-data-collapsed m200 s5: Assemblages in every largest subset (14): Hollywood, Rose_Mound, Cramor, Williamson, Parkin, Beck, Big_Eddy, Starkley, Cummins, Fortune, Salomon, Graves_Lake, Kent, Belle_Meade
+finished

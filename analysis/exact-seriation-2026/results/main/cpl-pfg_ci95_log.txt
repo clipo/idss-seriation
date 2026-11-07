@@ -1,0 +1,48 @@
+Assemblages: 20  Types: 10  Criterion: bootstrap CI 0.95 (1000 replicates)
+Middle-placements that create a dip: 2,406 of 3,420
+Engine: compiled (/home/claude/seriate_core)
+  [     0.0s] new best size 1
+  [     0.0s] new best size 2
+  [     0.0s] new best size 3
+  [     0.0s] new best size 4
+  [     0.0s] new best size 5
+  [     0.0s] new best size 6
+  [     0.0s] new best size 7
+  [     0.0s] new best size 8
+  [     0.0s] new best size 9
+  [     0.0s] new best size 10
+
+Search finished in 0.0s, 1,872 nodes.
+Largest valid subset size: 10 of 20
+Distinct largest subsets: 4
+Valid orderings of those subsets (mirror images counted once): 48
+
+  Subset 1: 16 ordering(s); excluded: 11-N-1, 13-N-5, 13-P-1, 13-P-8, 13-P-10, 13-O-5, 13-N-21, Holden_Lake, 13-N-15, 12-N-3
+    11-N-9 - 11-O-10 - 11-N-4 - 13-O-7 - 12-O-5 - 13-O-11 - 13-O-10 - 13-N-4 - 10-P-1 - 13-N-16
+    11-N-9 - 11-N-4 - 11-O-10 - 13-O-7 - 12-O-5 - 13-O-11 - 13-O-10 - 13-N-4 - 10-P-1 - 13-N-16
+    11-N-9 - 11-O-10 - 11-N-4 - 13-O-7 - 12-O-5 - 13-O-11 - 13-O-10 - 13-N-4 - 13-N-16 - 10-P-1
+    ... 13 more
+
+  Subset 2: 8 ordering(s); excluded: 11-N-1, 13-N-5, 13-P-1, 13-P-8, 13-P-10, 13-O-7, 13-O-5, 13-N-21, Holden_Lake, 13-N-15
+    11-N-9 - 11-N-4 - 11-O-10 - 12-N-3 - 12-O-5 - 13-O-11 - 13-O-10 - 13-N-4 - 10-P-1 - 13-N-16
+    11-N-9 - 11-N-4 - 11-O-10 - 12-N-3 - 12-O-5 - 13-O-11 - 13-O-10 - 13-N-4 - 13-N-16 - 10-P-1
+    11-N-9 - 11-N-4 - 11-O-10 - 12-N-3 - 12-O-5 - 13-O-11 - 13-N-4 - 13-O-10 - 10-P-1 - 13-N-16
+    ... 5 more
+
+  Subset 3: 16 ordering(s); excluded: 11-N-9, 11-N-1, 13-N-5, 13-P-1, 13-P-8, 13-P-10, 13-N-21, Holden_Lake, 13-N-15, 12-N-3
+    11-O-10 - 11-N-4 - 13-O-5 - 13-O-7 - 12-O-5 - 13-O-11 - 13-O-10 - 13-N-4 - 10-P-1 - 13-N-16
+    11-N-4 - 11-O-10 - 13-O-5 - 13-O-7 - 12-O-5 - 13-O-11 - 13-O-10 - 13-N-4 - 10-P-1 - 13-N-16
+    11-O-10 - 11-N-4 - 13-O-5 - 13-O-7 - 12-O-5 - 13-O-11 - 13-O-10 - 13-N-4 - 13-N-16 - 10-P-1
+    ... 13 more
+
+  Subset 4: 8 ordering(s); excluded: 11-N-9, 11-N-1, 13-N-5, 13-P-1, 13-P-8, 13-P-10, 13-O-5, 13-N-21, Holden_Lake, 13-N-15
+    11-N-4 - 11-O-10 - 12-N-3 - 13-O-7 - 12-O-5 - 13-O-11 - 13-O-10 - 13-N-4 - 10-P-1 - 13-N-16
+    11-N-4 - 11-O-10 - 12-N-3 - 13-O-7 - 12-O-5 - 13-O-11 - 13-O-10 - 13-N-4 - 13-N-16 - 10-P-1
+    11-N-4 - 11-O-10 - 12-N-3 - 13-O-7 - 12-O-5 - 13-O-11 - 13-N-4 - 13-O-10 - 10-P-1 - 13-N-16
+    ... 5 more
+
+Assemblages in every largest subset (8): 10-P-1, 11-O-10, 11-N-4, 13-N-4, 13-N-16, 13-O-11, 13-O-10, 12-O-5
+Assemblages in some but not all (4): 11-N-9, 13-O-7, 13-O-5, 12-N-3
+
+All subsets written to results/cpl-pfg_ci95_subsets.csv
+Orderings written to results/cpl-pfg_ci95.csv

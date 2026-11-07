@@ -1,0 +1,110 @@
+cpl-pfg s1: Search finished in 0.0s, 1,872 nodes.
+cpl-pfg s1: Largest valid subset size: 10 of 20
+cpl-pfg s1: Distinct largest subsets: 4
+cpl-pfg s1: Valid orderings of those subsets (mirror images counted once): 48
+cpl-pfg s1: Assemblages in every largest subset (8): 10-P-1, 11-O-10, 11-N-4, 13-N-4, 13-N-16, 13-O-11, 13-O-10, 12-O-5
+cpl-pfg s2: Search finished in 0.0s, 1,880 nodes.
+cpl-pfg s2: Largest valid subset size: 10 of 20
+cpl-pfg s2: Distinct largest subsets: 6
+cpl-pfg s2: Valid orderings of those subsets (mirror images counted once): 92
+cpl-pfg s2: Assemblages in every largest subset (6): 10-P-1, 13-N-4, 13-N-16, 13-O-11, 13-O-10, 12-O-5
+cpl-pfg s3: Search finished in 0.0s, 1,890 nodes.
+cpl-pfg s3: Largest valid subset size: 10 of 20
+cpl-pfg s3: Distinct largest subsets: 6
+cpl-pfg s3: Valid orderings of those subsets (mirror images counted once): 92
+cpl-pfg s3: Assemblages in every largest subset (6): 10-P-1, 13-N-4, 13-N-16, 13-O-11, 13-O-10, 12-O-5
+cpl-pfg s4: Search finished in 0.0s, 1,958 nodes.
+cpl-pfg s4: Largest valid subset size: 10 of 20
+cpl-pfg s4: Distinct largest subsets: 7
+cpl-pfg s4: Valid orderings of those subsets (mirror images counted once): 100
+cpl-pfg s4: Assemblages in every largest subset (6): 10-P-1, 13-N-4, 13-N-16, 13-O-11, 13-O-10, 12-O-5
+cpl-pfg s5: Search finished in 0.0s, 1,815 nodes.
+cpl-pfg s5: Largest valid subset size: 10 of 20
+cpl-pfg s5: Distinct largest subsets: 4
+cpl-pfg s5: Valid orderings of those subsets (mirror images counted once): 62
+cpl-pfg s5: Assemblages in every largest subset (8): 10-P-1, 11-O-10, 11-N-4, 13-N-4, 13-N-16, 13-O-11, 13-O-10, 12-O-5
+cpl-pfg s6: Search finished in 0.0s, 2,079 nodes.
+cpl-pfg s6: Largest valid subset size: 10 of 20
+cpl-pfg s6: Distinct largest subsets: 6
+cpl-pfg s6: Valid orderings of those subsets (mirror images counted once): 92
+cpl-pfg s6: Assemblages in every largest subset (6): 10-P-1, 13-N-4, 13-N-16, 13-O-11, 13-O-10, 12-O-5
+cpl-pfg s7: Search finished in 0.0s, 1,687 nodes.
+cpl-pfg s7: Largest valid subset size: 10 of 20
+cpl-pfg s7: Distinct largest subsets: 4
+cpl-pfg s7: Valid orderings of those subsets (mirror images counted once): 48
+cpl-pfg s7: Assemblages in every largest subset (8): 10-P-1, 11-O-10, 11-N-4, 13-N-4, 13-N-16, 13-O-11, 13-O-10, 12-O-5
+cpl-pfg s8: Search finished in 0.0s, 1,944 nodes.
+cpl-pfg s8: Largest valid subset size: 10 of 20
+cpl-pfg s8: Distinct largest subsets: 6
+cpl-pfg s8: Valid orderings of those subsets (mirror images counted once): 92
+cpl-pfg s8: Assemblages in every largest subset (6): 10-P-1, 13-N-4, 13-N-16, 13-O-11, 13-O-10, 12-O-5
+cpl-pfg s9: Search finished in 0.0s, 1,687 nodes.
+cpl-pfg s9: Largest valid subset size: 10 of 20
+cpl-pfg s9: Distinct largest subsets: 4
+cpl-pfg s9: Valid orderings of those subsets (mirror images counted once): 48
+cpl-pfg s9: Assemblages in every largest subset (8): 10-P-1, 11-O-10, 11-N-4, 13-N-4, 13-N-16, 13-O-11, 13-O-10, 12-O-5
+cpl-pfg s10: Search finished in 0.0s, 1,423 nodes.
+cpl-pfg s10: Largest valid subset size: 10 of 20
+cpl-pfg s10: Distinct largest subsets: 4
+cpl-pfg s10: Valid orderings of those subsets (mirror images counted once): 48
+cpl-pfg s10: Assemblages in every largest subset (8): 10-P-1, 11-O-10, 11-N-4, 13-N-4, 13-N-16, 13-O-11, 13-O-10, 12-O-5
+pfg-cpl-mainfort s1: Search finished in 27.6s, 20,606,635 nodes.
+pfg-cpl-mainfort s1: Largest valid subset size: 20 of 55
+pfg-cpl-mainfort s1: Distinct largest subsets: 10
+pfg-cpl-mainfort s1: Valid orderings of those subsets (mirror images counted once): 41,472
+pfg-cpl-mainfort s1: Assemblages in every largest subset (14): Notgrass, Pouncey, Wall, Graves_Lake, Carson_Lake, Fortune, Cummins, Hollywood, Starkley, Cramor_Place, Kent_Place, Rose_Mound, Nickel, Barton_Ranch
+pfg-cpl-mainfort s2: Search finished in 23.9s, 15,199,163 nodes.
+pfg-cpl-mainfort s2: Largest valid subset size: 21 of 55
+pfg-cpl-mainfort s2: Distinct largest subsets: 1
+pfg-cpl-mainfort s2: Valid orderings of those subsets (mirror images counted once): 18,048
+pfg-cpl-mainfort s2: Assemblages in every largest subset (21): Bishop, Notgrass, Richardsons_Landing, Dundee, Jeter, Pouncey, Parchman, Wilder, West_Mounds, Graves_Lake, Commerce, Soudan, Fortune, Holden_Lake, Salomon, Mound_Place, Cummins, Hollywood, Starkley, Clay_Hill, Kent_Place
+pfg-cpl-mainfort s3: Search finished in 25.2s, 14,619,545 nodes.
+pfg-cpl-mainfort s3: Largest valid subset size: 20 of 55
+pfg-cpl-mainfort s3: Distinct largest subsets: 24
+pfg-cpl-mainfort s3: Valid orderings of those subsets (mirror images counted once): 51,552
+pfg-cpl-mainfort s3: Assemblages in every largest subset (7): Notgrass, Pouncey, Wall, Fortune, Cummins, Rose_Mound, Barton_Ranch
+pfg-cpl-mainfort s4: Search finished in 29.2s, 21,405,273 nodes.
+pfg-cpl-mainfort s4: Largest valid subset size: 20 of 55
+pfg-cpl-mainfort s4: Distinct largest subsets: 5
+pfg-cpl-mainfort s4: Valid orderings of those subsets (mirror images counted once): 15,408
+pfg-cpl-mainfort s4: Assemblages in every largest subset (15): Notgrass, Pouncey, Wall, Graves_Lake, Carson_Lake, Fortune, Cummins, Hollywood, Starkley, Cramor_Place, Kent_Place, Williamson, Rose_Mound, Nickel, Barton_Ranch
+pfg-cpl-mainfort s5: Search finished in 30.3s, 21,544,543 nodes.
+pfg-cpl-mainfort s5: Largest valid subset size: 20 of 55
+pfg-cpl-mainfort s5: Distinct largest subsets: 31
+pfg-cpl-mainfort s5: Valid orderings of those subsets (mirror images counted once): 93,063
+pfg-cpl-mainfort s5: Assemblages in every largest subset (1): Notgrass
+pfg-cpl-mainfort s6: Search finished in 28.3s, 18,307,833 nodes.
+pfg-cpl-mainfort s6: Largest valid subset size: 20 of 55
+pfg-cpl-mainfort s6: Distinct largest subsets: 37
+pfg-cpl-mainfort s6: Valid orderings of those subsets (mirror images counted once): 135,204
+pfg-cpl-mainfort s6: Assemblages in every largest subset (4): Notgrass, Pouncey, Fortune, Cummins
+pfg-cpl-mainfort s7: Search finished in 24.3s, 17,302,520 nodes.
+pfg-cpl-mainfort s7: Largest valid subset size: 20 of 55
+pfg-cpl-mainfort s7: Distinct largest subsets: 44
+pfg-cpl-mainfort s7: Valid orderings of those subsets (mirror images counted once): 275,952
+pfg-cpl-mainfort s7: Assemblages in every largest subset (4): Notgrass, Pouncey, Fortune, Cummins
+pfg-cpl-mainfort s8: Search finished in 16.4s, 8,667,490 nodes.
+pfg-cpl-mainfort s8: Largest valid subset size: 21 of 55
+pfg-cpl-mainfort s8: Distinct largest subsets: 4
+pfg-cpl-mainfort s8: Valid orderings of those subsets (mirror images counted once): 12,312
+pfg-cpl-mainfort s8: Assemblages in every largest subset (19): Bishop, Notgrass, Upper_Nodena, Cheatham, 40LA007, Hatchie, Jeter, Pouncey, Wilder, Fullen, Wall, Fortune, Jones_Bayou, Davis, Cummins, Irby, Cramor_Place, Rose_Mound, Barton_Ranch
+pfg-cpl-mainfort s9: Search finished in 30.4s, 21,052,765 nodes.
+pfg-cpl-mainfort s9: Largest valid subset size: 20 of 55
+pfg-cpl-mainfort s9: Distinct largest subsets: 39
+pfg-cpl-mainfort s9: Valid orderings of those subsets (mirror images counted once): 153,738
+pfg-cpl-mainfort s9: Assemblages in every largest subset (1): Notgrass
+pfg-cpl-mainfort s10: Search finished in 20.6s, 13,607,481 nodes.
+pfg-cpl-mainfort s10: Largest valid subset size: 20 of 55
+pfg-cpl-mainfort s10: Distinct largest subsets: 29
+pfg-cpl-mainfort s10: Valid orderings of those subsets (mirror images counted once): 49,152
+pfg-cpl-mainfort s10: Assemblages in every largest subset (5): Notgrass, Pouncey, Fortune, Cummins, Barton_Ranch
+mfc s2: Search finished in 185.4s, 143,110,840 nodes.
+mfc s2: Largest valid subset size: 23 of 54
+mfc s2: Distinct largest subsets: 24
+mfc s2: Valid orderings of those subsets (mirror images counted once): 9,684,492
+mfc s2: Assemblages in every largest subset (9): Bishop, Notgrass, Rose_Mound, Cramor, Cheatham, Nickel, Pouncey, Cummins, Fortune
+mfc s3: Search finished in 289.3s, 253,839,261 nodes.
+mfc s3: Largest valid subset size: 23 of 54
+mfc s3: Distinct largest subsets: 19
+mfc s3: Valid orderings of those subsets (mirror images counted once): 25,405,320
+mfc s3: Assemblages in every largest subset (11): Hatchie, Bishop, Jeter, Notgrass, Rose_Mound, Cramor, Cheatham, Nickel, Pouncey, Cummins, Fortune

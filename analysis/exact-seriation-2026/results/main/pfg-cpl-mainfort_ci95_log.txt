@@ -1,0 +1,98 @@
+Assemblages: 55  Types: 10  Criterion: bootstrap CI 0.95 (1000 replicates)
+Middle-placements that create a dip: 48,984 of 78,705
+Engine: compiled (/home/claude/seriate_core)
+  [     0.0s] new best size 1
+  [     0.0s] new best size 2
+  [     0.0s] new best size 3
+  [     0.0s] new best size 4
+  [     0.0s] new best size 5
+  [     0.0s] new best size 6
+  [     0.0s] new best size 7
+  [     0.0s] new best size 8
+  [     0.0s] new best size 9
+  [     0.0s] new best size 10
+  [     0.0s] new best size 11
+  [     0.0s] new best size 12
+  [     0.0s] new best size 13
+  [     0.0s] new best size 14
+  [     0.0s] new best size 15
+  [     0.0s] new best size 16
+  [     0.0s] new best size 17
+  [     0.0s] new best size 18
+  [     0.0s] new best size 19
+  [     6.0s] nodes=4194304 best=19 orderings=122496
+  [    11.2s] nodes=8388608 best=19 orderings=421157
+  [    14.0s] new best size 20
+  [    16.3s] nodes=12582912 best=20 orderings=11208
+  [    23.7s] nodes=16777216 best=20 orderings=16559
+
+Search finished in 30.8s, 20,606,635 nodes.
+Largest valid subset size: 20 of 55
+Distinct largest subsets: 10
+Valid orderings of those subsets (mirror images counted once): 41,472
+
+  Subset 1: 2544 ordering(s); excluded: Bishop, Norfolk, Cheatham, Connor, Dundee, 40LA007, Hatchie, Jeter, Parchman, Wilder, Turnbow, Rast, Fullen, West_Mounds, Porter, Big_Eddy, Woodlyn, Commerce, Soudan, Jones_Bayou, Davis, Holden_Lake, Mound_Place, Lake_Cormorant, Young, Irby, Clay_Hill, Walls, Castile_Landing, Beck, Chuccalissa, Vernon_Paul, Neeleys_Ferry, Belle_Meade, Parkin
+    Pouncey - Fortune - Cummins - Williamson - Barton_Ranch - Rose_Mound - Wall - Cramor_Place - Nickel - Kent_Place - Hollywood - Starkley - Salomon - Carson_Lake - Graves_Lake - 40TP026 - Grant - Upper_Nodena - Notgrass - Richardsons_Landing
+    Pouncey - Fortune - Cummins - Williamson - Barton_Ranch - Wall - Rose_Mound - Cramor_Place - Nickel - Kent_Place - Hollywood - Starkley - Salomon - Carson_Lake - Graves_Lake - 40TP026 - Grant - Upper_Nodena - Notgrass - Richardsons_Landing
+    Pouncey - Fortune - Cummins - Williamson - Barton_Ranch - Rose_Mound - Wall - Cramor_Place - Nickel - Kent_Place - Starkley - Salomon - Hollywood - Carson_Lake - Graves_Lake - 40TP026 - Grant - Upper_Nodena - Notgrass - Richardsons_Landing
+    ... 2541 more
+
+  Subset 2: 2544 ordering(s); excluded: Bishop, Norfolk, Cheatham, Connor, Dundee, 40LA007, Hatchie, Jeter, Parchman, Wilder, Turnbow, Rast, Fullen, West_Mounds, Porter, Big_Eddy, Woodlyn, Commerce, Soudan, Jones_Bayou, Davis, Holden_Lake, Mound_Place, Lake_Cormorant, Young, Irby, Clay_Hill, Williamson, Walls, Castile_Landing, Beck, Chuccalissa, Vernon_Paul, Belle_Meade, Parkin
+    Pouncey - Fortune - Cummins - Neeleys_Ferry - Barton_Ranch - Rose_Mound - Wall - Cramor_Place - Nickel - Kent_Place - Hollywood - Starkley - Salomon - Carson_Lake - Graves_Lake - 40TP026 - Grant - Upper_Nodena - Notgrass - Richardsons_Landing
+    Pouncey - Fortune - Cummins - Neeleys_Ferry - Barton_Ranch - Wall - Rose_Mound - Cramor_Place - Nickel - Kent_Place - Hollywood - Starkley - Salomon - Carson_Lake - Graves_Lake - 40TP026 - Grant - Upper_Nodena - Notgrass - Richardsons_Landing
+    Pouncey - Fortune - Cummins - Neeleys_Ferry - Barton_Ranch - Rose_Mound - Wall - Cramor_Place - Nickel - Kent_Place - Starkley - Salomon - Hollywood - Carson_Lake - Graves_Lake - 40TP026 - Grant - Upper_Nodena - Notgrass - Richardsons_Landing
+    ... 2541 more
+
+  Subset 3: 3288 ordering(s); excluded: 40TP026, Norfolk, Cheatham, Connor, Dundee, 40LA007, Hatchie, Jeter, Parchman, Wilder, Turnbow, Rast, Grant, West_Mounds, Porter, Woodlyn, Commerce, Soudan, Jones_Bayou, Davis, Holden_Lake, Salomon, Mound_Place, Lake_Cormorant, Young, Irby, Clay_Hill, Walls, Castile_Landing, Beck, Chuccalissa, Vernon_Paul, Neeleys_Ferry, Belle_Meade, Parkin
+    Upper_Nodena - Fullen - Richardsons_Landing - Notgrass - Bishop - Big_Eddy - Carson_Lake - Hollywood - Kent_Place - Graves_Lake - Starkley - Nickel - Cramor_Place - Rose_Mound - Wall - Barton_Ranch - Williamson - Pouncey - Fortune - Cummins
+    Upper_Nodena - Fullen - Richardsons_Landing - Notgrass - Bishop - Big_Eddy - Carson_Lake - Hollywood - Kent_Place - Graves_Lake - Starkley - Nickel - Cramor_Place - Wall - Rose_Mound - Barton_Ranch - Williamson - Pouncey - Fortune - Cummins
+    Upper_Nodena - Fullen - Richardsons_Landing - Notgrass - Bishop - Big_Eddy - Carson_Lake - Hollywood - Graves_Lake - Kent_Place - Starkley - Nickel - Cramor_Place - Rose_Mound - Wall - Barton_Ranch - Williamson - Pouncey - Fortune - Cummins
+    ... 3285 more
+
+  Subset 4: 3288 ordering(s); excluded: 40TP026, Norfolk, Cheatham, Connor, Dundee, 40LA007, Hatchie, Jeter, Parchman, Wilder, Turnbow, Rast, Grant, West_Mounds, Porter, Woodlyn, Commerce, Soudan, Jones_Bayou, Davis, Holden_Lake, Salomon, Mound_Place, Lake_Cormorant, Young, Irby, Clay_Hill, Williamson, Walls, Castile_Landing, Beck, Chuccalissa, Vernon_Paul, Belle_Meade, Parkin
+    Upper_Nodena - Fullen - Richardsons_Landing - Notgrass - Bishop - Big_Eddy - Carson_Lake - Hollywood - Kent_Place - Graves_Lake - Starkley - Nickel - Cramor_Place - Rose_Mound - Wall - Barton_Ranch - Neeleys_Ferry - Pouncey - Fortune - Cummins
+    Upper_Nodena - Fullen - Richardsons_Landing - Notgrass - Bishop - Big_Eddy - Carson_Lake - Hollywood - Kent_Place - Graves_Lake - Starkley - Nickel - Cramor_Place - Wall - Rose_Mound - Barton_Ranch - Neeleys_Ferry - Pouncey - Fortune - Cummins
+    Upper_Nodena - Fullen - Richardsons_Landing - Notgrass - Bishop - Big_Eddy - Carson_Lake - Hollywood - Graves_Lake - Kent_Place - Starkley - Nickel - Cramor_Place - Rose_Mound - Wall - Barton_Ranch - Neeleys_Ferry - Pouncey - Fortune - Cummins
+    ... 3285 more
+
+  Subset 5: 2736 ordering(s); excluded: 40TP026, Richardsons_Landing, Norfolk, Cheatham, Connor, Dundee, Hatchie, Jeter, Parchman, Wilder, Turnbow, Rast, Grant, West_Mounds, Porter, Woodlyn, Commerce, Soudan, Jones_Bayou, Davis, Holden_Lake, Salomon, Mound_Place, Lake_Cormorant, Young, Irby, Clay_Hill, Walls, Castile_Landing, Beck, Chuccalissa, Vernon_Paul, Neeleys_Ferry, Belle_Meade, Parkin
+    Upper_Nodena - 40LA007 - Fullen - Notgrass - Bishop - Big_Eddy - Carson_Lake - Hollywood - Kent_Place - Graves_Lake - Starkley - Nickel - Cramor_Place - Rose_Mound - Wall - Barton_Ranch - Williamson - Pouncey - Fortune - Cummins
+    Upper_Nodena - 40LA007 - Fullen - Notgrass - Bishop - Big_Eddy - Carson_Lake - Hollywood - Kent_Place - Graves_Lake - Starkley - Nickel - Cramor_Place - Wall - Rose_Mound - Barton_Ranch - Williamson - Pouncey - Fortune - Cummins
+    Upper_Nodena - 40LA007 - Fullen - Notgrass - Bishop - Big_Eddy - Carson_Lake - Hollywood - Graves_Lake - Kent_Place - Starkley - Nickel - Cramor_Place - Rose_Mound - Wall - Barton_Ranch - Williamson - Pouncey - Fortune - Cummins
+    ... 2733 more
+
+  Subset 6: 2736 ordering(s); excluded: 40TP026, Richardsons_Landing, Norfolk, Cheatham, Connor, Dundee, Hatchie, Jeter, Parchman, Wilder, Turnbow, Rast, Grant, West_Mounds, Porter, Woodlyn, Commerce, Soudan, Jones_Bayou, Davis, Holden_Lake, Salomon, Mound_Place, Lake_Cormorant, Young, Irby, Clay_Hill, Williamson, Walls, Castile_Landing, Beck, Chuccalissa, Vernon_Paul, Belle_Meade, Parkin
+    Upper_Nodena - 40LA007 - Fullen - Notgrass - Bishop - Big_Eddy - Carson_Lake - Hollywood - Kent_Place - Graves_Lake - Starkley - Nickel - Cramor_Place - Rose_Mound - Wall - Barton_Ranch - Neeleys_Ferry - Pouncey - Fortune - Cummins
+    Upper_Nodena - 40LA007 - Fullen - Notgrass - Bishop - Big_Eddy - Carson_Lake - Hollywood - Kent_Place - Graves_Lake - Starkley - Nickel - Cramor_Place - Wall - Rose_Mound - Barton_Ranch - Neeleys_Ferry - Pouncey - Fortune - Cummins
+    Upper_Nodena - 40LA007 - Fullen - Notgrass - Bishop - Big_Eddy - Carson_Lake - Hollywood - Graves_Lake - Kent_Place - Starkley - Nickel - Cramor_Place - Rose_Mound - Wall - Barton_Ranch - Neeleys_Ferry - Pouncey - Fortune - Cummins
+    ... 2733 more
+
+  Subset 7: 8352 ordering(s); excluded: 40TP026, Bishop, Norfolk, Cheatham, Connor, Dundee, 40LA007, Hatchie, Jeter, Parchman, Wilder, Turnbow, Rast, Fullen, West_Mounds, Porter, Woodlyn, Commerce, Soudan, Jones_Bayou, Davis, Holden_Lake, Mound_Place, Lake_Cormorant, Young, Irby, Clay_Hill, Walls, Castile_Landing, Beck, Chuccalissa, Vernon_Paul, Neeleys_Ferry, Belle_Meade, Parkin
+    Pouncey - Fortune - Cummins - Williamson - Barton_Ranch - Rose_Mound - Wall - Cramor_Place - Nickel - Kent_Place - Hollywood - Starkley - Salomon - Carson_Lake - Graves_Lake - Grant - Big_Eddy - Upper_Nodena - Notgrass - Richardsons_Landing
+    Pouncey - Fortune - Cummins - Williamson - Barton_Ranch - Wall - Rose_Mound - Cramor_Place - Nickel - Kent_Place - Hollywood - Starkley - Salomon - Carson_Lake - Graves_Lake - Grant - Big_Eddy - Upper_Nodena - Notgrass - Richardsons_Landing
+    Pouncey - Fortune - Cummins - Williamson - Barton_Ranch - Rose_Mound - Wall - Cramor_Place - Nickel - Kent_Place - Starkley - Salomon - Hollywood - Carson_Lake - Graves_Lake - Grant - Big_Eddy - Upper_Nodena - Notgrass - Richardsons_Landing
+    ... 8349 more
+
+  Subset 8: 8352 ordering(s); excluded: 40TP026, Bishop, Norfolk, Cheatham, Connor, Dundee, 40LA007, Hatchie, Jeter, Parchman, Wilder, Turnbow, Rast, Fullen, West_Mounds, Porter, Woodlyn, Commerce, Soudan, Jones_Bayou, Davis, Holden_Lake, Mound_Place, Lake_Cormorant, Young, Irby, Clay_Hill, Williamson, Walls, Castile_Landing, Beck, Chuccalissa, Vernon_Paul, Belle_Meade, Parkin
+    Pouncey - Fortune - Cummins - Neeleys_Ferry - Barton_Ranch - Rose_Mound - Wall - Cramor_Place - Nickel - Kent_Place - Hollywood - Starkley - Salomon - Carson_Lake - Graves_Lake - Grant - Big_Eddy - Upper_Nodena - Notgrass - Richardsons_Landing
+    Pouncey - Fortune - Cummins - Neeleys_Ferry - Barton_Ranch - Wall - Rose_Mound - Cramor_Place - Nickel - Kent_Place - Hollywood - Starkley - Salomon - Carson_Lake - Graves_Lake - Grant - Big_Eddy - Upper_Nodena - Notgrass - Richardsons_Landing
+    Pouncey - Fortune - Cummins - Neeleys_Ferry - Barton_Ranch - Rose_Mound - Wall - Cramor_Place - Nickel - Kent_Place - Starkley - Salomon - Hollywood - Carson_Lake - Graves_Lake - Grant - Big_Eddy - Upper_Nodena - Notgrass - Richardsons_Landing
+    ... 8349 more
+
+  Subset 9: 3816 ordering(s); excluded: 40TP026, Bishop, Upper_Nodena, Norfolk, Cheatham, Connor, 40LA007, Hatchie, Jeter, Wilder, Turnbow, Rast, Fullen, West_Mounds, Porter, Woodlyn, Commerce, Soudan, Jones_Bayou, Davis, Holden_Lake, Salomon, Mound_Place, Lake_Cormorant, Young, Irby, Clay_Hill, Walls, Castile_Landing, Beck, Chuccalissa, Vernon_Paul, Neeleys_Ferry, Belle_Meade, Parkin
+    Dundee - Parchman - Grant - Big_Eddy - Notgrass - Richardsons_Landing - Carson_Lake - Hollywood - Kent_Place - Graves_Lake - Starkley - Nickel - Cramor_Place - Rose_Mound - Wall - Barton_Ranch - Williamson - Pouncey - Fortune - Cummins
+    Dundee - Parchman - Grant - Big_Eddy - Notgrass - Richardsons_Landing - Carson_Lake - Hollywood - Kent_Place - Graves_Lake - Starkley - Nickel - Cramor_Place - Wall - Rose_Mound - Barton_Ranch - Williamson - Pouncey - Fortune - Cummins
+    Dundee - Parchman - Grant - Big_Eddy - Notgrass - Richardsons_Landing - Carson_Lake - Hollywood - Graves_Lake - Kent_Place - Starkley - Nickel - Cramor_Place - Rose_Mound - Wall - Barton_Ranch - Williamson - Pouncey - Fortune - Cummins
+    ... 3813 more
+
+  Subset 10: 3816 ordering(s); excluded: 40TP026, Bishop, Upper_Nodena, Norfolk, Cheatham, Connor, 40LA007, Hatchie, Jeter, Wilder, Turnbow, Rast, Fullen, West_Mounds, Porter, Woodlyn, Commerce, Soudan, Jones_Bayou, Davis, Holden_Lake, Salomon, Mound_Place, Lake_Cormorant, Young, Irby, Clay_Hill, Williamson, Walls, Castile_Landing, Beck, Chuccalissa, Vernon_Paul, Belle_Meade, Parkin
+    Dundee - Parchman - Grant - Big_Eddy - Notgrass - Richardsons_Landing - Carson_Lake - Hollywood - Kent_Place - Graves_Lake - Starkley - Nickel - Cramor_Place - Rose_Mound - Wall - Barton_Ranch - Neeleys_Ferry - Pouncey - Fortune - Cummins
+    Dundee - Parchman - Grant - Big_Eddy - Notgrass - Richardsons_Landing - Carson_Lake - Hollywood - Kent_Place - Graves_Lake - Starkley - Nickel - Cramor_Place - Wall - Rose_Mound - Barton_Ranch - Neeleys_Ferry - Pouncey - Fortune - Cummins
+    Dundee - Parchman - Grant - Big_Eddy - Notgrass - Richardsons_Landing - Carson_Lake - Hollywood - Graves_Lake - Kent_Place - Starkley - Nickel - Cramor_Place - Rose_Mound - Wall - Barton_Ranch - Neeleys_Ferry - Pouncey - Fortune - Cummins
+    ... 3813 more
+
+Assemblages in every largest subset (14): Notgrass, Pouncey, Wall, Graves_Lake, Carson_Lake, Fortune, Cummins, Hollywood, Starkley, Cramor_Place, Kent_Place, Rose_Mound, Nickel, Barton_Ranch
+Assemblages in some but not all (13): 40TP026, Bishop, Upper_Nodena, Richardsons_Landing, Dundee, 40LA007, Parchman, Fullen, Grant, Big_Eddy, Salomon, Williamson, Neeleys_Ferry
+
+All subsets written to results/pfg-cpl-mainfort_ci95_subsets.csv
+Orderings written to results/pfg-cpl-mainfort_ci95.csv

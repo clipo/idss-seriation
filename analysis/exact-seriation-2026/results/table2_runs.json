@@ -1,0 +1,426 @@
+[
+ {
+  "table": "cpl-pfg",
+  "minsample": 0,
+  "seed": 1,
+  "largest": 10,
+  "n": 20,
+  "orderings": 48
+ },
+ {
+  "table": "cpl-pfg",
+  "minsample": 0,
+  "seed": 2,
+  "largest": 10,
+  "n": 20,
+  "orderings": 92
+ },
+ {
+  "table": "cpl-pfg",
+  "minsample": 0,
+  "seed": 3,
+  "largest": 10,
+  "n": 20,
+  "orderings": 92
+ },
+ {
+  "table": "cpl-pfg",
+  "minsample": 0,
+  "seed": 4,
+  "largest": 10,
+  "n": 20,
+  "orderings": 100
+ },
+ {
+  "table": "cpl-pfg",
+  "minsample": 0,
+  "seed": 5,
+  "largest": 10,
+  "n": 20,
+  "orderings": 62
+ },
+ {
+  "table": "cpl-pfg",
+  "minsample": 0,
+  "seed": 6,
+  "largest": 10,
+  "n": 20,
+  "orderings": 92
+ },
+ {
+  "table": "cpl-pfg",
+  "minsample": 0,
+  "seed": 7,
+  "largest": 10,
+  "n": 20,
+  "orderings": 48
+ },
+ {
+  "table": "cpl-pfg",
+  "minsample": 0,
+  "seed": 8,
+  "largest": 10,
+  "n": 20,
+  "orderings": 92
+ },
+ {
+  "table": "cpl-pfg",
+  "minsample": 0,
+  "seed": 9,
+  "largest": 10,
+  "n": 20,
+  "orderings": 48
+ },
+ {
+  "table": "cpl-pfg",
+  "minsample": 0,
+  "seed": 10,
+  "largest": 10,
+  "n": 20,
+  "orderings": 48
+ },
+ {
+  "table": "cpl-pfg",
+  "minsample": 100,
+  "seed": 1,
+  "largest": 10,
+  "n": 18,
+  "orderings": 92
+ },
+ {
+  "table": "cpl-pfg",
+  "minsample": 100,
+  "seed": 2,
+  "largest": 10,
+  "n": 18,
+  "orderings": 92
+ },
+ {
+  "table": "cpl-pfg",
+  "minsample": 100,
+  "seed": 3,
+  "largest": 10,
+  "n": 18,
+  "orderings": 48
+ },
+ {
+  "table": "cpl-pfg",
+  "minsample": 100,
+  "seed": 4,
+  "largest": 9,
+  "n": 18,
+  "orderings": 168
+ },
+ {
+  "table": "cpl-pfg",
+  "minsample": 100,
+  "seed": 5,
+  "largest": 10,
+  "n": 18,
+  "orderings": 92
+ },
+ {
+  "table": "cpl-pfg",
+  "minsample": 200,
+  "seed": 1,
+  "largest": 7,
+  "n": 14,
+  "orderings": 26
+ },
+ {
+  "table": "cpl-pfg",
+  "minsample": 200,
+  "seed": 2,
+  "largest": 7,
+  "n": 14,
+  "orderings": 26
+ },
+ {
+  "table": "cpl-pfg",
+  "minsample": 200,
+  "seed": 3,
+  "largest": 7,
+  "n": 14,
+  "orderings": 26
+ },
+ {
+  "table": "cpl-pfg",
+  "minsample": 200,
+  "seed": 4,
+  "largest": 7,
+  "n": 14,
+  "orderings": 28
+ },
+ {
+  "table": "cpl-pfg",
+  "minsample": 200,
+  "seed": 5,
+  "largest": 7,
+  "n": 14,
+  "orderings": 22
+ },
+ {
+  "table": "mainfort-data-collapsed",
+  "minsample": 0,
+  "seed": 1,
+  "largest": 23,
+  "n": 54,
+  "orderings": 37676664
+ },
+ {
+  "table": "mainfort-data-collapsed",
+  "minsample": 0,
+  "seed": 2,
+  "largest": 23,
+  "n": 54,
+  "orderings": 9684492
+ },
+ {
+  "table": "mainfort-data-collapsed",
+  "minsample": 0,
+  "seed": 3,
+  "largest": 23,
+  "n": 54,
+  "orderings": 25405320
+ },
+ {
+  "table": "mainfort-data-collapsed",
+  "minsample": 100,
+  "seed": 1,
+  "largest": 17,
+  "n": 41,
+  "orderings": 728
+ },
+ {
+  "table": "mainfort-data-collapsed",
+  "minsample": 100,
+  "seed": 2,
+  "largest": 17,
+  "n": 41,
+  "orderings": 552
+ },
+ {
+  "table": "mainfort-data-collapsed",
+  "minsample": 100,
+  "seed": 3,
+  "largest": 17,
+  "n": 41,
+  "orderings": 552
+ },
+ {
+  "table": "mainfort-data-collapsed",
+  "minsample": 100,
+  "seed": 4,
+  "largest": 18,
+  "n": 41,
+  "orderings": 320
+ },
+ {
+  "table": "mainfort-data-collapsed",
+  "minsample": 100,
+  "seed": 5,
+  "largest": 18,
+  "n": 41,
+  "orderings": 2656
+ },
+ {
+  "table": "mainfort-data-collapsed",
+  "minsample": 200,
+  "seed": 1,
+  "largest": 15,
+  "n": 31,
+  "orderings": 88
+ },
+ {
+  "table": "mainfort-data-collapsed",
+  "minsample": 200,
+  "seed": 2,
+  "largest": 15,
+  "n": 31,
+  "orderings": 396
+ },
+ {
+  "table": "mainfort-data-collapsed",
+  "minsample": 200,
+  "seed": 3,
+  "largest": 15,
+  "n": 31,
+  "orderings": 88
+ },
+ {
+  "table": "mainfort-data-collapsed",
+  "minsample": 200,
+  "seed": 4,
+  "largest": 15,
+  "n": 31,
+  "orderings": 396
+ },
+ {
+  "table": "mainfort-data-collapsed",
+  "minsample": 200,
+  "seed": 5,
+  "largest": 15,
+  "n": 31,
+  "orderings": 44
+ },
+ {
+  "table": "pfg-cpl-mainfort",
+  "minsample": 0,
+  "seed": 1,
+  "largest": 20,
+  "n": 55,
+  "orderings": 41472
+ },
+ {
+  "table": "pfg-cpl-mainfort",
+  "minsample": 0,
+  "seed": 2,
+  "largest": 21,
+  "n": 55,
+  "orderings": 18048
+ },
+ {
+  "table": "pfg-cpl-mainfort",
+  "minsample": 0,
+  "seed": 3,
+  "largest": 20,
+  "n": 55,
+  "orderings": 51552
+ },
+ {
+  "table": "pfg-cpl-mainfort",
+  "minsample": 0,
+  "seed": 4,
+  "largest": 20,
+  "n": 55,
+  "orderings": 15408
+ },
+ {
+  "table": "pfg-cpl-mainfort",
+  "minsample": 0,
+  "seed": 5,
+  "largest": 20,
+  "n": 55,
+  "orderings": 93063
+ },
+ {
+  "table": "pfg-cpl-mainfort",
+  "minsample": 0,
+  "seed": 6,
+  "largest": 20,
+  "n": 55,
+  "orderings": 135204
+ },
+ {
+  "table": "pfg-cpl-mainfort",
+  "minsample": 0,
+  "seed": 7,
+  "largest": 20,
+  "n": 55,
+  "orderings": 275952
+ },
+ {
+  "table": "pfg-cpl-mainfort",
+  "minsample": 0,
+  "seed": 8,
+  "largest": 21,
+  "n": 55,
+  "orderings": 12312
+ },
+ {
+  "table": "pfg-cpl-mainfort",
+  "minsample": 0,
+  "seed": 9,
+  "largest": 20,
+  "n": 55,
+  "orderings": 153738
+ },
+ {
+  "table": "pfg-cpl-mainfort",
+  "minsample": 0,
+  "seed": 10,
+  "largest": 20,
+  "n": 55,
+  "orderings": 49152
+ },
+ {
+  "table": "pfg-cpl-mainfort",
+  "minsample": 100,
+  "seed": 1,
+  "largest": 16,
+  "n": 42,
+  "orderings": 400
+ },
+ {
+  "table": "pfg-cpl-mainfort",
+  "minsample": 100,
+  "seed": 2,
+  "largest": 16,
+  "n": 42,
+  "orderings": 304
+ },
+ {
+  "table": "pfg-cpl-mainfort",
+  "minsample": 100,
+  "seed": 3,
+  "largest": 16,
+  "n": 42,
+  "orderings": 552
+ },
+ {
+  "table": "pfg-cpl-mainfort",
+  "minsample": 100,
+  "seed": 4,
+  "largest": 16,
+  "n": 42,
+  "orderings": 64
+ },
+ {
+  "table": "pfg-cpl-mainfort",
+  "minsample": 100,
+  "seed": 5,
+  "largest": 15,
+  "n": 42,
+  "orderings": 2652
+ },
+ {
+  "table": "pfg-cpl-mainfort",
+  "minsample": 200,
+  "seed": 1,
+  "largest": 14,
+  "n": 34,
+  "orderings": 42
+ },
+ {
+  "table": "pfg-cpl-mainfort",
+  "minsample": 200,
+  "seed": 2,
+  "largest": 14,
+  "n": 34,
+  "orderings": 64
+ },
+ {
+  "table": "pfg-cpl-mainfort",
+  "minsample": 200,
+  "seed": 3,
+  "largest": 14,
+  "n": 34,
+  "orderings": 64
+ },
+ {
+  "table": "pfg-cpl-mainfort",
+  "minsample": 200,
+  "seed": 4,
+  "largest": 14,
+  "n": 34,
+  "orderings": 32
+ },
+ {
+  "table": "pfg-cpl-mainfort",
+  "minsample": 200,
+  "seed": 5,
+  "largest": 14,
+  "n": 34,
+  "orderings": 64
+ }
+]

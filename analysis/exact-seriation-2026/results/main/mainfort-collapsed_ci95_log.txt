@@ -1,0 +1,126 @@
+Assemblages: 54  Types: 8  Criterion: bootstrap CI 0.95 (1000 replicates)
+Middle-placements that create a dip: 42,743 of 74,412
+Engine: compiled (/home/claude/seriate_core)
+  [     0.0s] new best size 1
+  [     0.0s] new best size 2
+  [     0.0s] new best size 3
+  [     0.0s] new best size 4
+  [     0.0s] new best size 5
+  [     0.0s] new best size 6
+  [     0.0s] new best size 7
+  [     0.0s] new best size 8
+  [     0.0s] new best size 9
+  [     0.0s] new best size 10
+  [     0.0s] new best size 11
+  [     0.0s] new best size 12
+  [     0.0s] new best size 13
+  [     0.0s] new best size 14
+  [     0.0s] new best size 15
+  [     0.0s] new best size 16
+  [     0.0s] new best size 17
+  [     0.0s] new best size 18
+  [     0.0s] new best size 19
+  [     0.0s] new best size 20
+  [     0.1s] new best size 21
+  [     0.1s] new best size 22
+  [     0.3s] new best size 23
+  [     3.5s] nodes=4194304 best=23 orderings=922064
+  [     5.5s] nodes=8388608 best=23 orderings=2407092
+  [     7.7s] nodes=12582912 best=23 orderings=3764600
+  [     8.7s] nodes=16777216 best=23 orderings=5570168
+  [     9.5s] nodes=20971520 best=23 orderings=7362752
+  [    10.2s] nodes=25165824 best=23 orderings=9410885
+  [    15.9s] nodes=29360128 best=23 orderings=9604368
+  [    20.2s] nodes=33554432 best=23 orderings=10331040
+  [    21.6s] nodes=37748736 best=23 orderings=11998731
+  [    22.5s] nodes=41943040 best=23 orderings=13854258
+  [    28.2s] nodes=46137344 best=23 orderings=14187000
+  [    33.3s] nodes=50331648 best=23 orderings=14380236
+  [    38.4s] nodes=54525952 best=23 orderings=14444220
+  [    42.8s] nodes=58720256 best=23 orderings=14444220
+  [    47.4s] nodes=62914560 best=23 orderings=14444220
+  [    52.8s] nodes=67108864 best=23 orderings=14444220
+  [    58.3s] nodes=71303168 best=23 orderings=14444220
+  [    64.4s] nodes=75497472 best=23 orderings=14444220
+  [    69.3s] nodes=79691776 best=23 orderings=14678067
+  [    70.5s] nodes=83886080 best=23 orderings=16260920
+  [    71.9s] nodes=88080384 best=23 orderings=17719100
+  [    72.9s] nodes=92274688 best=23 orderings=19197943
+  [    74.2s] nodes=96468992 best=23 orderings=20502982
+  [    77.1s] nodes=100663296 best=23 orderings=21575652
+  [    80.7s] nodes=104857600 best=23 orderings=22626111
+  [    83.1s] nodes=109051904 best=23 orderings=23773546
+  [    83.9s] nodes=113246208 best=23 orderings=25667772
+  [    84.6s] nodes=117440512 best=23 orderings=27638369
+  [    86.3s] nodes=121634816 best=23 orderings=29245371
+  [    87.7s] nodes=125829120 best=23 orderings=30921518
+  [    88.7s] nodes=130023424 best=23 orderings=32456976
+  [    96.4s] nodes=134217728 best=23 orderings=32456976
+  [    99.2s] nodes=138412032 best=23 orderings=33671166
+  [   100.3s] nodes=142606336 best=23 orderings=35443777
+  [   101.7s] nodes=146800640 best=23 orderings=37080792
+  [   107.6s] nodes=150994944 best=23 orderings=37537080
+  [   115.7s] nodes=155189248 best=23 orderings=37579560
+  [   121.2s] nodes=159383552 best=23 orderings=37579560
+  [   128.5s] nodes=163577856 best=23 orderings=37579560
+  [   135.4s] nodes=167772160 best=23 orderings=37579560
+  [   142.8s] nodes=171966464 best=23 orderings=37579560
+  [   149.5s] nodes=176160768 best=23 orderings=37579560
+  [   156.4s] nodes=180355072 best=23 orderings=37579560
+  [   161.7s] nodes=184549376 best=23 orderings=37579560
+  [   167.9s] nodes=188743680 best=23 orderings=37579560
+  [   174.4s] nodes=192937984 best=23 orderings=37579560
+  [   179.8s] nodes=197132288 best=23 orderings=37579560
+  [   185.1s] nodes=201326592 best=23 orderings=37579560
+  [   189.8s] nodes=205520896 best=23 orderings=37579560
+  [   195.9s] nodes=209715200 best=23 orderings=37579560
+  [   201.2s] nodes=213909504 best=23 orderings=37579560
+  [   206.8s] nodes=218103808 best=23 orderings=37584456
+  [   211.0s] nodes=222298112 best=23 orderings=37637928
+  [   216.1s] nodes=226492416 best=23 orderings=37639944
+  [   221.8s] nodes=230686720 best=23 orderings=37639944
+  [   228.0s] nodes=234881024 best=23 orderings=37639944
+  [   234.5s] nodes=239075328 best=23 orderings=37654632
+  [   241.4s] nodes=243269632 best=23 orderings=37654632
+  [   247.4s] nodes=247463936 best=23 orderings=37654632
+  [   253.7s] nodes=251658240 best=23 orderings=37654632
+  [   259.6s] nodes=255852544 best=23 orderings=37654632
+  [   264.9s] nodes=260046848 best=23 orderings=37676664
+  [   271.1s] nodes=264241152 best=23 orderings=37676664
+  [   277.5s] nodes=268435456 best=23 orderings=37676664
+  [   285.3s] nodes=272629760 best=23 orderings=37676664
+  [   292.3s] nodes=276824064 best=23 orderings=37676664
+  [   300.4s] nodes=281018368 best=23 orderings=37676664
+  [   307.2s] nodes=285212672 best=23 orderings=37676664
+  [   313.9s] nodes=289406976 best=23 orderings=37676664
+
+Search finished in 315.0s, 289,840,825 nodes.
+Largest valid subset size: 23 of 54
+Distinct largest subsets: 43
+Valid orderings of those subsets (mirror images counted once): 37,676,664
+NOTE: counts above are complete, but only the first 100,000 orderings are listed and written to file. Raise --max-solutions for a complete list.
+      40 subset(s) have no stored ordering.
+
+  Subset 1: 18480 ordering(s); excluded: Porter, 40LA007, Wilder, 40TP026, Jones_Bayou, Fullen, Rast, Norfolk, Lake_Cormorant, Upper_Nodena, Wall, Irby, Castile_Landing, Neeleys_Ferry, Williamson, Barton, Parkin, Woodlyn, Beck, Carson_Lake, Mound_Place, Young, Connor, Walls, West_Mounds, Parchman, Salomon, Chuccalissa, Graves_Lake, Grant, Belle_Meade
+    Turnbow - Dundee - Commerce - Big_Eddy - Richardsons_Landing - Hollywood - Kent - Starkley - Clay_Hill - Bishop - Notgrass - Soudan - Jeter - Davis - Rose_Mound - Nickel - Hatchie - Vernon Paul - Cummins - Cramor - Cheatham - Pouncey - Fortune
+    Turnbow - Dundee - Commerce - Big_Eddy - Richardsons_Landing - Hollywood - Kent - Starkley - Bishop - Clay_Hill - Notgrass - Soudan - Jeter - Davis - Rose_Mound - Nickel - Hatchie - Vernon Paul - Cummins - Cramor - Cheatham - Pouncey - Fortune
+    Turnbow - Dundee - Commerce - Big_Eddy - Richardsons_Landing - Hollywood - Kent - Starkley - Bishop - Notgrass - Clay_Hill - Soudan - Jeter - Davis - Rose_Mound - Nickel - Hatchie - Vernon Paul - Cummins - Cramor - Cheatham - Pouncey - Fortune
+    ... 18477 more
+
+  Subset 2: 54394 ordering(s); excluded: Porter, 40LA007, Wilder, 40TP026, Jones_Bayou, Fullen, Rast, Norfolk, Lake_Cormorant, Upper_Nodena, Wall, Irby, Castile_Landing, Commerce, Neeleys_Ferry, Williamson, Barton, Parkin, Woodlyn, Beck, Carson_Lake, Mound_Place, Young, Connor, Walls, West_Mounds, Parchman, Salomon, Chuccalissa, Graves_Lake, Belle_Meade
+    Turnbow - Dundee - Grant - Big_Eddy - Richardsons_Landing - Hollywood - Kent - Starkley - Clay_Hill - Bishop - Notgrass - Soudan - Jeter - Davis - Rose_Mound - Nickel - Hatchie - Vernon Paul - Cummins - Cramor - Cheatham - Pouncey - Fortune
+    Turnbow - Dundee - Grant - Big_Eddy - Richardsons_Landing - Hollywood - Kent - Starkley - Bishop - Clay_Hill - Notgrass - Soudan - Jeter - Davis - Rose_Mound - Nickel - Hatchie - Vernon Paul - Cummins - Cramor - Cheatham - Pouncey - Fortune
+    Turnbow - Dundee - Grant - Big_Eddy - Richardsons_Landing - Hollywood - Kent - Starkley - Bishop - Notgrass - Clay_Hill - Soudan - Jeter - Davis - Rose_Mound - Nickel - Hatchie - Vernon Paul - Cummins - Cramor - Cheatham - Pouncey - Fortune
+    ... 54391 more
+
+  Subset 3: 27126 ordering(s); excluded: Porter, 40LA007, Wilder, 40TP026, Jones_Bayou, Fullen, Rast, Norfolk, Lake_Cormorant, Upper_Nodena, Wall, Irby, Castile_Landing, Commerce, Neeleys_Ferry, Turnbow, Williamson, Barton, Parkin, Woodlyn, Beck, Carson_Lake, Mound_Place, Young, Connor, Walls, West_Mounds, Salomon, Chuccalissa, Graves_Lake, Belle_Meade
+    Dundee - Parchman - Grant - Big_Eddy - Richardsons_Landing - Hollywood - Kent - Starkley - Clay_Hill - Bishop - Notgrass - Soudan - Jeter - Davis - Rose_Mound - Nickel - Hatchie - Vernon Paul - Cummins - Cramor - Cheatham - Pouncey - Fortune
+    Dundee - Parchman - Grant - Big_Eddy - Richardsons_Landing - Hollywood - Kent - Starkley - Bishop - Clay_Hill - Notgrass - Soudan - Jeter - Davis - Rose_Mound - Nickel - Hatchie - Vernon Paul - Cummins - Cramor - Cheatham - Pouncey - Fortune
+    Dundee - Parchman - Grant - Big_Eddy - Richardsons_Landing - Hollywood - Kent - Starkley - Bishop - Notgrass - Clay_Hill - Soudan - Jeter - Davis - Rose_Mound - Nickel - Hatchie - Vernon Paul - Cummins - Cramor - Cheatham - Pouncey - Fortune
+    ... 27123 more
+
+Assemblages in every largest subset (8): Hatchie, Notgrass, Rose_Mound, Cramor, Nickel, Pouncey, Cummins, Fortune
+Assemblages in some but not all (38): Porter, 40LA007, Bishop, Richardsons_Landing, Wilder, Jones_Bayou, Fullen, Jeter, Lake_Cormorant, Upper_Nodena, Wall, Irby, Hollywood, Commerce, Neeleys_Ferry, Vernon Paul, Turnbow, Williamson, Barton, Parkin, Cheatham, Woodlyn, Beck, Carson_Lake, Mound_Place, Young, Big_Eddy, Dundee, Starkley, Walls, Parchman, Graves_Lake, Kent, Clay_Hill, Soudan, Davis, Grant, Belle_Meade
+
+All subsets written to results/mainfort-collapsed_ci95_subsets.csv
+Orderings written to results/mainfort-collapsed_ci95.csv

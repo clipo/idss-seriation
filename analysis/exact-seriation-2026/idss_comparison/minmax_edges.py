@@ -1,0 +1,10 @@
+# print edges of an IDSS minmax gml file (python 2.7, networkx 1.9.1)
+import sys, networkx as nx
+g = nx.read_gml(sys.argv[1])
+lab = nx.get_node_attributes(g, 'label')
+name = lambda n: lab.get(n, n)
+edges = sorted(tuple(sorted((str(name(a)), str(name(b))))) for a, b in g.edges())
+print("%d nodes, %d edges" % (g.number_of_nodes(), len(edges)))
+deg = sorted(((g.degree(n), str(name(n))) for n in g.nodes()), reverse=True)
+print("degree>=3: " + ", ".join("%s(%d)" % (n, d) for d, n in deg if d >= 3))
+for e in edges: print("  %s -- %s" % e)
