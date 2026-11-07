@@ -74,6 +74,10 @@ def checkForValidAdditions(nnetwork):
 
         ######################################################################################
         for testAssemblage in validAssemblages:
+            # FIX: an assemblage already in the solution was not excluded, so it
+            # could be added again, creating a cycle in the solution graph.
+            if testAssemblage in nnetwork:
+                continue
             if assEnd == "End1":
                 if nnetwork.graph["End1"] == nnetwork.graph["End2"]:
                     continue
@@ -116,10 +120,14 @@ def checkForValidAdditions(nnetwork):
                         upperCI_end = typeFrequencyUpperCI[compareAssemblage][i]
                         lowerCI_end = typeFrequencyLowerCI[compareAssemblage][i]
 
+                        # FIX: codes were reversed relative to the non-bootstrap branch
+                        # (outer < inner was coded "D"), so the valley pattern below
+                        # rejected peaks and accepted valleys. Codes now match the
+                        # non-bootstrap branch: moving inward, "U" = increase, "D" = decrease.
                         if upperCI_test < lowerCI_end:
-                            newstring += "D"
-                        elif lowerCI_test > upperCI_end:
                             newstring += "U"
+                        elif lowerCI_test > upperCI_end:
+                            newstring += "D"
                         else:
                             newstring += "M"
                     else:

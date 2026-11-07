@@ -23,6 +23,11 @@ def parse_arguments():
                         help="Sets whether you want to use the bootstrap confidence intervals for the comparisons between assemblage type frequencies. Set's to on or off.")
     parser.add_argument('--bootstrapSignificance', '-bs', default=0.95, type=float,
                         help="The significance to which the confidence intervals are calculated. Default is 0.95.")
+    parser.add_argument('--cimethod', default='percentile', choices=['percentile', 'legacy'],
+                        help="Bootstrap interval: 'percentile' (default) uses the percentile interval of the "
+                             "bootstrap replicates; 'legacy' reproduces the original mean +/- t*SE interval.")
+    parser.add_argument('--seed', default=None, help="Random seed for the bootstrap intervals.")
+    parser.add_argument('--bootsize', default=None, help="Number of bootstrap replicates (default 10000).")
     parser.add_argument('--filtered','-f', default=1,
                         help="The script will complete by checking to see if smaller valid solutions are included in the larger sets. If not, they are added to the final set. Default is true. ")
     parser.add_argument('--largestonly','-lo', default=None,

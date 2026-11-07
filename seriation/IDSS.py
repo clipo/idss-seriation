@@ -151,6 +151,9 @@ class IDSS():
                     'spatialbootstrapN':None,
                     'minmaxbycount':None,
                     'delimiter': None,
+                    'cimethod': 'percentile',
+                    'seed': None,
+                    'bootsize': None,
                     'preservepickle' : 0,
                     'source_identifier': 'none'
                     }
@@ -210,7 +213,14 @@ class IDSS():
         :return: list of triples of assemblages
         """
         if self._cached_triples == None:
-            self._cached_triples = list(itertools.combinations(lst, 3))
+            # FIX: itertools.combinations gives each set of three assemblages in one
+            # order only, so only one of the three possible middle assemblages was
+            # ever tested. Each set is now tested with each assemblage in the middle
+            # (reversals are equivalent and are not repeated).
+            triples = []
+            for a, b, c in itertools.combinations(sorted(lst), 3):
+                triples.extend([(a, b, c), (b, a, c), (a, c, b)])
+            self._cached_triples = triples
         useable_tuples = []
         # for e in tuples:
         #     useable_tuples.append(e)
@@ -442,7 +452,7 @@ class IDSS():
             columns = len(self.assemblages[combo[0]])
             self.log.trace("Number of columns: %d", columns)
             ## calculate the maximum differences between the pairs of assemblages (across all types)
-            for i in (0, columns - 1):
+            for i in range(0, columns):  # FIX: was (0, columns - 1), which checked only two columns
                 self.log.trace("i: %d ", i)
                 ass1 = float(assemblage1[i])
                 ass2 = float(assemblage2[i])
@@ -468,12 +478,26 @@ class IDSS():
             self.validComparisonsHash[assemblage1] = cAssemblages
         return True
 
-    def confidence_interval(self, data, confidence=0.05):
+    def confidence_interval(self, data, confidence=0.95):
+        """Interval for a type frequency from its bootstrap replicates.
+
+        FIX: the original returned mean +/- t * standard error of the replicates,
+        an interval for the mean of the replicates whose width shrinks with the
+        number of replicates (about 0.02 sampling SD at 10,000 replicates). The
+        default is now the percentile interval of the replicates, which estimates
+        the sampling distribution of the observed frequency. The original
+        behaviour is available with --cimethod=legacy.
+        """
         a = 1.0 * np.array(data)
-        n = len(a)
-        m, se = np.mean(a), scipy.stats.sem(a)
-        h = se * sp.stats.t._ppf((1 + confidence) / 2., n - 1)
-        return m, m - h, m + h
+        m = np.mean(a)
+        if self.args.get('cimethod', 'percentile') == 'legacy':
+            n = len(a)
+            se = scipy.stats.sem(a)
+            h = se * sp.stats.t._ppf((1 + confidence) / 2., n - 1)
+            return m, m - h, m + h
+        alpha = (1.0 - float(confidence)) / 2.0
+        lower, upper = np.percentile(a, [100.0 * alpha, 100.0 * (1.0 - alpha)])
+        return m, lower, upper
 
     ########################################### BOOTSTRAP CI SECTION ####################################
     def bootstrapCICalculation(self, bootsize=1000, confidenceInterval=0.05):
@@ -621,6 +645,24 @@ class IDSS():
         return True
 
 
+    def compareFrequencies(self, a, b, i):
+        """Direction of change in type i from assemblage a to assemblage b:
+        "U" (increase), "D" (decrease) or "M" (equal, or no significant
+        difference when bootstrap intervals are used)."""
+        if self.args['bootstrapCI'] not in self.FalseList:
+            if self.typeFrequencyLowerCI[b][i] > self.typeFrequencyUpperCI[a][i]:
+                return "U"
+            if self.typeFrequencyUpperCI[b][i] < self.typeFrequencyLowerCI[a][i]:
+                return "D"
+            return "M"
+        va = self.assemblages[a][i]
+        vb = self.assemblages[b][i]
+        if vb > va:
+            return "U"
+        if vb < va:
+            return "D"
+        return "M"
+
     ########################################### FIND ALL THE VALID TRIPLES  ####################################
     ########################################### #################################### ###########################
     def findAllValidTriples(self):
@@ -650,69 +692,29 @@ class IDSS():
 
             ## the idea here is that you are have 3 assemblages in order 1<->2<->3
             ## what we want to do is see if the %s go up or down from 1 to 2 and 2 to 3
+            # FIX: the original concatenated the codes of all types into one string and
+            # searched it for "DU", so codes of adjacent types produced false
+            # rejections; in the bootstrap branch it kept only the last type and
+            # coded the two steps in opposite directions. Each type is now tested
+            # on its own, with one coding: U = increase, D = decrease, M = no
+            # (significant) difference, reading 1 -> 2 -> 3. A triple is invalid
+            # if any type decreases and then increases (a valley).
+            # FIX: the pair threshold (--threshold) was applied only when solutions
+            # were extended, not to the triples they start from.
+            if permu[1] not in self.validComparisonsHash.get(permu[0], ()) or \
+                    permu[2] not in self.validComparisonsHash.get(permu[1], ()):
+                continue
             comparison12 = ""
             comparison23 = ""
             for i in range(0, columns):
-                ass1 = self.assemblages[permu[0]][i]
-                ass2 = self.assemblages[permu[1]][i]
-                ass3 = self.assemblages[permu[2]][i]
-
-                self.log.trace("ass1: %f ass2: %f ass3: %f", ass1, ass2, ass3)
-                if self.args['bootstrapCI'] not in self.FalseList:
-                    low1 = self.typeFrequencyLowerCI[permu[0]][i]
-                    low2 = self.typeFrequencyLowerCI[permu[1]][i]
-                    low3 = self.typeFrequencyLowerCI[permu[2]][i]
-                    high1 = self.typeFrequencyUpperCI[permu[0]][i]
-                    high2 = self.typeFrequencyUpperCI[permu[1]][i]
-                    high3 = self.typeFrequencyUpperCI[permu[2]][i]
-
-                    # compare 1 and 2 -- comparing left to right
-                    if low2 > high1:
-                        comparison12 = "U"
-                    elif high2 > low1:
-                        comparison12 = "D"
-                    else:
-                        comparison12 = "M"
-
-                    ## compare 2 and 3 -- comparing left to right
-                    if low3 > high2:
-                        comparison23 = "U"
-                    elif  high3 < low2:
-                        comparison23 = "D"
-                    else:
-                        comparison23 = "M"
-
-                else:     ### not bootstrap
-                    if ass2 > ass1:
-                        comparison12 += "U"
-                    elif ass2 < ass1:
-                        comparison12 += "D"
-                    elif ass2 == ass1:
-                        comparison12 += "M"
-                    else:
-                        self.log.trace("\n\rNo match to our possibility of combinations. ass1: %f ass2: %f" % ass1, ass2)
-                        print "\n\rNo match to our possibility of combinations.  ass1: %f  ass2: %f \n\r" % ass1, ass2
-                        print "I must quit. Debugging required.\n\r"
-                        sys.exit()
-
-                    if ass3 > ass2:
-                        comparison23 += "U"
-                    elif ass3 < ass2:
-                        comparison23 += "D"
-                    elif ass2 == ass3:
-                        comparison23 = "M"
-                    else:
-                        self.log.trace("\n\rNo match to our possibility of combinations. ass2: %f ass3: %f" % ass2, ass3)
-                        print "\n\rNo match to our possibility of combinations.  ass2: %f  ass3: %f \n\r" % ass2, ass3
-                        print "I must quit. Debugging required.\n\r"
-                        sys.exit()
-
-                    self.log.trace("Comparison12: %s Comparison23: %s", comparison12, comparison23)
-
-            comparison = comparison12 + comparison23
-            test = re.compile('DU').search(comparison)
-            if test not in self.FalseList:
-                error += 1
+                c12 = self.compareFrequencies(permu[0], permu[1], i)
+                c23 = self.compareFrequencies(permu[1], permu[2], i)
+                comparison12 += c12
+                comparison23 += c23
+                if c12 == "D" and c23 == "U":
+                    error += 1
+                    break
+            self.log.trace("Comparison12: %s Comparison23: %s", comparison12, comparison23)
 
             if error == 0:
                 # uses NetworkX
@@ -1719,9 +1721,9 @@ class IDSS():
         return output_graph
 
     def _get_longest_subsolution(self,all_solutions):
-        cur_longest = []
+        cur_longest = None  # FIX: was [], which was passed on as a solution when none existed
         for sol in all_solutions:
-            if len(sol) > len(cur_longest):
+            if cur_longest is None or len(sol) > len(cur_longest):
                 cur_longest = sol
         return cur_longest
 
@@ -1744,7 +1746,10 @@ class IDSS():
 
         self.log.trace("--- Filtering solutions so we only end up with the unique ones.")
         self.log.trace("--- Start with %d solutions.", len(end_solutions))
-        filteredarray.append(self._get_longest_subsolution(end_solutions))
+        longest = self._get_longest_subsolution(end_solutions)
+        if longest is None:
+            return filteredarray
+        filteredarray.append(longest)
         newOne = 0
         for tnetwork in reversed(all_solutions):
             self.log.trace("trying tnetwork: %s of length %s", tnetwork, len(tnetwork.nodes()))
@@ -2216,7 +2221,7 @@ class IDSS():
         self.log.trace("Now calculate the bootstrap comparisons based ")
         self.log.trace("on specified confidence interval, if in the arguments.")
 
-        if self.args['bootstrapCI'] == True:
+        if self.args['bootstrapCI'] not in self.FalseList:  # FIX: was == True, inconsistent with the comparisons, which use FalseList
             bootstrap_start = time.time()
             bootsize = 10000
 
@@ -2225,6 +2230,10 @@ class IDSS():
             else:
                 confidenceInterval = 0.95
 
+            if self.args.get('seed') not in (None, "", "None"):
+                np.random.seed(int(self.args['seed']))  # FIX: reproducible bootstrap intervals
+            if self.args.get('bootsize') not in (None, "", "None"):
+                bootsize = int(self.args['bootsize'])
             self.bootstrap_CI_calculation_numpy(bootsize, float(confidenceInterval))
             bootstrap_elapsed = time.time() - bootstrap_start
 
@@ -2372,9 +2381,19 @@ class IDSS():
 
                 #validNewNetworks = [x for x in result if not x is False]
 
+                # FIX (efficiency): the same ordering is reached by adding its ends in
+                # different sequences; keep one copy of each ordering per step.
+                seen_paths = set()
                 for s in resultdict:
                     if s is not False:
-                        #for sol in s:
+                        unique_s = []
+                        for g in s:
+                            pth = tuple(nx.shortest_path(g, g.graph["End1"], g.graph["End2"]))
+                            key = min(pth, pth[::-1])
+                            if key not in seen_paths:
+                                seen_paths.add(key)
+                                unique_s.append(g)
+                        s = unique_s
                         newNetworks += s
                         all_solutions += s
                         self.solutionCount += len(s)
