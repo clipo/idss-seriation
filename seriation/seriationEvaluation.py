@@ -54,6 +54,37 @@ def worker(pickledir, networks, out_q):
 
 
 
+def tripleDipWithNewEnd(newEnd, path, i):
+    """Every-triple criterion (--dipcriterion=triple) for type i.
+
+    newEnd is placed before path[0]; path runs from the end it joins to the other
+    end and is already valid. The only new triples are (newEnd, path[a], path[b])
+    with a < b, in which path[a] is the middle. path[a] is a dip if it is lower
+    than both newEnd and path[b]: with bootstrap intervals, if its upper bound is
+    below both lower bounds; without them, if its value is below both values.
+    Returns True if any such dip exists."""
+    boot = args['bootstrapCI'] not in (None, 0, "", "0", False)
+    if boot:
+        low = lambda a: typeFrequencyLowerCI[a][i]
+        high = lambda a: typeFrequencyUpperCI[a][i]
+    else:
+        low = lambda a: assemblages[a][i]
+        high = lambda a: assemblages[a][i]
+    endLow = low(newEnd)
+    # largest lower bound among assemblages further inward than position a
+    suffixMax = [None] * len(path)
+    running = None
+    for a in range(len(path) - 1, -1, -1):
+        suffixMax[a] = running
+        v = low(path[a])
+        running = v if running is None or v > running else running
+    for a in range(len(path) - 1):
+        h = high(path[a])
+        if h < endLow and h < suffixMax[a]:
+            return True
+    return False
+
+
 def checkForValidAdditions(nnetwork):
     solutionsChecked=0
     pattern_to_find = re.compile('DU|DM*U')
@@ -106,6 +137,13 @@ def checkForValidAdditions(nnetwork):
             oneToColumns = range(len(assemblages[testAssemblage]))
 
             error = 0  ## set the error check to 0
+            if args.get('dipcriterion', 'neighbor') == 'triple':
+                p = nx.shortest_path(nnetwork, nnetwork.graph[assEnd], nnetwork.graph[otherEnd])
+                for i in oneToColumns:
+                    if tripleDipWithNewEnd(testAssemblage, p, i):
+                        error += 1
+                        break
+                oneToColumns = []  # the neighbour test below is skipped
             for i in oneToColumns:
                 newstring = ""
                 p = nx.shortest_path(nnetwork, nnetwork.graph[assEnd], nnetwork.graph[otherEnd])

@@ -50,6 +50,23 @@ present in tag v2.0 in the same or a closely related form, except where noted.
 
 ## Additions
 
+- `--search=exact`, with `--maxorderings` and `--exactengine` (new files `seriation/exactSearch.py` and
+  `seriation/seriate_core.c`). Exact branch-and-bound search for every largest valid subset and every
+  valid ordering of it, under the every-triple criterion. Results are passed to the existing output
+  routines as solution graphs, and a complete list of subsets and orderings is written to
+  `<input>-exact-subsets.txt`. Verified: on 15 random tables with and without bootstrap intervals
+  (30 runs), the Python engine, the compiled engine, the iterative search with
+  `--dipcriterion=triple` and an independent standalone implementation returned the identical set
+  of largest orderings.
+
+- `--dipcriterion=neighbor|triple`. `neighbor` (default) is the original IDSS test. `triple` rejects
+  any assemblage whose upper bound is below the lower bounds of both an earlier and a later
+  assemblage in the solution (without bootstrap: whose value is below both values). When a solution
+  is extended, only the new triples, those with the new end assemblage as one end, are checked
+  (`seriationEvaluation.tripleDipWithNewEnd`). The triple test used for the starting triples is the
+  same under both criteria. This criterion is hereditary, so extending solutions at their ends
+  remains a complete search.
+
 - `--seed` sets the random seed for the bootstrap intervals.
 - `--bootsize` sets the number of bootstrap replicates (default 10000).
 - Identical orderings produced at the same step are kept once (they arise when the ends of an
@@ -60,11 +77,11 @@ present in tag v2.0 in the same or a closely related form, except where noted.
 - **One ordering per set of assemblages.** `filterSolutions_optimized` discards a solution whose
   assemblages are the same as, or a subset of, an accepted solution, so when a set has several
   valid orderings only one (the first encountered) is reported.
-- **Adjacent-step criterion with bootstrap.** Codes come from neighbouring assemblages only, so a
-  chain of overlapping intervals can contain an assemblage that is significantly below both an
+- **Neighbour criterion with bootstrap (default).** Codes come from neighbouring assemblages only,
+  so a chain of overlapping intervals can contain an assemblage that is significantly below both an
   earlier and a later one. Such orderings are accepted, while the corresponding triple on its own
   is rejected. The search remains complete for this criterion, because removing an end assemblage
-  cannot create the pattern `DM*U`.
+  cannot create the pattern `DM*U`. The alternative criterion below can be selected for comparison.
 - **`largestonly`.** `maxNodes` is set from the number of solutions returned by a worker
   (`maxNodes = len(s)`) rather than from solution size, and `output` uses it to decide which
   solutions count as largest. The `largestonly` option therefore does not select by size as

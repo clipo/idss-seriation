@@ -26,6 +26,21 @@ def parse_arguments():
     parser.add_argument('--cimethod', default='percentile', choices=['percentile', 'legacy'],
                         help="Bootstrap interval: 'percentile' (default) uses the percentile interval of the "
                              "bootstrap replicates; 'legacy' reproduces the original mean +/- t*SE interval.")
+    parser.add_argument('--dipcriterion', default='neighbor', choices=['neighbor', 'triple'],
+                        help="How a violation of unimodality is detected. 'neighbor' (default, the original IDSS "
+                             "test) compares neighbouring assemblages and rejects a decrease followed by an increase. "
+                             "'triple' rejects any assemblage that is lower than both an earlier and a later "
+                             "assemblage in the solution. Without bootstrap intervals the two are equivalent.")
+    parser.add_argument('--search', default='idss', choices=['idss', 'exact'],
+                        help="'idss' (default) builds solutions iteratively from valid triples. 'exact' runs a "
+                             "branch-and-bound search that returns every largest valid subset and every valid "
+                             "ordering of it, with proof that none is missed; it uses --dipcriterion=triple.")
+    parser.add_argument('--maxorderings', default=None,
+                        help="With --search=exact, the maximum number of orderings kept as solution graphs for "
+                             "output (default 10000). Counts and the subset list are always complete.")
+    parser.add_argument('--exactengine', default='auto', choices=['auto', 'c', 'python'],
+                        help="With --search=exact: 'auto' uses the compiled engine seriation/seriate_core if it "
+                             "has been built, otherwise Python; 'c' requires the compiled engine.")
     parser.add_argument('--seed', default=None, help="Random seed for the bootstrap intervals.")
     parser.add_argument('--bootsize', default=None, help="Number of bootstrap replicates (default 10000).")
     parser.add_argument('--filtered','-f', default=1,

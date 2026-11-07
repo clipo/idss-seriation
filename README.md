@@ -27,6 +27,82 @@ we output an innovative graph-based representation of all the seriation solution
 occur in more than one seriation solution, the set of all solutions is actually a branching graph or network, where
 each branch represents a solution (set of assemblages that seriate together, meeting the unimodality criterion).  
 
+## Corrections, November 2026 ##
+
+Releases v2.0 through v2.5.1 contain defects in the code that compares type frequencies, enumerates
+candidate triples and extends solutions. Depending on the version and on whether bootstrap intervals
+are used, those releases can miss valid solutions, return solutions smaller than the largest that
+exist, accept invalid solutions, or fail on data that seriate perfectly. Results produced with those
+releases should be re-run with the corrected code.
+
+The corrections, and how each was verified, are listed in [FIXES.md](FIXES.md). In summary:
+
+1. Each set of three assemblages is now tested with each assemblage in the middle. The earlier code
+   tested only one of the three placements.
+2. The triple test now evaluates each type separately with one consistent coding of increases and
+   decreases.
+3. In the bootstrap branch of the extension step, increases and decreases were coded in reverse, so
+   peaks were rejected and valleys accepted. This is corrected.
+4. An assemblage can no longer be added to a solution that already contains it.
+5. The pair threshold (`--threshold`) now compares all types and is applied to triples as well as
+   to extensions.
+6. The bootstrap interval is now the percentile interval of the bootstrap replicates. The earlier
+   interval (mean plus or minus t times the standard error of the replicates) narrowed as the number
+   of replicates increased. `--cimethod=legacy` restores the earlier interval exactly.
+
+With `--bootstrapCI=0`, the corrected code returns the same largest solutions as an independent
+exhaustive search on a synthetic table, the PFG test data (`testdata/pfg/pfg-cpl.txt`) and 40 random
+tables, and an independent brute-force check over every ordering of every subset agreed on 120 runs
+of small tables with and without bootstrap intervals.
+
+### Two criteria for a violation of unimodality ###
+
+With bootstrap intervals, IDSS can detect violations in two ways, selected with `--dipcriterion`:
+
+- `neighbor` (default, the original IDSS test): increases and decreases are judged between neighbouring
+  assemblages, and a significant decrease followed (possibly after non-significant steps) by a significant
+  increase is a violation. A chain of overlapping intervals can therefore contain an assemblage that is
+  significantly lower than both an earlier and a later assemblage, and such a solution is accepted.
+- `triple`: any assemblage whose upper bound is below the lower bounds of both an earlier and a later
+  assemblage in the solution is a violation. This is the stricter reading of unimodality. Any valid
+  solution remains valid when assemblages are removed from it.
+
+Without bootstrap intervals (`--bootstrapCI=0`) the two criteria are equivalent. Running the same data under
+both shows how much the results depend on the choice.
+
+One property of the iterative search is unchanged: when a set of assemblages has several valid orderings, only
+the first one found is reported.
+
+### Exact search option ###
+
+`--search=exact` replaces the iterative search with an exact branch-and-bound search. It returns every subset of
+assemblages of the largest size that has a valid ordering, and every valid ordering of each such subset (mirror
+images counted once), with proof that none is missed. It uses the every-triple criterion (`--dipcriterion=triple`),
+because the search relies on a valid solution staying valid when assemblages are removed from it.
+
+- Assemblages are added one at a time and inserted at every position where they create no violation.
+- An assemblage that cannot be inserted anywhere in a partial solution is dropped from that branch, since it
+  cannot join any larger solution built from it.
+- A branch is abandoned when it cannot reach the largest size already found.
+
+The search writes `<input>-exact-subsets.txt`, which lists every largest subset with its number of valid
+orderings, followed by the orderings, and passes the orderings to the usual output routines as solutions
+(up to `--maxorderings`, default 10000; the counts and subset list are always complete). It reports only
+solutions of the largest size, not smaller solutions that cannot be extended. It cannot be combined with a
+`--threshold` below 1.0.
+
+A compiled engine runs the search 100 to 300 times faster than the Python version. Build it once with
+
+```shell
+gcc -O3 -o seriation/seriate_core seriation/seriate_core.c
+```
+
+It is used automatically when present (`--exactengine=auto`); `--exactengine=python` forces the Python version.
+The `--frequencyseriation` figure computes its own bootstrap for every row of every solution, so with many
+orderings it can take much longer than the search itself; lower `--maxorderings` when producing that figure.
+On the PFG test data with bootstrap intervals, the exact search takes under a second. In testing on tables of
+54 and 55 assemblages it completed in seconds to minutes, depending on how many valid orderings the data allow.
+
 ## Installation and Prerequisites ##
 
 IDSS requires a standard Python 2.7 installation.  We recommend Anaconda Scientific Python, from http://continuum.io/.  
@@ -51,10 +127,9 @@ Please check out: http://continuum.io/thanks and https://binstar.org
 >>>
 ```
 
-1. Download one of the [release packages](https://github.com/clipo/idss-seriation/releases) for IDSS, and unzip or 
-untar the package into a working directory.  Alternatively, you can clone the main Github repository, but be aware that
-branch `master` is under active development and we do not warrant its correctness or functionality.  For published 
-research, please use the latest release version.  
+1. Clone the Github repository, or download a release package and unzip or untar it into a working directory.
+Releases v2.0 through v2.5.1 contain the defects described under "Corrections, November 2026" above; use code that
+includes those corrections.  
 
 2.  After cloning or decompressing the IDSS package, change directories into `idss-seriation` and ensure that you have the 
 packages listed in `requirements.txt` installed.  The easiest way to do this is to use the `pip` package manager:
@@ -127,6 +202,22 @@ of the IDSS seriation library.  At this time we cannot suppress the warning.
 The rest of the help message lists the command line options for the `idss-seriation.py` program.  
 
 
+### Tested Environment (2026) ###
+
+Anaconda's own Python 2.7 packages are no longer distributed, but Python 2.7 environments can still be built from
+conda-forge. The corrected code was tested with the following, using `micromamba` (the same commands work with `conda`
+or `mamba`):
+
+```shell
+micromamba create -p ./py27 -c conda-forge python=2.7 numpy scipy matplotlib pip pygraphviz graphviz
+./py27/bin/pip install "networkx==1.9.1" "path.py==7.7.1" "svglib==0.9.3" "reportlab<3.6" \
+    pysvg svgwrite xlsxwriter "mongoengine<0.20"
+./py27/bin/python idss-seriation.py --inputfile=testdata/pfg/pfg-cpl.txt --frequency=1 --bootstrapCI=1 --seed=1
+```
+
+This gave Python 2.7.15, NumPy 1.16.5, SciPy 1.2.1, networkx 1.9.1 and pygraphviz 1.5. Later versions of networkx
+(2.x and above) are not compatible with this code.
+
 ### Installation Without Anaconda Python ###
 
 If you are using a pre-installed or "system" version of Python, it may be installed in directories on your system which require
@@ -179,11 +270,24 @@ To run IDSS you must set at least one  options on the command line.  The most im
 --inputfile=<filename>). This option specifies the data file that contains the raw data that describes the 
 assemblages that are to be seriated.   Other useful options include:
 
-** --output=  <name/location of directory that will be used for output. The default is ./output
-** --bootstrapCI=1 Use a bootstrap determined confidence interval for making comparisons. Default significance is 0.95.
-** --bootstrapSignificance=0.95 Set the confidence interval significance value. Default is 0.95.
-** --yxfile=<filename> If you have spatial coordinates for your assemblages and want the results shown in geographic space
-  set this option to the name of the file with the coordinates (format: assemblage<tab>X<tab>Y<return>).
+- `--outputdirectory=<directory>` Directory for output files. The default is `./output`.
+- `--frequency=1` Conduct a frequency seriation (the default).
+- `--bootstrapCI=1` Use bootstrap confidence intervals when comparing type frequencies (the default). With
+  `--bootstrapCI=0`, frequencies are compared directly and any decrease followed by an increase is a violation.
+- `--bootstrapSignificance=0.95` Confidence level of the bootstrap intervals. Default is 0.95.
+- `--cimethod=percentile|legacy` Bootstrap interval. `percentile` (default) uses the percentile interval of the
+  bootstrap replicates; `legacy` reproduces the interval used in releases v2.0 to v2.5.1.
+- `--dipcriterion=neighbor|triple` How a violation of unimodality is detected with bootstrap intervals (see
+  "Two criteria for a violation of unimodality" above). Default is `neighbor`.
+- `--search=idss|exact` Iterative search (default) or exact branch-and-bound search (see "Exact search option").
+- `--maxorderings=<n>` With `--search=exact`, the number of orderings kept as solutions for output. Default 10000.
+- `--exactengine=auto|c|python` With `--search=exact`, which implementation to use. Default `auto`.
+- `--bootsize=<n>` Number of bootstrap replicates. Default is 10000.
+- `--seed=<n>` Random seed for the bootstrap, so that runs can be repeated exactly.
+- `--threshold=<x>` Only pairs of assemblages whose largest difference in type proportions is at most `x` may be
+  adjacent in a solution. Default is 1.0 (no restriction).
+- `--xyfile=<filename>` Spatial coordinates for the assemblages, used to show results in geographic space
+  (format: assemblage<tab>X<tab>Y).
 
 (TBD)
 

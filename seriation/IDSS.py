@@ -51,6 +51,7 @@ import shapefile
 #     import memory
 from seriation.frequencySeriationMaker import frequencySeriationMaker
 import seriation.seriationEvaluation as seriationEvaluation
+import seriation.exactSearch as exactSearch
 from seriation.occurrenceSeriationMaker import occurrenceSeriationMaker
 from seriation import idss_version
 
@@ -152,6 +153,10 @@ class IDSS():
                     'minmaxbycount':None,
                     'delimiter': None,
                     'cimethod': 'percentile',
+                    'dipcriterion': 'neighbor',
+                    'search': 'idss',
+                    'maxorderings': None,
+                    'exactengine': 'auto',
                     'seed': None,
                     'bootsize': None,
                     'preservepickle' : 0,
@@ -1720,6 +1725,67 @@ class IDSS():
 
         return output_graph
 
+    def exactSeriation(self):
+        """--search=exact: every largest valid subset and every valid ordering of it, found by
+        exact branch-and-bound search under the every-triple criterion. Returns solution graphs
+        in the same form as the iterative search, one per ordering (up to --maxorderings)."""
+        if self.args.get('threshold') not in (None, "", "None") and float(self.args['threshold']) < 1.0:
+            sys.exit("--search=exact cannot be combined with --threshold below 1.0: the threshold restricts "
+                     "which assemblages may be neighbours, which the exact search does not support.")
+        if self.args.get('dipcriterion', 'neighbor') != 'triple':
+            self.log.info("--search=exact uses the every-triple criterion (--dipcriterion=triple).")
+            self.args['dipcriterion'] = 'triple'
+        labels = sorted(self.assemblages.keys())
+        if self.args['bootstrapCI'] not in self.FalseList:
+            lower, upper = self.typeFrequencyLowerCI, self.typeFrequencyUpperCI
+        else:
+            lower = upper = self.assemblages
+        maxstore = int(self.args.get('maxorderings') or 10000)
+        engine = self.args.get('exactengine') or 'auto'
+        result = exactSearch.exact_search(labels, lower, upper, max_store=maxstore, engine=engine)
+        self.exactResult = result
+        self.statsMap["exact_search_engine"] = result["engine"]
+        self.statsMap["exact_search_time"] = result["seconds"]
+        self.statsMap["exact_largest_size"] = result["best"]
+        self.statsMap["exact_number_of_subsets"] = len(result["subsets"])
+        self.statsMap["exact_number_of_orderings"] = result["n_orderings"]
+        self.log.info("Exact search (%s): largest solution size %d; %d subset(s); %d ordering(s); %.1f s",
+                      result["engine"], result["best"], len(result["subsets"]), result["n_orderings"],
+                      result["seconds"])
+        if result["truncated"]:
+            self.log.warning("Only the first %d orderings are kept as solution graphs (--maxorderings); "
+                             "the counts and the subset list are complete.", maxstore)
+        # list of every largest subset with its number of valid orderings
+        try:
+            fname = self.outputDirectory + self.inputFile[0:-4] + "-exact-subsets.txt"
+            with open(fname, "w") as fh:
+                fh.write("# largest solution size: %d\n" % result["best"])
+                fh.write("# number of largest subsets: %d\n" % len(result["subsets"]))
+                fh.write("# number of valid orderings (mirror images counted once): %d\n" % result["n_orderings"])
+                fh.write("subset\tn_orderings\tassemblages\n")
+                for idx, (members, count) in enumerate(sorted(result["subsets"]), 1):
+                    fh.write("%d\t%d\t%s\n" % (idx, count, ", ".join(members)))
+                fh.write("\nordering\tassemblages\n")
+                for idx, o in enumerate(result["orderings"], 1):
+                    fh.write("%d\t%s\n" % (idx, " - ".join(o)))
+            self.fileMap["exact_subsets_file"] = fname
+        except (IOError, AttributeError) as e:
+            self.log.warning("Could not write the exact search subset list: %s", e)
+        graphs = []
+        if result["best"] < 3:
+            return graphs
+        for idx, o in enumerate(result["orderings"]):
+            graphID = uuid.uuid4().urn
+            net = nx.Graph(name=str(idx), GraphID=graphID, End1=o[0], End2=o[-1], is_directed=False)
+            for pos, a in enumerate(o):
+                is_end = 1 if pos in (0, len(o) - 1) else 0
+                net.add_node(a, name=a, site="end" if is_end else "middle", end=is_end)
+            for pos in range(len(o) - 1):
+                is_end = 1 if pos in (0, len(o) - 2) else 0
+                net.add_edge(o[pos], o[pos + 1], weight="", GraphID=graphID, end=is_end)
+            graphs.append(net)
+        return graphs
+
     def _get_longest_subsolution(self,all_solutions):
         cur_longest = None  # FIX: was [], which was passed on as a solution when none existed
         for sol in all_solutions:
@@ -2268,174 +2334,178 @@ class IDSS():
 
         if self.args['frequency'] not in self.FalseList or self.args['occurrence'] not in self.FalseList:
             frequency_start = time.time()
-            ###########################################################################################################
-            self.log.trace("Calculate all the valid triples.")
-            triples = self.findAllValidTriples()
-            ###########################################################################################################
-            stepcount = 0
-            currentMaxSeriationSize = 2
-            newNetworks = []
-            self.solutionCount = len(triples)     ## the current # of solutions that will be checked
-            self.solutionsChecked = len(triples)  ## set the total solutions checked value
-            self.log.debug("Starting with triples as the solution set to examine, size: %s", len(triples))
+            if self.args.get('search', 'idss') == 'exact':
+                # Exact branch-and-bound search (see seriation/exactSearch.py)
+                frequencyArray = self.exactSeriation()
+            else:
+                ###########################################################################################################
+                self.log.trace("Calculate all the valid triples.")
+                triples = self.findAllValidTriples()
+                ###########################################################################################################
+                stepcount = 0
+                currentMaxSeriationSize = 2
+                newNetworks = []
+                self.solutionCount = len(triples)     ## the current # of solutions that will be checked
+                self.solutionsChecked = len(triples)  ## set the total solutions checked value
+                self.log.debug("Starting with triples as the solution set to examine, size: %s", len(triples))
 
-            currentTotal = len(triples)
-            solutions = []
-            all_solutions = []
-            all_solutions = all_solutions + triples  ## add the triples to the initial solution
+                currentTotal = len(triples)
+                solutions = []
+                all_solutions = []
+                all_solutions = all_solutions + triples  ## add the triples to the initial solution
 
 
-            ## pickle the stuff I need for parallel processing
-            vchashfile = self.pickledir + "/validComparisonsHash.p"
-            pickle.dump(self.validComparisonsHash,open(vchashfile, 'wb'))
+                ## pickle the stuff I need for parallel processing
+                vchashfile = self.pickledir + "/validComparisonsHash.p"
+                pickle.dump(self.validComparisonsHash,open(vchashfile, 'wb'))
 
-            pgfile = self.pickledir + "/pairGraph.p"
-            pickle.dump(self.pairGraph,open(pgfile,'wb'))
+                pgfile = self.pickledir + "/pairGraph.p"
+                pickle.dump(self.pairGraph,open(pgfile,'wb'))
 
-            assemfile = self.pickledir + "/assemblages.p"
-            pickle.dump(self.assemblages,open(assemfile,'wb'))
+                assemfile = self.pickledir + "/assemblages.p"
+                pickle.dump(self.assemblages,open(assemfile,'wb'))
 
-            argsfile = self.pickledir + "/args.p"
-            pickle.dump(self.args,open(argsfile,'wb'))
+                argsfile = self.pickledir + "/args.p"
+                pickle.dump(self.args,open(argsfile,'wb'))
 
-            fucifile = self.pickledir + "/typeFrequencyUpperCI.p"
-            pickle.dump(self.typeFrequencyUpperCI,open(fucifile,'wb'))
+                fucifile = self.pickledir + "/typeFrequencyUpperCI.p"
+                pickle.dump(self.typeFrequencyUpperCI,open(fucifile,'wb'))
 
-            flcifile = self.pickledir + "/typeFrequencyLowerCI.p"
-            pickle.dump(self.typeFrequencyLowerCI,open(flcifile,'wb'))
+                flcifile = self.pickledir + "/typeFrequencyLowerCI.p"
+                pickle.dump(self.typeFrequencyLowerCI,open(flcifile,'wb'))
 
-            prewhile_loop = time.time() - frequency_start
-            self.log.debug("...elapsed time prior to parallelized worker loop: %s seconds", prewhile_loop)
+                prewhile_loop = time.time() - frequency_start
+                self.log.debug("...elapsed time prior to parallelized worker loop: %s seconds", prewhile_loop)
 
-            while currentMaxSeriationSize <= self.maxSeriationSize:
-                currentMaxSeriationSize += 1
-                ### first time through copy the triples, else get the previous new ones.
-                if currentMaxSeriationSize == 3:  ## first time through. Just copy the triples to the working arrays
-                    networks = triples
-                    solutions = triples # clear the
-                else:
-                    i = 0
-                    #print("Currently have %d solutions at step %d"%( len(newNetworks), currentMaxSeriationSize))
+                while currentMaxSeriationSize <= self.maxSeriationSize:
+                    currentMaxSeriationSize += 1
+                    ### first time through copy the triples, else get the previous new ones.
+                    if currentMaxSeriationSize == 3:  ## first time through. Just copy the triples to the working arrays
+                        networks = triples
+                        solutions = triples # clear the
+                    else:
+                        i = 0
+                        #print("Currently have %d solutions at step %d"%( len(newNetworks), currentMaxSeriationSize))
+                        if len(newNetworks) > 0:
+                            # there were no networks the previous times so nothing to do.
+                            self.log.trace("These solutions are ---  ")
+                            for sol in newNetworks:
+                                self.log.trace("solution %d: %s", i, nx.shortest_path(sol, sol.graph["End1"], sol.graph["End2"]))
+                                i += 1
+                            networks = []
+                            networks += newNetworks  # copy the array of previous new ones for this round
+                            solutions.append(newNetworks) # append the new list to the previous one
+                            newNetworks = []         # clear the array of new solutions
+
+                    stepcount += 1
+                    self.log.trace("_______________________________________________________________________________________")
+                    self.log.trace("Step number:  %d", currentMaxSeriationSize)
+                    self.log.trace("_______________________________________________________________________________________")
+
+                    if self.args['screen'] not in self.FalseList:
+                        self.scr.addstr(4, 0, "Step number:                                    ")
+                        msg = "Step number:   %d" % currentMaxSeriationSize
+                        self.scr.addstr(4, 0, msg)
+                        self.scr.addstr(5, 0, "Number of solutions from previous step:         ")
+                        msg = "Number of solutions from previous step: %d" % len(networks)
+                        self.scr.addstr(5, 0, msg)
+                        self.scr.refresh()
+
+                    self.log.trace("Number of solutions from previous step: %d", len(networks))
+                    match = 0      ## set the current match to zero for this step (sees if there are any new solutions for step)
+                    ## look through the set of existing valid networks.
+                    validNewNetworks = []
+
+
+                    preparallel_time = time.time() - frequency_start
+                    self.log.debug("...elapsed time prior to parallel section for curmaxsize: %s = %s seconds", currentMaxSeriationSize,preparallel_time)
+
+                    try:
+                        cpus = multiprocessing.cpu_count()
+                    except NotImplementedError:
+                        cpus = 2   # arbitrary default
+
+                    # Each process will get 'chunksize' nums and a queue to put his out
+                    # dict into
+
+                    out_q = multiprocessing.Queue()
+                    chunksize = int(math.ceil(len(networks) / float(cpus)))
+                    procs = []
+
+                    for i in range(cpus):
+                        p = multiprocessing.Process(
+                        target=seriationEvaluation.worker,
+                        args=(self.pickledir,networks[chunksize * i:chunksize * (i + 1)],out_q))
+                        procs.append(p)
+                        p.start()
+
+                    # Collect all results into a single result dict. We know how many dicts
+                    # with results to expect.
+                    resultdict = []
+                    for i in range(cpus):
+                        resultdict.append(out_q.get())
+
+                    # Wait for all worker processes to finish
+                    for p in procs:
+                        p.join()
+
+                    #validNewNetworks = [x for x in result if not x is False]
+
+                    # FIX (efficiency): the same ordering is reached by adding its ends in
+                    # different sequences; keep one copy of each ordering per step.
+                    seen_paths = set()
+                    for s in resultdict:
+                        if s is not False:
+                            unique_s = []
+                            for g in s:
+                                pth = tuple(nx.shortest_path(g, g.graph["End1"], g.graph["End2"]))
+                                key = min(pth, pth[::-1])
+                                if key not in seen_paths:
+                                    seen_paths.add(key)
+                                    unique_s.append(g)
+                            s = unique_s
+                            newNetworks += s
+                            all_solutions += s
+                            self.solutionCount += len(s)
+                            self.log.trace("Added %d new solutions. Solution count is now:  %d", len(validNewNetworks),
+                                     self.solutionCount)
+                            if len(s) > maxNodes:
+                                maxNodes = len(s)
+                            currentTotal = len(newNetworks)
+
+                    if self.args['screen'] not in self.FalseList:
+                        msg = "Current Max Nodes:  %d " % maxNodes
+                        self.scr.addstr(6, 0, msg)
+                        msg = "Total number of seriation solutions and sub-solutions: %d" % self.solutionCount
+                        self.scr.addstr(7, 0, msg)
+                        self.scr.addstr(8, 43, "                                           ")
+                        msg = "Number of seriation solutions at this step: %d" % currentTotal
+                        self.scr.addstr(8, 0, msg)
+                        # if os.name != "nt":
+                        #     msg = "Memory used:        " + str(self.mem.memory())
+                        self.scr.addstr(9, 0, msg)
+                        self.scr.refresh()
+
                     if len(newNetworks) > 0:
-                        # there were no networks the previous times so nothing to do.
-                        self.log.trace("These solutions are ---  ")
-                        for sol in newNetworks:
-                            self.log.trace("solution %d: %s", i, nx.shortest_path(sol, sol.graph["End1"], sol.graph["End2"]))
-                            i += 1
-                        networks = []
-                        networks += newNetworks  # copy the array of previous new ones for this round
-                        solutions.append(newNetworks) # append the new list to the previous one
-                        newNetworks = []         # clear the array of new solutions
+                        end_solutions = newNetworks
+                    else:
+                        end_solutions = networks
 
-                stepcount += 1
-                self.log.trace("_______________________________________________________________________________________")
-                self.log.trace("Step number:  %d", currentMaxSeriationSize)
-                self.log.trace("_______________________________________________________________________________________")
-
-                if self.args['screen'] not in self.FalseList:
-                    self.scr.addstr(4, 0, "Step number:                                    ")
-                    msg = "Step number:   %d" % currentMaxSeriationSize
-                    self.scr.addstr(4, 0, msg)
-                    self.scr.addstr(5, 0, "Number of solutions from previous step:         ")
-                    msg = "Number of solutions from previous step: %d" % len(networks)
-                    self.scr.addstr(5, 0, msg)
-                    self.scr.refresh()
-
-                self.log.trace("Number of solutions from previous step: %d", len(networks))
-                match = 0      ## set the current match to zero for this step (sees if there are any new solutions for step)
-                ## look through the set of existing valid networks.
-                validNewNetworks = []
-
-
-                preparallel_time = time.time() - frequency_start
-                self.log.debug("...elapsed time prior to parallel section for curmaxsize: %s = %s seconds", currentMaxSeriationSize,preparallel_time)
-
-                try:
-                    cpus = multiprocessing.cpu_count()
-                except NotImplementedError:
-                    cpus = 2   # arbitrary default
-
-                # Each process will get 'chunksize' nums and a queue to put his out
-                # dict into
-
-                out_q = multiprocessing.Queue()
-                chunksize = int(math.ceil(len(networks) / float(cpus)))
-                procs = []
-
-                for i in range(cpus):
-                    p = multiprocessing.Process(
-                    target=seriationEvaluation.worker,
-                    args=(self.pickledir,networks[chunksize * i:chunksize * (i + 1)],out_q))
-                    procs.append(p)
-                    p.start()
-
-                # Collect all results into a single result dict. We know how many dicts
-                # with results to expect.
-                resultdict = []
-                for i in range(cpus):
-                    resultdict.append(out_q.get())
-
-                # Wait for all worker processes to finish
-                for p in procs:
-                    p.join()
-
-                #validNewNetworks = [x for x in result if not x is False]
-
-                # FIX (efficiency): the same ordering is reached by adding its ends in
-                # different sequences; keep one copy of each ordering per step.
-                seen_paths = set()
-                for s in resultdict:
-                    if s is not False:
-                        unique_s = []
-                        for g in s:
-                            pth = tuple(nx.shortest_path(g, g.graph["End1"], g.graph["End2"]))
-                            key = min(pth, pth[::-1])
-                            if key not in seen_paths:
-                                seen_paths.add(key)
-                                unique_s.append(g)
-                        s = unique_s
-                        newNetworks += s
-                        all_solutions += s
-                        self.solutionCount += len(s)
-                        self.log.trace("Added %d new solutions. Solution count is now:  %d", len(validNewNetworks),
-                                 self.solutionCount)
-                        if len(s) > maxNodes:
-                            maxNodes = len(s)
-                        currentTotal = len(newNetworks)
-
-                if self.args['screen'] not in self.FalseList:
-                    msg = "Current Max Nodes:  %d " % maxNodes
-                    self.scr.addstr(6, 0, msg)
-                    msg = "Total number of seriation solutions and sub-solutions: %d" % self.solutionCount
-                    self.scr.addstr(7, 0, msg)
-                    self.scr.addstr(8, 43, "                                           ")
-                    msg = "Number of seriation solutions at this step: %d" % currentTotal
-                    self.scr.addstr(8, 0, msg)
-                    # if os.name != "nt":
-                    #     msg = "Memory used:        " + str(self.mem.memory())
-                    self.scr.addstr(9, 0, msg)
-                    self.scr.refresh()
-
-                if len(newNetworks) > 0:
-                    end_solutions = newNetworks
-                else:
-                    end_solutions = networks
-
-                self.log.trace("...size of end_solutions at end of parallel step: %s", len(end_solutions))
+                    self.log.trace("...size of end_solutions at end of parallel step: %s", len(end_solutions))
 
 
 
-            all_solutions += end_solutions
-            self.log.debug("...parallel processing complete at seriation size %s with %s solutions before filtering.", self.maxSeriationSize, len(all_solutions))
+                all_solutions += end_solutions
+                self.log.debug("...parallel processing complete at seriation size %s with %s solutions before filtering.", self.maxSeriationSize, len(all_solutions))
 
-            #pickle.dump(all_solutions,open("prefilter-allsolutions.pickle", 'wb'))
+                #pickle.dump(all_solutions,open("prefilter-allsolutions.pickle", 'wb'))
 
-            ###########################################################################################################
-            freq_filter_solutions = time.time()
-            frequencyArray = self.filterSolutions_optimized(end_solutions, all_solutions)
-            #frequencyArray = self.filterSolutions(end_solutions, all_solutions)
-            freq_filter_elapsed = time.time() - freq_filter_solutions
-            self.statsMap["frequency_filter_solutions_time"] = freq_filter_elapsed
+                ###########################################################################################################
+                freq_filter_solutions = time.time()
+                frequencyArray = self.filterSolutions_optimized(end_solutions, all_solutions)
+                #frequencyArray = self.filterSolutions(end_solutions, all_solutions)
+                freq_filter_elapsed = time.time() - freq_filter_solutions
+                self.statsMap["frequency_filter_solutions_time"] = freq_filter_elapsed
 
             #if self.args['allsolutions'] not in self.FalseList:
             #frequencyArray = self.filterInclusiveSolutions(all_solutions,end_solutions)
